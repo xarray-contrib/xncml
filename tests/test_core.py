@@ -1,4 +1,5 @@
 import os
+import tempfile
 from collections import OrderedDict
 
 import pytest
@@ -136,3 +137,18 @@ def test_remove_dataset_variable():
     expected = set(['T', 'lat', 'lon', 'time'])
     res = set([item['@name'] for item in nc.ncroot['netcdf']['variable']])
     assert expected == res
+
+
+def test_to_ncml():
+    nc = xncml.NcmlReader(input_file)
+    with tempfile.NamedTemporaryFile(suffix='.ncml') as t:
+        nc.to_ncml(path=t.name)
+        assert os.path.exists(t.name)
+
+    nc.to_ncml()
+    default = f'{input_file.strip(".ncml")}_updated.ncml'
+    assert os.path.exists(default)
+    try:
+        os.remove(default)
+    except Exception:
+        pass

@@ -155,3 +155,12 @@ class NcmlReader(object):
             for var in variables:
                 if var['@name'] == key:
                     variables.remove(var)
+
+    def to_ncml(self, path=None):
+        if not path:
+            path = f'{self.filepath.strip(".ncml")}_updated.ncml'
+
+        xml_output = xmltodict.unparse(self.ncroot, pretty=True)
+        with open(path, 'w') as fd:
+            fd.write(xml_output)
+        print(f'Persisted new ncml file at: {path}')
