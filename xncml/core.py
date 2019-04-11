@@ -112,10 +112,7 @@ class NcmlReader(object):
         """
         attributes = self.ncroot['netcdf'].get('attribute', None)
 
-        if not attributes or len(attributes) == 0:
-            self.ncroot['netcdf']['attribute'] = OrderedDict()
-
-        else:
+        if attributes:
             if isinstance(attributes, OrderedDict):
                 if attributes['@name'] == key:
                     attributes.clear()
@@ -128,3 +125,18 @@ class NcmlReader(object):
 
                 if len(attributes) == 0:
                     self.ncroot['netcdf']['attribute'] = OrderedDict()
+
+    def remove_dataset_dimension(self, key):
+        """ Remove dataset dimension
+
+        Parameters
+        ----------
+        key : str
+            name of the dimension to remove
+        """
+
+        dimensions = self.ncroot['netcdf'].get('dimension', None)
+        if dimensions and isinstance(dimensions, list):
+            for dim in dimensions:
+                if dim['@name'] == key:
+                    dimensions.remove(dim)

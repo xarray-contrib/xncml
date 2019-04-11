@@ -117,3 +117,14 @@ def test_remove_dataset_attribute():
     nc = xncml.NcmlReader(input_file)
     nc.remove_dataset_attribute('title')
     assert nc.ncroot['netcdf']['attribute'] == OrderedDict()
+
+
+def test_remove_dataset_dimension():
+    nc = xncml.NcmlReader(input_file)
+    nc.remove_dataset_dimension('time')
+    expected = [
+        OrderedDict([('@name', 'lat'), ('@length', '3')]),
+        OrderedDict([('@name', 'lon'), ('@length', '4')]),
+    ]
+    res = nc.ncroot['netcdf']['dimension']
+    assert expected == res
