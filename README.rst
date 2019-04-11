@@ -18,7 +18,15 @@ xncml
     :alt: Python Package Index
 
 
-Tools for manipulating NCML (NetCDF Markup) files with/for xarray.
+Tools for manipulating NcML (NetCDF Markup Language) files with/for xarray.
+
+These tools allow you to modify NcML by:
+
+- Adding or removing global attributes
+- Adding or removing variable attributes
+- Removing variables and dimensions
+
+
 See documentation_ for more information.
 
 .. _documentation: https://xncml.readthedocs.io
