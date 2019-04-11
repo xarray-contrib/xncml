@@ -100,3 +100,31 @@ class NcmlReader(object):
 
         else:
             self.ncroot['netcdf']['attribute'] = item
+
+    def remove_dataset_attribute(self, key):
+        """ Remove dataset attribute
+
+        Parameters
+        ----------
+        key : str
+            Name of the attribute to remove
+
+        """
+        attributes = self.ncroot['netcdf'].get('attribute', None)
+
+        if not attributes or len(attributes) == 0:
+            self.ncroot['netcdf']['attribute'] = OrderedDict()
+
+        else:
+            if isinstance(attributes, OrderedDict):
+                if attributes['@name'] == key:
+                    attributes.clear()
+
+            else:
+                for attrs in attributes:
+                    if attrs['@name'] == key:
+                        attributes.remove(attrs)
+                        break
+
+                if len(attributes) == 0:
+                    self.ncroot['netcdf']['attribute'] = OrderedDict()

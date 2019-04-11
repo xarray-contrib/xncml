@@ -102,3 +102,11 @@ def test_add_dataset_attribute():
 
     res = nc.ncroot['netcdf']['attribute']
     assert res == expected
+
+
+def test_remove_dataset_attribute():
+    nc = xncml.NcmlReader(input_file)
+    nc.add_dataset_attribute('bar', 'foo')
+    nc.remove_dataset_attribute('title')
+    nc.remove_dataset_attribute('bar')
+    assert nc.ncroot['netcdf']['attribute'] == OrderedDict()

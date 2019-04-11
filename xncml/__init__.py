@@ -9,3 +9,5 @@ try:
 except DistributionNotFound:
     # package is not installed
     pass
+finally:
+    del get_distribution, DistributionNotFound
