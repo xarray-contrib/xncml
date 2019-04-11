@@ -128,3 +128,11 @@ def test_remove_dataset_dimension():
     ]
     res = nc.ncroot['netcdf']['dimension']
     assert expected == res
+
+
+def test_remove_dataset_variable():
+    nc = xncml.NcmlReader(input_file)
+    nc.remove_dataset_variable('rh')
+    expected = set(['T', 'lat', 'lon', 'time'])
+    res = set([item['@name'] for item in nc.ncroot['netcdf']['variable']])
+    assert expected == res

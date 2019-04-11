@@ -140,3 +140,18 @@ class NcmlReader(object):
             for dim in dimensions:
                 if dim['@name'] == key:
                     dimensions.remove(dim)
+
+    def remove_dataset_variable(self, key):
+        """ Remove dataset variable
+
+        Parameters
+        ----------
+        key : str
+            name of the variable to remove
+        """
+
+        variables = self.ncroot['netcdf'].get('variable', None)
+        if variables and isinstance(variables, list):
+            for var in variables:
+                if var['@name'] == key:
+                    variables.remove(var)
