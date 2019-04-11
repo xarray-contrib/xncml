@@ -27,12 +27,6 @@ class NcmlReader(object):
         except Exception as exc:
             raise exc
 
-        root = self.ncroot['netcdf'].get('@xmlns', None)
-        if not root:
-            self.ncroot['netcdf'][
-                '@xmlns'
-            ] = 'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2'
-
     def add_variable_attribute(self, variable, key, value, type_='String'):
         """ Add variable attribute
 
