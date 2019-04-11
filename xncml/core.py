@@ -5,7 +5,20 @@ import xmltodict
 
 
 class NcmlReader(object):
+    """ This is a class for reading and manipulating NcML file
+    """
+
     def __init__(self, filepath):
+        """
+
+        Parameters
+        -----------
+
+        filepath : str
+              file path to dataset NcML file
+
+        """
+
         self.filepath = filepath
         try:
             with open(filepath) as fd:
@@ -65,9 +78,6 @@ class NcmlReader(object):
                             if attr['@name'] == key:
                                 var['attribute'].remove(attr)
                                 break
-                    else:
-                        if key in var['attribute'].keys():
-                            del var['attribute'][key]
 
     def add_dataset_attribute(self, key, value, type_='String'):
         """ Add dataset attribute
