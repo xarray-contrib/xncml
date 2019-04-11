@@ -3,12 +3,12 @@ channels:
   - conda-forge
 dependencies:
   - autopep8
+  - black
   - codecov
-  - dask
-  - distributed
   - flake8
   - git
   - ipykernel
+  - isort
   - make
   - nbsphinx
   - netcdf4
@@ -22,7 +22,6 @@ dependencies:
   - sphinx_rtd_theme
   - sphinx>=1.6
   - xarray
-  - zarr
   - pip:
     - sphinx_copybutton
     - xmltodict
