@@ -1,0 +1,28 @@
+name: dev
+channels:
+  - conda-forge
+dependencies:
+  - autopep8
+  - codecov
+  - dask
+  - distributed
+  - flake8
+  - git
+  - ipykernel
+  - make
+  - nbsphinx
+  - netcdf4
+  - numpy
+  - numpydoc
+  - pip
+  - pytest
+  - pytest-cov
+  - python=3.7
+  - recommonmark
+  - sphinx_rtd_theme
+  - sphinx>=1.6
+  - xarray
+  - zarr
+  - pip:
+    - sphinx_copybutton
+    - xmltodict
