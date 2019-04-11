@@ -34,6 +34,9 @@ def test_ncml_reader_constructor():
     res = nc.ncroot['netcdf']['variable'][1]
     assert res == expected
 
+    with pytest.raises(Exception):
+        nc = xncml.NcmlReader('example.ncml')
+
 
 def test_add_variable_attribute():
     nc = xncml.NcmlReader(input_file)
@@ -95,11 +98,11 @@ def test_remove_variable_attribute():
 def test_add_dataset_attribute():
     nc = xncml.NcmlReader(input_file)
     nc.add_dataset_attribute(key='editedby', value='foo')
+    nc.add_dataset_attribute(key='editedby', value='bar')
     expected = [
         OrderedDict([('@name', 'title'), ('@type', 'String'), ('@value', 'Example Data')]),
-        OrderedDict([('@name', 'editedby'), ('@type', 'String'), ('@value', 'foo')]),
+        OrderedDict([('@name', 'editedby'), ('@type', 'String'), ('@value', 'bar')]),
     ]
-
     res = nc.ncroot['netcdf']['attribute']
     assert res == expected
 
@@ -109,4 +112,8 @@ def test_remove_dataset_attribute():
     nc.add_dataset_attribute('bar', 'foo')
     nc.remove_dataset_attribute('title')
     nc.remove_dataset_attribute('bar')
+    assert nc.ncroot['netcdf']['attribute'] == OrderedDict()
+
+    nc = xncml.NcmlReader(input_file)
+    nc.remove_dataset_attribute('title')
     assert nc.ncroot['netcdf']['attribute'] == OrderedDict()
