@@ -27,6 +27,9 @@ class NcmlReader(object):
         except Exception as exc:
             raise exc
 
+    def __repr__(self):
+        return xmltodict.unparse(self.ncroot, pretty=True)
+
     def add_variable_attribute(self, variable, key, value, type_='String'):
         """ Add variable attribute
 
@@ -49,11 +52,13 @@ class NcmlReader(object):
                 if var['@name'] == variable:
                     if isinstance(var['attribute'], list):
                         for attr in var['attribute']:
+                            print(attr)
                             if attr['@name'] == key:
                                 attr = attr.update(item)
-                            else:
-                                var['attribute'].append(item)
                                 break
+                        else:
+                            var['attribute'].append(item)
+                            break
                     else:
                         var['attribute'] = var['attribute'].update(item)
 
