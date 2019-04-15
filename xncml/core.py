@@ -112,18 +112,25 @@ class Dataset(object):
                                 attr['@orgName'] = old_name
                                 break
                         else:
-                            warn(
-                                f'No {old_name} attribute found for {variable} variable. Skipping 1'
-                            )
+                            warn(f'No {old_name} attribute found for {variable} variable. Skipping')
 
                     else:
                         if var['attribute']['@name'] == old_name:
                             var['attribute']['@name'] = new_name
                             var['attribute']['@orgName'] = old_name
                         else:
-                            warn(
-                                f'No {old_name} attribute found for {variable} variable. Skipping 2'
-                            )
+                            warn(f'No {old_name} attribute found for {variable} variable. Skipping')
+
+    def rename_dimension(self, dimension, new_name):
+        dimensions = self.ncroot['netcdf'].get('dimension', [])
+        if dimensions:
+            for dim in dimensions:
+                if dim['@name'] == dimension:
+                    dim['@name'] = new_name
+                    dim['@orgName'] = dimension
+                    break
+            else:
+                warn(f'No {dimension} dimension found. Skipping')
 
     def add_dataset_attribute(self, key, value, type_='String'):
         """ Add dataset attribute

@@ -167,6 +167,24 @@ def test_rename_variable_attribute():
         nc.rename_variable_attribute('lat', 'units', 'Units')
 
 
+def test_rename_dimension():
+    nc = xncml.Dataset(input_file)
+    nc.rename_dimension('time', 'Time')
+    res = nc.ncroot['netcdf']['dimension']
+    expected = [
+        OrderedDict(
+            [('@name', 'Time'), ('@length', '2'), ('@isUnlimited', 'true'), ('@orgName', 'time')]
+        ),
+        OrderedDict([('@name', 'lat'), ('@length', '3')]),
+        OrderedDict([('@name', 'lon'), ('@length', '4')]),
+    ]
+
+    assert res == expected
+
+    with pytest.warns(UserWarning):
+        nc.rename_dimension('time_bound', 'time_bounds')
+
+
 def test_add_dataset_attribute():
     nc = xncml.Dataset(input_file)
     nc.add_dataset_attribute(key='editedby', value='foo')
