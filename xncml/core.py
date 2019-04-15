@@ -1,10 +1,11 @@
 import os
 from collections import OrderedDict
+from warnings import warn
 
 import xmltodict
 
 
-class NcmlReader(object):
+class Dataset(object):
     """ This is a class for reading and manipulating NcML file
     """
 
@@ -30,6 +31,8 @@ class NcmlReader(object):
     def __repr__(self):
         return xmltodict.unparse(self.ncroot, pretty=True)
 
+    # Variable
+
     def add_variable_attribute(self, variable, key, value, type_='String'):
         """ Add variable attribute
 
@@ -46,37 +49,112 @@ class NcmlReader(object):
 
         """
         item = OrderedDict({'@name': key, '@type': type_, '@value': value})
-        variables = self.ncroot['netcdf'].get('variable', None)
+        variables = self.ncroot['netcdf'].get('variable', [])
+
+        if isinstance(variables, OrderedDict):
+            variables = [variables]
+
         if variables:
             for var in variables:
                 if var['@name'] == variable:
-                    if isinstance(var['attribute'], list):
-                        for attr in var['attribute']:
-                            print(attr)
-                            if attr['@name'] == key:
-                                attr = attr.update(item)
-                                break
-                        else:
-                            var['attribute'].append(item)
+                    var_attributes = var.get('attribute', [])
+                    if isinstance(var_attributes, OrderedDict):
+                        var_attributes = [var_attributes]
+                    for attr in var_attributes:
+                        if attr['@name'] == key:
+                            attr = attr.update(item)
                             break
                     else:
-                        var['attribute'] = var['attribute'].update(item)
+                        var_attributes.append(item)
+                        var['attribute'] = var_attributes
+                    break
 
-        else:
-            var['@name'] = variable
-            var['attribute'] = item
+            else:
+                variables.append(OrderedDict({'@name': variable, 'attribute': item}))
 
     def remove_variable_attribute(self, variable, key):
         """ Remove variable attribute """
-        variables = self.ncroot['netcdf'].get('variable', None)
+        variables = self.ncroot['netcdf'].get('variable', [])
+        item = OrderedDict({'@name': key, '@type': 'attribute'})
         if variables:
             for var in variables:
                 if var['@name'] == variable:
-                    if isinstance(var['attribute'], list):
-                        for attr in var['attribute']:
-                            if attr['@name'] == key:
-                                var['attribute'].remove(attr)
-                                break
+                    var['remove'] = item
+                    break
+            else:
+                new_var = OrderedDict({'@name': variable, 'remove': item})
+                variables.append(new_var)
+
+    def rename_variable(self, variable, new_name):
+        """ Rename variable attribute
+
+        Parameters
+        ----------
+        variable : str
+              original variable name
+        new_name : str
+              New variable name
+
+        """
+        variables = self.ncroot['netcdf'].get('variable', [])
+        if variables:
+            for var in variables:
+                if var['@name'] == variable:
+                    var['@name'] = new_name
+                    var['@orgName'] = variable
+                    break
+            else:
+                warn(f'No {variable} variable found. Skipping')
+
+    def remove_variable(self, variable):
+        """ Remove dataset variable
+
+        Parameters
+        ----------
+        key : str
+            name of the variable to remove
+        """
+        variables = self.ncroot['netcdf'].get('variable', [])
+        removes = self.ncroot['netcdf'].get('remove', [])
+        item = OrderedDict({'@name': variable, '@type': 'variable'})
+        if variables:
+            variables_ = [var['@name'] for var in variables]
+            if variable in variables_:
+                removes.append(item)
+                self.ncroot['netcdf']['remove'] = removes
+            else:
+                warn(f'No {variable} variable found. Skipping')
+
+    def rename_variable_attribute(self, variable, old_name, new_name):
+        variables = self.ncroot['netcdf'].get('variable', [])
+        if variables:
+            for var in variables:
+                if var['@name'] == variable:
+                    if isinstance(var['attribute'], OrderedDict):
+                        var['attribute'] = [var['attribute']]
+
+                    for attr in var['attribute']:
+                        if attr['@name'] == old_name:
+                            attr['@name'] = new_name
+                            attr['@orgName'] = old_name
+                            break
+                    else:
+                        warn(f'No {old_name} attribute found for {variable} variable. Skipping')
+
+    # Dimensions
+
+    def rename_dimension(self, dimension, new_name):
+        dimensions = self.ncroot['netcdf'].get('dimension', [])
+        if dimensions:
+            for dim in dimensions:
+                if dim['@name'] == dimension:
+                    dim['@name'] = new_name
+                    dim['@orgName'] = dimension
+                    break
+            else:
+                warn(f'No {dimension} dimension found. Skipping')
+
+    # Dataset
 
     def add_dataset_attribute(self, key, value, type_='String'):
         """ Add dataset attribute
@@ -119,57 +197,25 @@ class NcmlReader(object):
             Name of the attribute to remove
 
         """
-        attributes = self.ncroot['netcdf'].get('attribute', None)
+        removals = self.ncroot['netcdf'].get('remove', [])
+        item = OrderedDict({'@name': key, '@type': 'attribute'})
+        if isinstance(removals, OrderedDict):
+            removals = [removals]
 
-        if attributes:
-            if isinstance(attributes, OrderedDict):
-                if attributes['@name'] == key:
-                    attributes.clear()
-
-            else:
-                for attrs in attributes:
-                    if attrs['@name'] == key:
-                        attributes.remove(attrs)
-                        break
-
-                if len(attributes) == 0:
-                    self.ncroot['netcdf']['attribute'] = OrderedDict()
-
-    def remove_dataset_dimension(self, key):
-        """ Remove dataset dimension
-
-        Parameters
-        ----------
-        key : str
-            name of the dimension to remove
-        """
-
-        dimensions = self.ncroot['netcdf'].get('dimension', None)
-        if dimensions and isinstance(dimensions, list):
-            for dim in dimensions:
-                if dim['@name'] == key:
-                    dimensions.remove(dim)
-
-    def remove_dataset_variable(self, key):
-        """ Remove dataset variable
-
-        Parameters
-        ----------
-        key : str
-            name of the variable to remove
-        """
-
-        variables = self.ncroot['netcdf'].get('variable', None)
-        if variables and isinstance(variables, list):
-            for var in variables:
-                if var['@name'] == key:
-                    variables.remove(var)
+        if removals:
+            removals_keys = [
+                removal['@name'] for removal in removals if removal['@type'] == 'attribute'
+            ]
+            if key not in removals_keys:
+                removals.append(item)
+        else:
+            self.ncroot['netcdf']['remove'] = [item]
 
     def to_ncml(self, path=None):
         if not path:
-            path = f'{self.filepath.strip(".ncml")}_updated.ncml'
+            path = f'{self.filepath.strip(".ncml")}_modified.ncml'
 
         xml_output = xmltodict.unparse(self.ncroot, pretty=True)
         with open(path, 'w') as fd:
             fd.write(xml_output)
-        print(f'Persisted new ncml file at: {path}')
+        print(f'Persisted modified ncml file at: {path}')
