@@ -1,5 +1,6 @@
 import os
 from collections import OrderedDict
+from warnings import warn
 
 import xmltodict
 
@@ -78,6 +79,27 @@ class Dataset(object):
             else:
                 new_var = OrderedDict({'@name': variable, 'remove': item})
                 variables.append(new_var)
+
+    def rename_variable(self, variable, new_name):
+        """ Rename variable attribute
+
+        Parameters
+        ----------
+        variable : str
+              original variable name
+        new_name : str
+              New variable name
+
+        """
+        variables = self.ncroot['netcdf'].get('variable', [])
+        if variables:
+            for var in variables:
+                if var['@name'] == variable:
+                    var['@name'] = new_name
+                    var['@orgName'] = variable
+                    break
+            else:
+                warn(f'No {variable} variable found. Skipping')
 
     def add_dataset_attribute(self, key, value, type_='String'):
         """ Add dataset attribute

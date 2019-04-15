@@ -125,6 +125,30 @@ def test_remove_variable_attribute(variable, key, expected, var_index):
     assert res == expected
 
 
+def test_rename_variable():
+    nc = xncml.Dataset(input_file)
+    nc.rename_variable('lat', 'latitude')
+    res = nc.ncroot['netcdf']['variable'][2]
+    expected = OrderedDict(
+        [
+            ('@name', 'latitude'),
+            ('@shape', 'lat'),
+            ('@type', 'float'),
+            (
+                'attribute',
+                OrderedDict([('@name', 'units'), ('@type', 'String'), ('@value', 'degrees_north')]),
+            ),
+            ('values', '41.0 40.0 39.0'),
+            ('@orgName', 'lat'),
+        ]
+    )
+
+    assert expected == res
+
+    with pytest.warns(UserWarning):
+        nc.rename_variable('Temp', 'Temperature')
+
+
 def test_add_dataset_attribute():
     nc = xncml.Dataset(input_file)
     nc.add_dataset_attribute(key='editedby', value='foo')
