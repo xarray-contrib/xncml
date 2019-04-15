@@ -68,15 +68,16 @@ class Dataset(object):
 
     def remove_variable_attribute(self, variable, key):
         """ Remove variable attribute """
-        variables = self.ncroot['netcdf'].get('variable', None)
+        variables = self.ncroot['netcdf'].get('variable', [])
+        item = OrderedDict({'@name': key, '@type': 'attribute'})
         if variables:
             for var in variables:
                 if var['@name'] == variable:
-                    if isinstance(var['attribute'], list):
-                        for attr in var['attribute']:
-                            if attr['@name'] == key:
-                                var['attribute'].remove(attr)
-                                break
+                    var['remove'] = item
+                    break
+            else:
+                new_var = OrderedDict({'@name': variable, 'remove': item})
+                variables.append(new_var)
 
     def add_dataset_attribute(self, key, value, type_='String'):
         """ Add dataset attribute
@@ -134,21 +135,6 @@ class Dataset(object):
 
                 if len(attributes) == 0:
                     self.ncroot['netcdf']['attribute'] = OrderedDict()
-
-    def remove_dataset_dimension(self, key):
-        """ Remove dataset dimension
-
-        Parameters
-        ----------
-        key : str
-            name of the dimension to remove
-        """
-
-        dimensions = self.ncroot['netcdf'].get('dimension', None)
-        if dimensions and isinstance(dimensions, list):
-            for dim in dimensions:
-                if dim['@name'] == key:
-                    dimensions.remove(dim)
 
     def remove_dataset_variable(self, key):
         """ Remove dataset variable

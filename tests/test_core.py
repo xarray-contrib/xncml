@@ -11,7 +11,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 input_file = os.path.join(here, 'exercise1.ncml')
 
 
-def test_ncml_reader_constructor():
+def test_ncml_dataset_constructor():
     nc = xncml.Dataset(input_file)
     expected = OrderedDict(
         [
@@ -71,29 +71,57 @@ def test_add_variable_attribute():
     assert res == expected
 
 
-def test_remove_variable_attribute():
-    nc = xncml.Dataset(input_file)
-    nc.remove_variable_attribute(variable='T', key='units')
-    expected = OrderedDict(
-        [
-            ('@name', 'T'),
-            ('@shape', 'time lat lon'),
-            ('@type', 'double'),
-            (
-                'attribute',
+@pytest.mark.parametrize(
+    'variable,key,expected, var_index',
+    [
+        (
+            'T',
+            'units',
+            OrderedDict(
                 [
-                    OrderedDict(
+                    ('@name', 'T'),
+                    ('@shape', 'time lat lon'),
+                    ('@type', 'double'),
+                    (
+                        'attribute',
                         [
-                            ('@name', 'long_name'),
-                            ('@type', 'String'),
-                            ('@value', 'surface temperature'),
-                        ]
-                    )
-                ],
+                            OrderedDict(
+                                [
+                                    ('@name', 'long_name'),
+                                    ('@type', 'String'),
+                                    ('@value', 'surface temperature'),
+                                ]
+                            ),
+                            OrderedDict([('@name', 'units'), ('@type', 'String'), ('@value', 'C')]),
+                        ],
+                    ),
+                    ('remove', OrderedDict([('@name', 'units'), ('@type', 'attribute')])),
+                ]
             ),
-        ]
-    )
-    res = nc.ncroot['netcdf']['variable'][1]
+            1,
+        ),
+        (
+            'Tidi',
+            'unwantedvaribleAttribute',
+            OrderedDict(
+                [
+                    ('@name', 'Tidi'),
+                    (
+                        'remove',
+                        OrderedDict(
+                            [('@name', 'unwantedvaribleAttribute'), ('@type', 'attribute')]
+                        ),
+                    ),
+                ]
+            ),
+            5,
+        ),
+    ],
+)
+def test_remove_variable_attribute(variable, key, expected, var_index):
+    nc = xncml.Dataset(input_file)
+    nc.remove_variable_attribute(variable=variable, key=key)
+    res = nc.ncroot['netcdf']['variable'][var_index]
     assert res == expected
 
 
@@ -119,17 +147,6 @@ def test_remove_dataset_attribute():
     nc = xncml.Dataset(input_file)
     nc.remove_dataset_attribute('title')
     assert nc.ncroot['netcdf']['attribute'] == OrderedDict()
-
-
-def test_remove_dataset_dimension():
-    nc = xncml.Dataset(input_file)
-    nc.remove_dataset_dimension('time')
-    expected = [
-        OrderedDict([('@name', 'lat'), ('@length', '3')]),
-        OrderedDict([('@name', 'lon'), ('@length', '4')]),
-    ]
-    res = nc.ncroot['netcdf']['dimension']
-    assert expected == res
 
 
 def test_remove_dataset_variable():
