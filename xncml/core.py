@@ -53,7 +53,6 @@ class Dataset(object):
                 if var['@name'] == variable:
                     if isinstance(var['attribute'], list):
                         for attr in var['attribute']:
-                            print(attr)
                             if attr['@name'] == key:
                                 attr = attr.update(item)
                                 break
@@ -100,6 +99,31 @@ class Dataset(object):
                     break
             else:
                 warn(f'No {variable} variable found. Skipping')
+
+    def rename_variable_attribute(self, variable, old_name, new_name):
+        variables = self.ncroot['netcdf'].get('variable', [])
+        if variables:
+            for var in variables:
+                if var['@name'] == variable:
+                    if isinstance(var['attribute'], list):
+                        for attr in var['attribute']:
+                            if attr['@name'] == old_name:
+                                attr['@name'] = new_name
+                                attr['@orgName'] = old_name
+                                break
+                        else:
+                            warn(
+                                f'No {old_name} attribute found for {variable} variable. Skipping 1'
+                            )
+
+                    else:
+                        if var['attribute']['@name'] == old_name:
+                            var['attribute']['@name'] = new_name
+                            var['attribute']['@orgName'] = old_name
+                        else:
+                            warn(
+                                f'No {old_name} attribute found for {variable} variable. Skipping 2'
+                            )
 
     def add_dataset_attribute(self, key, value, type_='String'):
         """ Add dataset attribute

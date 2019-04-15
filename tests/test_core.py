@@ -149,6 +149,24 @@ def test_rename_variable():
         nc.rename_variable('Temp', 'Temperature')
 
 
+def test_rename_variable_attribute():
+    nc = xncml.Dataset(input_file)
+    expected = OrderedDict(
+        [
+            ('@name', 'Units'),
+            ('@type', 'String'),
+            ('@value', 'degrees_north'),
+            ('@orgName', 'units'),
+        ]
+    )
+    nc.rename_variable_attribute('lat', 'units', 'Units')
+    res = nc.ncroot['netcdf']['variable'][2]['attribute']
+    assert res == expected
+
+    with pytest.warns(UserWarning):
+        nc.rename_variable_attribute('lat', 'units', 'Units')
+
+
 def test_add_dataset_attribute():
     nc = xncml.Dataset(input_file)
     nc.add_dataset_attribute(key='editedby', value='foo')
