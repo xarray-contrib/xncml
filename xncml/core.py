@@ -4,7 +4,7 @@ from collections import OrderedDict
 import xmltodict
 
 
-class NcmlReader(object):
+class Dataset(object):
     """ This is a class for reading and manipulating NcML file
     """
 
