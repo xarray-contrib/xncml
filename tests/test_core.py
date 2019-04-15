@@ -151,14 +151,17 @@ def test_rename_variable():
 
 def test_rename_variable_attribute():
     nc = xncml.Dataset(input_file)
-    expected = OrderedDict(
-        [
-            ('@name', 'Units'),
-            ('@type', 'String'),
-            ('@value', 'degrees_north'),
-            ('@orgName', 'units'),
-        ]
-    )
+    expected = [
+        OrderedDict(
+            [
+                ('@name', 'Units'),
+                ('@type', 'String'),
+                ('@value', 'degrees_north'),
+                ('@orgName', 'units'),
+            ]
+        )
+    ]
+
     nc.rename_variable_attribute('lat', 'units', 'Units')
     res = nc.ncroot['netcdf']['variable'][2]['attribute']
     assert res == expected
@@ -201,12 +204,13 @@ def test_remove_dataset_attribute():
     nc = xncml.Dataset(input_file)
     nc.add_dataset_attribute('bar', 'foo')
     nc.remove_dataset_attribute('title')
-    nc.remove_dataset_attribute('bar')
-    assert nc.ncroot['netcdf']['attribute'] == OrderedDict()
-
-    nc = xncml.Dataset(input_file)
     nc.remove_dataset_attribute('title')
-    assert nc.ncroot['netcdf']['attribute'] == OrderedDict()
+    nc.remove_dataset_attribute('bar')
+    expected_removals = nc.ncroot['netcdf']['remove']
+    expected_removals = [
+        removal for removal in expected_removals if removal['@type'] == 'attribute'
+    ]
+    assert len(expected_removals) == 2
 
 
 def test_remove_variable():
@@ -216,6 +220,9 @@ def test_remove_variable():
     res = nc.ncroot['netcdf']['remove']
     assert expected == res
 
+    with pytest.warns(UserWarning):
+        nc.remove_variable('Lon')
+
 
 def test_to_ncml():
     nc = xncml.Dataset(input_file)
@@ -224,7 +231,7 @@ def test_to_ncml():
         assert os.path.exists(t.name)
 
     nc.to_ncml()
-    default = f'{input_file.strip(".ncml")}_updated.ncml'
+    default = f'{input_file.strip(".ncml")}_modified.ncml'
     assert os.path.exists(default)
     try:
         os.remove(default)

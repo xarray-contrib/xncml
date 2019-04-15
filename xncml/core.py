@@ -31,6 +31,8 @@ class Dataset(object):
     def __repr__(self):
         return xmltodict.unparse(self.ncroot, pretty=True)
 
+    # Variable
+
     def add_variable_attribute(self, variable, key, value, type_='String'):
         """ Add variable attribute
 
@@ -124,21 +126,18 @@ class Dataset(object):
         if variables:
             for var in variables:
                 if var['@name'] == variable:
-                    if isinstance(var['attribute'], list):
-                        for attr in var['attribute']:
-                            if attr['@name'] == old_name:
-                                attr['@name'] = new_name
-                                attr['@orgName'] = old_name
-                                break
-                        else:
-                            warn(f'No {old_name} attribute found for {variable} variable. Skipping')
+                    if isinstance(var['attribute'], OrderedDict):
+                        var['attribute'] = [var['attribute']]
 
+                    for attr in var['attribute']:
+                        if attr['@name'] == old_name:
+                            attr['@name'] = new_name
+                            attr['@orgName'] = old_name
+                            break
                     else:
-                        if var['attribute']['@name'] == old_name:
-                            var['attribute']['@name'] = new_name
-                            var['attribute']['@orgName'] = old_name
-                        else:
-                            warn(f'No {old_name} attribute found for {variable} variable. Skipping')
+                        warn(f'No {old_name} attribute found for {variable} variable. Skipping')
+
+    # Dimensions
 
     def rename_dimension(self, dimension, new_name):
         dimensions = self.ncroot['netcdf'].get('dimension', [])
@@ -150,6 +149,8 @@ class Dataset(object):
                     break
             else:
                 warn(f'No {dimension} dimension found. Skipping')
+
+    # Dataset
 
     def add_dataset_attribute(self, key, value, type_='String'):
         """ Add dataset attribute
@@ -192,27 +193,25 @@ class Dataset(object):
             Name of the attribute to remove
 
         """
-        attributes = self.ncroot['netcdf'].get('attribute', None)
+        removals = self.ncroot['netcdf'].get('remove', [])
+        item = OrderedDict({'@name': key, '@type': 'attribute'})
+        if isinstance(removals, OrderedDict):
+            removals = [removals]
 
-        if attributes:
-            if isinstance(attributes, OrderedDict):
-                if attributes['@name'] == key:
-                    attributes.clear()
-
-            else:
-                for attrs in attributes:
-                    if attrs['@name'] == key:
-                        attributes.remove(attrs)
-                        break
-
-                if len(attributes) == 0:
-                    self.ncroot['netcdf']['attribute'] = OrderedDict()
+        if removals:
+            removals_keys = [
+                removal['@name'] for removal in removals if removal['@type'] == 'attribute'
+            ]
+            if key not in removals_keys:
+                removals.append(item)
+        else:
+            self.ncroot['netcdf']['remove'] = [item]
 
     def to_ncml(self, path=None):
         if not path:
-            path = f'{self.filepath.strip(".ncml")}_updated.ncml'
+            path = f'{self.filepath.strip(".ncml")}_modified.ncml'
 
         xml_output = xmltodict.unparse(self.ncroot, pretty=True)
         with open(path, 'w') as fd:
             fd.write(xml_output)
-        print(f'Persisted new ncml file at: {path}')
+        print(f'Persisted modified ncml file at: {path}')
