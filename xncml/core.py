@@ -100,6 +100,25 @@ class Dataset(object):
             else:
                 warn(f'No {variable} variable found. Skipping')
 
+    def remove_variable(self, variable):
+        """ Remove dataset variable
+
+        Parameters
+        ----------
+        key : str
+            name of the variable to remove
+        """
+        variables = self.ncroot['netcdf'].get('variable', [])
+        removes = self.ncroot['netcdf'].get('remove', [])
+        item = OrderedDict({'@name': variable, '@type': 'variable'})
+        if variables:
+            variables_ = [var['@name'] for var in variables]
+            if variable in variables_:
+                removes.append(item)
+                self.ncroot['netcdf']['remove'] = removes
+            else:
+                warn(f'No {variable} variable found. Skipping')
+
     def rename_variable_attribute(self, variable, old_name, new_name):
         variables = self.ncroot['netcdf'].get('variable', [])
         if variables:
@@ -188,21 +207,6 @@ class Dataset(object):
 
                 if len(attributes) == 0:
                     self.ncroot['netcdf']['attribute'] = OrderedDict()
-
-    def remove_dataset_variable(self, key):
-        """ Remove dataset variable
-
-        Parameters
-        ----------
-        key : str
-            name of the variable to remove
-        """
-
-        variables = self.ncroot['netcdf'].get('variable', None)
-        if variables and isinstance(variables, list):
-            for var in variables:
-                if var['@name'] == key:
-                    variables.remove(var)
 
     def to_ncml(self, path=None):
         if not path:

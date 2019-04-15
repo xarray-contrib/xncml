@@ -209,11 +209,11 @@ def test_remove_dataset_attribute():
     assert nc.ncroot['netcdf']['attribute'] == OrderedDict()
 
 
-def test_remove_dataset_variable():
+def test_remove_variable():
     nc = xncml.Dataset(input_file)
-    nc.remove_dataset_variable('rh')
-    expected = set(['T', 'lat', 'lon', 'time'])
-    res = set([item['@name'] for item in nc.ncroot['netcdf']['variable']])
+    nc.remove_variable('lon')
+    expected = [OrderedDict([('@name', 'lon'), ('@type', 'variable')])]
+    res = nc.ncroot['netcdf']['remove']
     assert expected == res
 
 
