@@ -70,6 +70,19 @@ def test_add_variable_attribute():
     res = nc.ncroot['netcdf']['variable'][1]
     assert res == expected
 
+    nc.add_variable_attribute(variable='Tasmax', key='units', value='kelvin')
+    res = nc.ncroot['netcdf']['variable'][5]
+    expected = OrderedDict(
+        [
+            ('@name', 'Tasmax'),
+            (
+                'attribute',
+                OrderedDict([('@name', 'units'), ('@type', 'String'), ('@value', 'kelvin')]),
+            ),
+        ]
+    )
+    assert res == expected
+
 
 @pytest.mark.parametrize(
     'variable,key,expected, var_index',

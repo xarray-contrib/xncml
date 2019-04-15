@@ -49,24 +49,28 @@ class Dataset(object):
 
         """
         item = OrderedDict({'@name': key, '@type': type_, '@value': value})
-        variables = self.ncroot['netcdf'].get('variable', None)
+        variables = self.ncroot['netcdf'].get('variable', [])
+
+        if isinstance(variables, OrderedDict):
+            variables = [variables]
+
         if variables:
             for var in variables:
                 if var['@name'] == variable:
-                    if isinstance(var['attribute'], list):
-                        for attr in var['attribute']:
-                            if attr['@name'] == key:
-                                attr = attr.update(item)
-                                break
-                        else:
-                            var['attribute'].append(item)
+                    var_attributes = var.get('attribute', [])
+                    if isinstance(var_attributes, OrderedDict):
+                        var_attributes = [var_attributes]
+                    for attr in var_attributes:
+                        if attr['@name'] == key:
+                            attr = attr.update(item)
                             break
                     else:
-                        var['attribute'] = var['attribute'].update(item)
+                        var_attributes.append(item)
+                        var['attribute'] = var_attributes
+                    break
 
-        else:
-            var['@name'] = variable
-            var['attribute'] = item
+            else:
+                variables.append(OrderedDict({'@name': variable, 'attribute': item}))
 
     def remove_variable_attribute(self, variable, key):
         """ Remove variable attribute """
