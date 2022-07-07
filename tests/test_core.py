@@ -8,7 +8,7 @@ import pytest
 import xncml
 
 here = os.path.abspath(os.path.dirname(__file__))
-input_file = os.path.join(here, 'exercise1.ncml')
+input_file = os.path.join(here, 'data/exercise1.ncml')
 
 
 def test_ncml_dataset_constructor():
