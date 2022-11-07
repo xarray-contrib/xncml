@@ -47,7 +47,7 @@ from .generated import (
     ObjectType,
     Values,
     Group,
-    EnumTypedef
+    EnumTypedef,
 )
 from xsdata.formats.dataclass.parsers import XmlParser
 import numpy as np
@@ -95,7 +95,9 @@ def open_ncml(ncml: str | Path) -> xr.Dataset:
     return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml)
 
 
-def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) -> xr.Dataset:
+def read_netcdf(
+    target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path
+) -> xr.Dataset:
     """
     Return content of <netcdf> element.
 
@@ -172,7 +174,9 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
 
         # Handle coordinate values
         if item.coord_value is not None:
-            dtypes = [i[obj.dim_name].dtype.type for i in [tar, target] if obj.dim_name in i]
+            dtypes = [
+                i[obj.dim_name].dtype.type for i in [tar, target] if obj.dim_name in i
+            ]
             coords = read_coord_value(item, obj, dtypes=dtypes)
             tar = tar.assign_coords({obj.dim_name: coords})
         items.append(tar)
@@ -184,7 +188,9 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     # Need to decode time variable
     if obj.time_units_change:
         for i, ds in enumerate(items):
-            t = xr.as_variable(ds[obj.dim_name], obj.dim_name)  # Maybe not the same name...
+            t = xr.as_variable(
+                ds[obj.dim_name], obj.dim_name
+            )  # Maybe not the same name...
             encoded = CFDatetimeCoder(use_cftime=True).decode(t, name=t.name)
             items[i] = ds.assign_coords({obj.dim_name: encoded})
 
@@ -340,7 +346,7 @@ def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
     if agg.type == AggregationType.JOIN_NEW:
         coord = val
     elif agg.type == AggregationType.JOIN_EXISTING:
-        coord = val.replace(',', ' ').split()
+        coord = val.replace(",", " ").split()
     else:
         raise NotImplementedError
 
@@ -403,8 +409,7 @@ def read_variable(target: xr.Dataset, ref: xr.Dataset, obj: Variable, dimensions
     elif obj.shape:
         dims = obj.shape.split(" ")
         shape = [dimensions[dim].length for dim in dims]
-        out = xr.Variable(
-            data=np.empty(shape, dtype=nctype(obj)), dims=dims)
+        out = xr.Variable(data=np.empty(shape, dtype=nctype(obj)), dims=dims)
     else:
         raise ValueError
 
@@ -494,7 +499,9 @@ def read_remove(target: xr.Dataset | xr.Variable, obj: Remove) -> xr.Dataset:
     return target
 
 
-def read_attribute(target: xr.Dataset | xr.Variable, obj: Attribute, ref: xr.Dataset = None):
+def read_attribute(
+    target: xr.Dataset | xr.Variable, obj: Attribute, ref: xr.Dataset = None
+):
     """Update target dataset in place with new or modified attribute.
 
     Parameters
