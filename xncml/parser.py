@@ -157,6 +157,9 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     # Names of variables to be aggregated. All variables if undefined.
     names = [v.name for v in filter_by_class(obj.choice, Aggregation.VariableAgg)]
 
+    for attr in obj.promote_global_attribute:
+        raise NotImplementedError
+
     # Create list of items to aggregate.
     items = []
     for item in obj.netcdf:

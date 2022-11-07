@@ -21,7 +21,7 @@ def test_aggexisting():
     assert ds["time"].attrs["ncmlAdded"] == "timeAtt"
 
 
-def test_aggexistingwcoords():
+def test_aggexisting_w_coords():
     ds = xncml.open_ncml(data / "aggExistingWcoords.xml")
     check_dimension(ds)
     check_coord_var(ds)
@@ -57,22 +57,28 @@ def test_agg_new_coord():
     assert len(ds.lat) == 3
 
 
-def test_type2():
+def test_agg_existing2():
     ds = xncml.open_ncml(data / "aggExisting2.xml")
     assert ds["time"].attrs["units"] == "hours since 2006-06-16 00:00"
     assert ds["time"].dtype == float
     assert all(ds["time"].data == [12., 13., 14.])
 
 
-def test_type4():
+def test_agg_existing4():
     ds = xncml.open_ncml(data / "aggExisting4.ncml")
     assert all(ds["time"].data == [1.1496816E9, 1.1496852E9, 1.1496888E9])
 
 
-def test_type5():
+def test_agg_existing5():
     ds = xncml.open_ncml(data / "aggExisting5.ncml")
     assert ds["time"].dtype == np.int32
     assert all(ds["time"].data == list(range(59)))
+
+
+def test_agg_existing_add_coords():
+    # TODO: Complete test
+    ds = xncml.open_ncml(data / "aggExistingAddCoord.ncml")
+    assert "time" in ds.variables
 
 
 def test_modify_atts():
@@ -113,8 +119,34 @@ def test_agg_syn_grid():
     assert all(ds.time == ["2005-11-22 22:19:53Z", "2005-11-22 23:19:53Z", "2005-11-23 00:19:59Z"])
 
 
+def test_agg_syn_no_coord():
+    ds = xncml.open_ncml(data / "aggSynNoCoord.xml")
+    assert len(ds.lat) == 3
+    assert len(ds.lon) == 4
+    assert len(ds.time) == 3
+
+
+def test_agg_syn_no_coords_dir():
+    ds = xncml.open_ncml(data / "aggSynNoCoordsDir.xml")
+    assert len(ds.lat) == 3
+    assert len(ds.lon) == 4
+    assert len(ds.time) == 3
+
+
 def test_agg_synthetic():
     ds = xncml.open_ncml(data / "aggSynthetic.xml")
+    assert len(ds.time) == 3
+    assert all(ds.time == [0, 10, 99])
+
+
+def test_agg_synthetic_2():
+    ds = xncml.open_ncml(data / "aggSynthetic2.xml")
+    assert len(ds.time) == 3
+    assert all(ds.time == [0, 1, 2])
+
+
+def test_agg_synthetic_3():
+    ds = xncml.open_ncml(data / "aggSynthetic3.xml")
     assert len(ds.time) == 3
     assert all(ds.time == [0, 10, 99])
 
@@ -175,8 +207,34 @@ def test_agg_union():
     assert ds.Temperature.attrs["units"] == "degC"
 
 
+
+
+def test_agg_union_rename():
+    ds = xncml.open_ncml(data / "aggUnionRename.xml")
+    assert "LavaFlow" in ds.variables
+
+
+def test_agg_union_scan():
+    ds = xncml.open_ncml(data / "aggUnionScan.xml")
+    assert "lflx" in ds
+    assert "cldc" in ds
+
+
 def test_read():
     ds = xncml.open_ncml(data / "testRead.xml")
+    assert ds.attrs["title"] == "Example Data"
+    assert ds.attrs["testFloat"] == (1., 2., 3., 4.)
+
+
+def test_read_override():
+    ds = xncml.open_ncml(data / "testReadOverride.xml")
+    assert "rh" not in ds.variables
+
+
+@pytest.mark.skip(reason="unclear if this is meant to fail")
+def test_read_https():
+    ds = xncml.open_ncml(data / "testReadHttps.xml")
+    assert ds.attrs["title"] == "Example Data"
 
 
 def test_agg_existing_inequivalent_cals():
@@ -189,6 +247,35 @@ def test_agg_existing_inequivalent_cals():
 def test_aggexistingone():
     ds = xncml.open_ncml(data / "aggExistingOne.ncml")
     assert len(ds.time) == 3
+
+
+@pytest.mark.skip(reason="dateFormatMark not implemented")
+@pytest.mark.skip(reason="<promoteGlobalAttribute> not implemented")
+def test_agg_existing_promote():
+    ds = xncml.open_ncml(data / "aggExistingPromote.ncml")
+    assert "times" in ds.variables
+
+
+@pytest.mark.skip(reason="<promoteGlobalAttribute> not implemented")
+def test_agg_existing_promote2():
+    ds = xncml.open_ncml(data / "aggExistingPromote2.ncml")
+
+
+def test_agg_join_new_scalar_coord():
+    ds = xncml.open_ncml(data / "aggJoinNewScalarCoord.xml")
+    # TODO: Complete test
+
+
+def test_exercise_1():
+    ds = xncml.open_ncml(data / "exercise1.ncml")
+    # TODO: Complete test
+
+
+def test_read_meta_data():
+    ds = xncml.open_ncml(data / "readMetadata.xml")
+    assert ds.attrs["title"] == "Example Data"
+    assert ds.variables["T"].attrs["units"] == "degC"
+
 
 
 # --- #
