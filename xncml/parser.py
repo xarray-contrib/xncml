@@ -23,22 +23,17 @@ Support for these elements is missing:
 - <logicalSlice>
 - <promoteGlobalAttribute>
 - <enumTypedef>
-- <group>
 - <scanFmrc>
 
 Support for these attributes is missing:
 - dateFormatMark
 - olderThan
 - tiled aggregations
-
-
-
-
-
 """
 __author__ = "David Huard"
 __date__ = "July 2022"
 __contact__ = "huard.david@ouranos.ca"
+
 
 from .generated import (
     Netcdf,
@@ -97,19 +92,7 @@ def open_ncml(ncml: str | Path) -> xr.Dataset:
     ncml = Path(ncml)
     obj = parse(ncml)
 
-    # Open location if any
-    ref = read_ds(obj, ncml) or xr.Dataset()
-    target = xr.Dataset()
-
-    # <explicit/> element means that only content specifically mentioned in NcML document is included in dataset.
-    if obj.read_metadata is not None:
-        target = ref
-    elif obj.explicit is not None:
-        pass
-    else:  # Default
-        target = ref
-
-    return read_netcdf(target, ref, obj, ncml)
+    return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml)
 
 
 def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) -> xr.Dataset:
@@ -132,10 +115,20 @@ def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) ->
     xr.Dataset
       Dataset holding variables and attributes defined in <netcdf> element.
     """
-    # We need to start parsing <aggregation>, since it contains required information for later <variable> elements.
+    # Open location if any
+    ref = read_ds(obj, ncml) or ref
+
+    # <explicit/> element means that only content specifically mentioned in NcML document is included in dataset.
+    if obj.explicit is not None:
+        pass
+    else:
+        # By default, all metadata from the reference dataset is read: <readMetadata/>
+        target = ref
+
     for item in filter_by_class(obj.choice, Aggregation):
         target = read_aggregation(target, item, ncml)
 
+    # Handle <variable>, <attribute> and <remove> elements
     target = read_group(target, ref, obj)
 
     return target
@@ -168,19 +161,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     items = []
     for item in obj.netcdf:
         # Open dataset defined in <netcdf>'s `location` attribute
-        ref = read_ds(item, ncml) or xr.Dataset()
-
-        # Handle <explicit/> tag.
-        tar = xr.Dataset()
-        if item.read_metadata is not None:
-            tar = ref
-        elif item.explicit is not None:
-            pass
-        else:  # Default
-            tar = ref
-
-        # Handle <variable>, <attribute> and <remove> elements
-        tar = read_group(tar, ref, item)
+        tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml)
 
         # Select variables
         if names:
@@ -188,7 +169,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
 
         # Handle coordinate values
         if item.coord_value is not None:
-            dtypes = [i[obj.dim_name].dtype.type for i in [tar, target, ref] if obj.dim_name in i]
+            dtypes = [i[obj.dim_name].dtype.type for i in [tar, target] if obj.dim_name in i]
             coords = read_coord_value(item, obj, dtypes=dtypes)
             tar = tar.assign_coords({obj.dim_name: coords})
         items.append(tar)
@@ -205,17 +186,17 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
             items[i] = ds.assign_coords({obj.dim_name: encoded})
 
     # Translate different types of aggregation into xarray instructions.
-    match obj.type:
-        case AggregationType.JOIN_EXISTING:
-            agg = xr.concat(items, obj.dim_name)
-        case AggregationType.JOIN_NEW:
-            agg = xr.concat(items, obj.dim_name)
-        case AggregationType.UNION:
-            agg = xr.merge(items)
-        case _:
-            raise NotImplementedError
+    if obj.type == AggregationType.JOIN_EXISTING:
+        agg = xr.concat(items, obj.dim_name)
+    elif obj.type == AggregationType.JOIN_NEW:
+        agg = xr.concat(items, obj.dim_name)
+    elif obj.type == AggregationType.UNION:
+        agg = xr.merge(items)
+    else:
+        raise NotImplementedError
 
-    return target.merge(agg)
+    agg = read_group(agg, None, obj)
+    return target.merge(agg, combine_attrs="no_conflicts")
 
 
 def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
@@ -261,23 +242,22 @@ def read_group(target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf) -> xr.D
     """
     dims = {}
     for item in obj.choice:
-        match item:
-            case Dimension():
-                dims[item.name] = read_dimension(item)
-            case Variable():
-                target = read_variable(target, ref, item, dims)
-            case Attribute():
-                read_attribute(target, item, ref)
-            case Remove():
-                target = read_remove(target, item)
-            case EnumTypedef():
-                raise NotImplementedError
-            case Group():
-                target = read_group(target, ref, item)
-            case Aggregation():
-                pass  # <aggregation> elements are parsed in `read_netcdf`
-            case _:
-                raise AttributeError
+        if isinstance(item, Dimension):
+            dims[item.name] = read_dimension(item)
+        elif isinstance(item, Variable):
+            target = read_variable(target, ref, item, dims)
+        elif isinstance(item, Attribute):
+            read_attribute(target, item, ref)
+        elif isinstance(item, Remove):
+            target = read_remove(target, item)
+        elif isinstance(item, EnumTypedef):
+            raise NotImplementedError
+        elif isinstance(item, Group):
+            target = read_group(target, ref, item)
+        elif isinstance(item, Aggregation):
+            pass  # <aggregation> elements are parsed in `read_netcdf`
+        else:
+            raise AttributeError
 
     return target
 
@@ -299,6 +279,7 @@ def read_scan(obj: Aggregation.Scan, ncml: Path) -> [xr.Dataset]:
       List of datasets found by scan.
     """
     import re
+    import glob
 
     if obj.date_format_mark:
         raise NotImplementedError
@@ -307,18 +288,25 @@ def read_scan(obj: Aggregation.Scan, ncml: Path) -> [xr.Dataset]:
     if not path.is_absolute():
         path = ncml.parent / path
 
-    files = path.rglob("*") if obj.subdirs else path.glob("*")
+    files = list(path.rglob("*") if obj.subdirs else path.glob("*"))
 
+    if not files:
+        raise ValueError(f"No files found in {path}")
+
+    fns = map(str, files)
     if obj.reg_exp:
         pat = re.compile(obj.reg_exp)
-        files = filter(pat.match, map(str, files))
+        files = list(filter(pat.match, fns))
     elif obj.suffix:
         pat = "*" + obj.suffix
-        files = [f for f in files if f.match(pat)]
+        files = glob.fnmatch.filter(fns, pat)
+
+    if not files:
+        raise ValueError(f"regular expression or suffix matches no file.")
 
     files.sort()
 
-    return [xr.open_dataset(f, decode_times=False) for f in files]
+    return [xr.open_dataset(f, decode_times=False).chunk() for f in files]
 
 
 def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
@@ -345,20 +333,13 @@ def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
     """
     val = nc.coord_value
 
-    match agg.type:
-        # A JOIN_NEW aggregation has exactly one coordinate value
-        case AggregationType.JOIN_NEW:
-            coord = val
-        case AggregationType.JOIN_EXISTING:
-            if "," in val:
-                coord = val.split(",")
-            elif " " in val:
-                coord = val.split(" ")
-            else:
-                coord = [val]
-
-        case _:
-            raise NotImplementedError
+    # A JOIN_NEW aggregation has exactly one coordinate value
+    if agg.type == AggregationType.JOIN_NEW:
+        coord = val
+    elif agg.type == AggregationType.JOIN_EXISTING:
+        coord = val.replace(',', ' ').split()
+    else:
+        raise NotImplementedError
 
     # Cast to dtype, not clear what the spec is exactly for this.
     if dtypes:
@@ -499,13 +480,13 @@ def read_remove(target: xr.Dataset | xr.Variable, obj: Remove) -> xr.Dataset:
     xr.Dataset or xr.Variable
       Dataset with attribute, variable or dimension removed, or variable with attribute removed.
     """
-    match obj.type:
-        case ObjectType.ATTRIBUTE:
-            target.attrs.pop(obj.name)
-        case ObjectType.VARIABLE:
-            target = target.drop_vars(obj.name)
-        case ObjectType.DIMENSION:
-            target = target.drop_dims(obj.name)
+
+    if obj.type == ObjectType.ATTRIBUTE:
+        target.attrs.pop(obj.name)
+    elif obj.type == ObjectType.VARIABLE:
+        target = target.drop_vars(obj.name)
+    elif obj.type == ObjectType.DIMENSION:
+        target = target.drop_dims(obj.name)
 
     return target
 
@@ -538,29 +519,31 @@ def read_attribute(target: xr.Dataset | xr.Variable, obj: Attribute, ref: xr.Dat
 
 def read_dimension(obj: Dimension) -> Dimension:
     """Return dimension object with its length cast to an integer."""
-    obj.length = int(obj.length)
+    if obj.length is not None:
+        obj.length = int(obj.length)
+
     return obj
 
 
 def nctype(obj: [Attribute, Variable]) -> type:
     """Return Python type corresponding to the NcML DataType of object."""
-    match obj.type:
-        case DataType.STRING | DataType.STRING_1:
-            return str
-        case DataType.BYTE:
-            return np.int8
-        case DataType.SHORT:
-            return np.int16
-        case DataType.INT:
-            return np.int32
-        case DataType.LONG:
-            return int
-        case DataType.FLOAT:
-            return np.float32
-        case DataType.DOUBLE:
-            return np.float64
-        case _:
-            raise NotImplementedError
+
+    if obj.type in [DataType.STRING, DataType.STRING_1]:
+        return str
+    elif obj.type == DataType.BYTE:
+        return np.int8
+    elif obj.type == DataType.SHORT:
+        return np.int16
+    elif obj.type == DataType.INT:
+        return np.int32
+    elif obj.type == DataType.LONG:
+        return int
+    elif obj.type == DataType.FLOAT:
+        return np.float32
+    elif obj.type == DataType.DOUBLE:
+        return np.float64
+
+    raise NotImplementedError
 
 
 def cast(obj: Attribute):
@@ -573,8 +556,6 @@ def cast(obj: Attribute):
         sep = obj.separator or " "
         values = value.split(sep)
         return tuple(map(nctype(obj), values))
-
-        return nctype(obj)(value)
 
 
 def filter_by_class(iterable, klass):
