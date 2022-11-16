@@ -4,7 +4,7 @@
 Features
 ========
   - Manipulate NcML file: add & remove attributes, variables and dimensions. By @andersy005
-  - Return `xarray.Dataset` based on NcML content. By @huard
+  - Implement `open_ncml`, which returns an `xarray.Dataset` built from an NcML. By @huard
 
 Notes
 =====
