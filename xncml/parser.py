@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 # NcML parser for xarray
 
@@ -54,6 +55,7 @@ import numpy as np
 from pathlib import Path
 import xarray as xr
 import datetime as dt
+
 
 
 def parse(path: Path) -> Netcdf:
@@ -225,7 +227,12 @@ def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
       Dataset defined at <netcdf>' `location` attribute.
     """
     if obj.location:
-        location = obj.location.removeprefix("file:")
+        try:
+            # Python >= 3.9
+            location = obj.location.removeprefix("file:")
+        except AttributeError:
+            location = obj.location.strip("file:")
+
         if not Path(location).is_absolute():
             location = ncml.parent / location
         return xr.open_dataset(location, decode_times=False)
