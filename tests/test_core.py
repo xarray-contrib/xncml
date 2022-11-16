@@ -244,7 +244,7 @@ def test_to_ncml():
         assert os.path.exists(t.name)
 
     nc.to_ncml()
-    default = f'{input_file.strip(".ncml")}_modified.ncml'
+    default = f'{str(input_file).strip(".ncml")}_modified.ncml'
     assert os.path.exists(default)
     try:
         os.remove(default)
