@@ -20,7 +20,7 @@ class Dataset(object):
 
         """
 
-        self.filepath = filepath
+        self.filepath = str(filepath)
         try:
             with open(filepath) as fd:
                 self.ncroot = xmltodict.parse(fd.read())
@@ -130,7 +130,7 @@ class Dataset(object):
         if variables:
             for var in variables:
                 if var['@name'] == variable:
-                    if isinstance(var['attribute'], OrderedDict):
+                    if isinstance(var['attribute'], (dict, OrderedDict)):
                         var['attribute'] = [var['attribute']]
 
                     for attr in var['attribute']:
@@ -171,7 +171,7 @@ class Dataset(object):
         item = OrderedDict({'@name': key, '@type': type_, '@value': value})
         attributes = self.ncroot['netcdf'].get('attribute', None)
         if attributes:
-            if isinstance(attributes, OrderedDict):
+            if isinstance(attributes, (dict, OrderedDict)):
                 if attributes['@name'] == key:
                     attributes = attributes.update(item)
 
@@ -199,7 +199,7 @@ class Dataset(object):
         """
         removals = self.ncroot['netcdf'].get('remove', [])
         item = OrderedDict({'@name': key, '@type': 'attribute'})
-        if isinstance(removals, OrderedDict):
+        if isinstance(removals, (dict, OrderedDict)):
             removals = [removals]
 
         if removals:
