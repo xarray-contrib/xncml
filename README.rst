@@ -2,9 +2,6 @@
 xncml
 =====
 
-#.. image:: https://img.shields.io/circleci/project/github/xarray-contrib/xncml/master.svg?style=for-the-badge&logo=circleci
-#    :target: https://circleci.com/gh/xarray-contrib/xncml/tree/master
-
 #.. image:: https://img.shields.io/codecov/c/github/xarray-contrib/xncml.svg?style=for-the-badge
 #    :target: https://codecov.io/gh/xarray-contrib/xncml
 
