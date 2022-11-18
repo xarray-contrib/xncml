@@ -4,7 +4,7 @@
     <dimension name="lat"  length="4"  />
     <dimension name="lon"  length="4"  />
     <dimension name="bnds" length="2"  />
-    
+
     <attribute name="Conventions" value="CF-1.0" />
 
     <variable name="time" shape="time" type="double">
@@ -41,4 +41,4 @@
     <variable name="foo" shape="time lat lon" type="float">
         <values start="1.0" increment="1.0" />
     </variable>
-</netcdf> 
+</netcdf>

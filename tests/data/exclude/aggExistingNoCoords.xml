@@ -5,5 +5,5 @@
     <netcdf location="file:src/test/data/ncml/nc/01janN.nc" />
     <netcdf location="file:src/test/data/ncml/nc/02febN.nc" />
   </aggregation>
-	
+
 </netcdf>
