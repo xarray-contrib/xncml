@@ -9,5 +9,5 @@
     <netcdf location="nc/jan.nc"/>
     <netcdf location="nc/feb.nc"/>
   </aggregation>
-	
+
 </netcdf>
