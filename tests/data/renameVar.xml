@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nc:netcdf xmlns:nc="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
   location="nc/example.nc">
-	
+
 	<nc:variable name="ReletiveHumidity" type="int" shape="time lat lon" orgName="rh">
 		<nc:attribute name="long_name" type="string" value="relative humidity"/>
 		<nc:attribute name="units" type="string" value="percent"/>
@@ -18,7 +18,7 @@
 		<nc:attribute name="units" type="string" value="hours"/>
 		<nc:values separator=" ">6 18 24 36</nc:values>
 	</nc:variable>
-	
+
 	<nc:attribute name="title" type="string" value="Example Data"/>
 	<nc:attribute name="testByte" type="byte" value="1 2 3 4"/>
 	<nc:attribute name="testShort" type="short" value="1 2 3 4"/>
