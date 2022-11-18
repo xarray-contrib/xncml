@@ -48,8 +48,8 @@ extensions = [
 ]
 
 extlinks = {
-    'issue': ('https://github.com/NCAR/xncml/issues/%s', 'GH#'),
-    'pr': ('https://github.com/NCAR/xncml/pull/%s', 'GH#'),
+    'issue': ('https://github.com/xarray-contrib/xncml/issues/%s', 'GH#'),
+    'pr': ('https://github.com/xarray-contrib/xncml/pull/%s', 'GH#'),
 }
 
 # Add any paths that contain templates here, relative to this directory.

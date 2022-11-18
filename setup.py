@@ -25,7 +25,7 @@ setup(
     long_description=long_description,
     maintainer='Anderson Banihirwe',
     maintainer_email='abanihi@ucar.edu',
-    url='https://github.com/NCAR/xncml',
+    url='https://github.com/xarray-contrib/xncml',
     packages=find_packages(),
     package_dir={'xncml': 'xncml'},
     include_package_data=True,
