@@ -23,6 +23,12 @@ pip install xncml
 tutorial
 ```
 
+## Meta
+
+- [Changelog](changelog.md)
+- [Github](https://github.com/xarray-contrib/xncml/)
+
+
 ## Feedback
 
 If you encounter any errors or problems with **xncml**,
