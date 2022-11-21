@@ -119,10 +119,7 @@ def test_agg_syn_grid():
     assert len(ds.lat) == 3
     assert len(ds.lon) == 4
     assert len(ds.time) == 3
-    assert all(
-        ds.time
-        == ['2005-11-22 22:19:53Z', '2005-11-22 23:19:53Z', '2005-11-23 00:19:59Z']
-    )
+    assert all(ds.time == ['2005-11-22 22:19:53Z', '2005-11-22 23:19:53Z', '2005-11-23 00:19:59Z'])
 
 
 def test_agg_syn_no_coord():

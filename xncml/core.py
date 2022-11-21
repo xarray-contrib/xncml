@@ -6,8 +6,7 @@ import xmltodict
 
 
 class Dataset(object):
-    """ This is a class for reading and manipulating NcML file
-    """
+    """This is a class for reading and manipulating NcML file"""
 
     def __init__(self, filepath):
         """
@@ -34,7 +33,7 @@ class Dataset(object):
     # Variable
 
     def add_variable_attribute(self, variable, key, value, type_='String'):
-        """ Add variable attribute
+        """Add variable attribute
 
         Parameters
         ----------
@@ -73,7 +72,7 @@ class Dataset(object):
                 variables.append(OrderedDict({'@name': variable, 'attribute': item}))
 
     def remove_variable_attribute(self, variable, key):
-        """ Remove variable attribute """
+        """Remove variable attribute"""
         variables = self.ncroot['netcdf'].get('variable', [])
         item = OrderedDict({'@name': key, '@type': 'attribute'})
         if variables:
@@ -86,7 +85,7 @@ class Dataset(object):
                 variables.append(new_var)
 
     def rename_variable(self, variable, new_name):
-        """ Rename variable attribute
+        """Rename variable attribute
 
         Parameters
         ----------
@@ -107,7 +106,7 @@ class Dataset(object):
                 warn(f'No {variable} variable found. Skipping')
 
     def remove_variable(self, variable):
-        """ Remove dataset variable
+        """Remove dataset variable
 
         Parameters
         ----------
@@ -157,7 +156,7 @@ class Dataset(object):
     # Dataset
 
     def add_dataset_attribute(self, key, value, type_='String'):
-        """ Add dataset attribute
+        """Add dataset attribute
          Parameters
         ----------
         key : str
@@ -189,7 +188,7 @@ class Dataset(object):
             self.ncroot['netcdf']['attribute'] = item
 
     def remove_dataset_attribute(self, key):
-        """ Remove dataset attribute
+        """Remove dataset attribute
 
         Parameters
         ----------

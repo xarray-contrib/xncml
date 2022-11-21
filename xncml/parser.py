@@ -59,9 +59,6 @@ __date__ = 'July 2022'
 __contact__ = 'huard.david@ouranos.ca'
 
 
-
-
-
 def parse(path: Path) -> Netcdf:
     """
     Parse NcML file using NetCDF datamodel based on NcML-2.2 Schema.
@@ -101,9 +98,7 @@ def open_ncml(ncml: str | Path) -> xr.Dataset:
     return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml)
 
 
-def read_netcdf(
-    target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path
-) -> xr.Dataset:
+def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) -> xr.Dataset:
     """
     Return content of <netcdf> element.
 
@@ -180,9 +175,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
 
         # Handle coordinate values
         if item.coord_value is not None:
-            dtypes = [
-                i[obj.dim_name].dtype.type for i in [tar, target] if obj.dim_name in i
-            ]
+            dtypes = [i[obj.dim_name].dtype.type for i in [tar, target] if obj.dim_name in i]
             coords = read_coord_value(item, obj, dtypes=dtypes)
             tar = tar.assign_coords({obj.dim_name: coords})
         items.append(tar)
@@ -194,9 +187,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     # Need to decode time variable
     if obj.time_units_change:
         for i, ds in enumerate(items):
-            t = xr.as_variable(
-                ds[obj.dim_name], obj.dim_name
-            )  # Maybe not the same name...
+            t = xr.as_variable(ds[obj.dim_name], obj.dim_name)  # Maybe not the same name...
             encoded = CFDatetimeCoder(use_cftime=True).decode(t, name=t.name)
             items[i] = ds.assign_coords({obj.dim_name: encoded})
 
@@ -298,8 +289,8 @@ def read_scan(obj: Aggregation.Scan, ncml: Path) -> [xr.Dataset]:
     list
       List of datasets found by scan.
     """
-    import re
     import glob
+    import re
 
     if obj.date_format_mark:
         raise NotImplementedError
@@ -510,9 +501,7 @@ def read_remove(target: xr.Dataset | xr.Variable, obj: Remove) -> xr.Dataset:
     return target
 
 
-def read_attribute(
-    target: xr.Dataset | xr.Variable, obj: Attribute, ref: xr.Dataset = None
-):
+def read_attribute(target: xr.Dataset | xr.Variable, obj: Attribute, ref: xr.Dataset = None):
     """Update target dataset in place with new or modified attribute.
 
     Parameters
