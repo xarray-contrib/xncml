@@ -6,10 +6,9 @@ import pytest
 
 import xncml
 
-
 # Notes
 
-# This is not testing absolute paths. 
+# This is not testing absolute paths.
 # Would need to modify the XML files _live_ to reflect the actual path.
 
 
