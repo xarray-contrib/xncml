@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 # NcML parser for xarray
 
@@ -31,31 +30,35 @@ Support for these attributes is missing:
 - olderThan
 - tiled aggregations
 """
-__author__ = "David Huard"
-__date__ = "July 2022"
-__contact__ = "huard.david@ouranos.ca"
 
+
+from __future__ import annotations
+
+import datetime as dt
+from pathlib import Path
+
+import numpy as np
+import xarray as xr
+from xsdata.formats.dataclass.parsers import XmlParser
 
 from .generated import (
-    Netcdf,
-    DataType,
     Aggregation,
-    Dimension,
-    Attribute,
-    Variable,
     AggregationType,
-    Remove,
-    ObjectType,
-    Values,
-    Group,
+    Attribute,
+    DataType,
+    Dimension,
     EnumTypedef,
+    Group,
+    Netcdf,
+    ObjectType,
+    Remove,
+    Values,
+    Variable,
 )
-from xsdata.formats.dataclass.parsers import XmlParser
-import numpy as np
-from pathlib import Path
-import xarray as xr
-import datetime as dt
 
+__author__ = 'David Huard'
+__date__ = 'July 2022'
+__contact__ = 'huard.david@ouranos.ca'
 
 
 def parse(path: Path) -> Netcdf:
@@ -97,9 +100,7 @@ def open_ncml(ncml: str | Path) -> xr.Dataset:
     return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml)
 
 
-def read_netcdf(
-    target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path
-) -> xr.Dataset:
+def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) -> xr.Dataset:
     """
     Return content of <netcdf> element.
 
@@ -176,9 +177,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
 
         # Handle coordinate values
         if item.coord_value is not None:
-            dtypes = [
-                i[obj.dim_name].dtype.type for i in [tar, target] if obj.dim_name in i
-            ]
+            dtypes = [i[obj.dim_name].dtype.type for i in [tar, target] if obj.dim_name in i]
             coords = read_coord_value(item, obj, dtypes=dtypes)
             tar = tar.assign_coords({obj.dim_name: coords})
         items.append(tar)
@@ -190,9 +189,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     # Need to decode time variable
     if obj.time_units_change:
         for i, ds in enumerate(items):
-            t = xr.as_variable(
-                ds[obj.dim_name], obj.dim_name
-            )  # Maybe not the same name...
+            t = xr.as_variable(ds[obj.dim_name], obj.dim_name)  # Maybe not the same name...
             encoded = CFDatetimeCoder(use_cftime=True).decode(t, name=t.name)
             items[i] = ds.assign_coords({obj.dim_name: encoded})
 
@@ -207,7 +204,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
         raise NotImplementedError
 
     agg = read_group(agg, None, obj)
-    return target.merge(agg, combine_attrs="no_conflicts")
+    return target.merge(agg, combine_attrs='no_conflicts')
 
 
 def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
@@ -229,9 +226,9 @@ def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
     if obj.location:
         try:
             # Python >= 3.9
-            location = obj.location.removeprefix("file:")
+            location = obj.location.removeprefix('file:')
         except AttributeError:
-            location = obj.location.strip("file:")
+            location = obj.location.strip('file:')
 
         if not Path(location).is_absolute():
             location = ncml.parent / location
@@ -294,8 +291,8 @@ def read_scan(obj: Aggregation.Scan, ncml: Path) -> [xr.Dataset]:
     list
       List of datasets found by scan.
     """
-    import re
     import glob
+    import re
 
     if obj.date_format_mark:
         raise NotImplementedError
@@ -304,21 +301,21 @@ def read_scan(obj: Aggregation.Scan, ncml: Path) -> [xr.Dataset]:
     if not path.is_absolute():
         path = ncml.parent / path
 
-    files = list(path.rglob("*") if obj.subdirs else path.glob("*"))
+    files = list(path.rglob('*') if obj.subdirs else path.glob('*'))
 
     if not files:
-        raise ValueError(f"No files found in {path}")
+        raise ValueError(f'No files found in {path}')
 
     fns = map(str, files)
     if obj.reg_exp:
         pat = re.compile(obj.reg_exp)
         files = list(filter(pat.match, fns))
     elif obj.suffix:
-        pat = "*" + obj.suffix
+        pat = '*' + obj.suffix
         files = glob.fnmatch.filter(fns, pat)
 
     if not files:
-        raise ValueError(f"regular expression or suffix matches no file.")
+        raise ValueError('regular expression or suffix matches no file.')
 
     files.sort()
 
@@ -353,7 +350,7 @@ def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
     if agg.type == AggregationType.JOIN_NEW:
         coord = val
     elif agg.type == AggregationType.JOIN_EXISTING:
-        coord = val.replace(",", " ").split()
+        coord = val.replace(',', ' ').split()
     else:
         raise NotImplementedError
 
@@ -362,7 +359,7 @@ def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
         typ = dtypes[0]
     else:
         try:
-            dt.datetime.strptime(coord, "%Y-%m-%d %H:%M:%SZ")
+            dt.datetime.strptime(coord, '%Y-%m-%d %H:%M:%SZ')
             typ = str
         except ValueError:
             typ = np.float64
@@ -414,7 +411,7 @@ def read_variable(target: xr.Dataset, ref: xr.Dataset, obj: Variable, dimensions
             out = out.astype(nctype(obj))
         ref_var = ref[obj.name]
     elif obj.shape:
-        dims = obj.shape.split(" ")
+        dims = obj.shape.split(' ')
         shape = [dimensions[dim].length for dim in dims]
         out = xr.Variable(data=np.empty(shape, dtype=nctype(obj)), dims=dims)
     else:
@@ -470,7 +467,7 @@ def read_values(v: xr.Variable, obj: Values) -> xr.Variable:
     if obj.start is not None and obj.increment is not None:
         data = obj.start + np.arange(n) * obj.increment
     else:
-        sep = obj.separator or " "
+        sep = obj.separator or ' '
         if isinstance(obj.content, list) and isinstance(obj.content[0], str):
             data = obj.content[0].split(sep)
         else:
@@ -506,9 +503,7 @@ def read_remove(target: xr.Dataset | xr.Variable, obj: Remove) -> xr.Dataset:
     return target
 
 
-def read_attribute(
-    target: xr.Dataset | xr.Variable, obj: Attribute, ref: xr.Dataset = None
-):
+def read_attribute(target: xr.Dataset | xr.Variable, obj: Attribute, ref: xr.Dataset = None):
     """Update target dataset in place with new or modified attribute.
 
     Parameters
@@ -570,7 +565,7 @@ def cast(obj: Attribute):
         if obj.type in [DataType.STRING, DataType.STRING_1]:
             return value
 
-        sep = obj.separator or " "
+        sep = obj.separator or ' '
         values = value.split(sep)
         return tuple(map(nctype(obj), values))
 
