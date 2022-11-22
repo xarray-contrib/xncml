@@ -56,7 +56,6 @@ from .generated import (
     Variable,
 )
 
-
 __author__ = 'David Huard'
 __date__ = 'July 2022'
 __contact__ = 'huard.david@ouranos.ca'
