@@ -259,16 +259,16 @@ def test_agg_existing_promote():
 
 @pytest.mark.skip(reason='<promoteGlobalAttribute> not implemented')
 def test_agg_existing_promote2():
-    ds = xncml.open_ncml(data / 'aggExistingPromote2.ncml')
+    _ = xncml.open_ncml(data / 'aggExistingPromote2.ncml')
 
 
 def test_agg_join_new_scalar_coord():
-    ds = xncml.open_ncml(data / 'aggJoinNewScalarCoord.xml')
+    _ = xncml.open_ncml(data / 'aggJoinNewScalarCoord.xml')
     # TODO: Complete test
 
 
 def test_exercise_1():
-    ds = xncml.open_ncml(data / 'exercise1.ncml')
+    _ = xncml.open_ncml(data / 'exercise1.ncml')
     # TODO: Complete test
 
 

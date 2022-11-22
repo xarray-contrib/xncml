@@ -313,7 +313,7 @@ def read_scan(obj: Aggregation.Scan, ncml: Path) -> [xr.Dataset]:
         files = glob.fnmatch.filter(fns, pat)
 
     if not files:
-        raise ValueError(f'regular expression or suffix matches no file.')
+        raise ValueError('regular expression or suffix matches no file.')
 
     files.sort()
 
