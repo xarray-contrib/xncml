@@ -6,11 +6,11 @@ import pytest
 
 import xncml
 
-"""
 # Notes
 
-This is not testing absolute paths. Would need to modify the XML files _live_ to reflect the actual path.
-"""
+# This is not testing absolute paths.
+# Would need to modify the XML files _live_ to reflect the actual path.
+
 
 data = Path(__file__).parent / 'data'
 
@@ -119,10 +119,7 @@ def test_agg_syn_grid():
     assert len(ds.lat) == 3
     assert len(ds.lon) == 4
     assert len(ds.time) == 3
-    assert all(
-        ds.time
-        == ['2005-11-22 22:19:53Z', '2005-11-22 23:19:53Z', '2005-11-23 00:19:59Z']
-    )
+    assert all(ds.time == ['2005-11-22 22:19:53Z', '2005-11-22 23:19:53Z', '2005-11-23 00:19:59Z'])
 
 
 def test_agg_syn_no_coord():
@@ -262,16 +259,16 @@ def test_agg_existing_promote():
 
 @pytest.mark.skip(reason='<promoteGlobalAttribute> not implemented')
 def test_agg_existing_promote2():
-    ds = xncml.open_ncml(data / 'aggExistingPromote2.ncml')
+    _ = xncml.open_ncml(data / 'aggExistingPromote2.ncml')
 
 
 def test_agg_join_new_scalar_coord():
-    ds = xncml.open_ncml(data / 'aggJoinNewScalarCoord.xml')
+    _ = xncml.open_ncml(data / 'aggJoinNewScalarCoord.xml')
     # TODO: Complete test
 
 
 def test_exercise_1():
-    ds = xncml.open_ncml(data / 'exercise1.ncml')
+    _ = xncml.open_ncml(data / 'exercise1.ncml')
     # TODO: Complete test
 
 
