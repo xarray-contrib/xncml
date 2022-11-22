@@ -1,27 +1,3 @@
-from __future__ import annotations
-
-import datetime as dt
-from pathlib import Path
-
-import numpy as np
-import xarray as xr
-from xsdata.formats.dataclass.parsers import XmlParser
-
-from .generated import (
-    Aggregation,
-    AggregationType,
-    Attribute,
-    DataType,
-    Dimension,
-    EnumTypedef,
-    Group,
-    Netcdf,
-    ObjectType,
-    Remove,
-    Values,
-    Variable,
-)
-
 """
 # NcML parser for xarray
 
@@ -54,6 +30,33 @@ Support for these attributes is missing:
 - olderThan
 - tiled aggregations
 """
+
+
+from __future__ import annotations
+
+import datetime as dt
+from pathlib import Path
+
+import numpy as np
+import xarray as xr
+from xsdata.formats.dataclass.parsers import XmlParser
+
+from .generated import (
+    Aggregation,
+    AggregationType,
+    Attribute,
+    DataType,
+    Dimension,
+    EnumTypedef,
+    Group,
+    Netcdf,
+    ObjectType,
+    Remove,
+    Values,
+    Variable,
+)
+
+
 __author__ = 'David Huard'
 __date__ = 'July 2022'
 __contact__ = 'huard.david@ouranos.ca'
