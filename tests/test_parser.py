@@ -6,11 +6,12 @@ import pytest
 
 import xncml
 
-"""
+
 # Notes
 
-This is not testing absolute paths. Would need to modify the XML files _live_ to reflect the actual path.
-"""
+# This is not testing absolute paths. 
+# Would need to modify the XML files _live_ to reflect the actual path.
+
 
 data = Path(__file__).parent / 'data'
 
