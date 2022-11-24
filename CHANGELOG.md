@@ -1,4 +1,4 @@
-0.1 Initial release (unreleased)
+0.1 Initial release (2022-11-24)
 ================================
 
  - Manipulate NcML file: add & remove attributes, variables and dimensions. By @andersy005
