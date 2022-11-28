@@ -2,17 +2,18 @@
 
 """The setup script."""
 
-from os.path import exists
+import os
 
 from setuptools import find_packages, setup
 
-if exists('requirements.txt'):
-    with open('requirements.txt') as f:
-        install_requires = f.read().strip().split('\n')
-else:
-    install_requires = ['xmltodict', 'xsdata']
+if not os.getenv('READTHEDOCS'):
+    if os.path.exists('requirements.txt'):
+        with open('requirements.txt') as f:
+            install_requires = f.read().strip().split('\n')
+    else:
+        install_requires = ['xmltodict', 'xsdata']
 
-if exists('README.md'):
+if os.path.exists('README.md'):
     with open('README.md') as f:
         long_description = f.read()
 else:
