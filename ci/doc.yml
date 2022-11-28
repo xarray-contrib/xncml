@@ -1,0 +1,20 @@
+name: xncml-doc
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - python=3.8
+  - xmltodict
+  - xsdata
+  - xarray
+  - sphinx==5.3.0
+  - nbsphinx==0.8.10
+  - sphinx-copybutton
+  - numpydoc
+  - sphinx-autosummary-accessors
+  - ipython
+  - pip:
+      - myst_nb
+      - myst-parser==0.18.1
+      - sphinx_rtd_theme==1.1.1
+

@@ -12,22 +12,12 @@
 # serve to show the default.
 
 import datetime
-import os
-import sys
-from pathlib import Path
+import xncml
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here.
 
-cwd = Path.cwd()
-sys.path.insert(0, str(cwd.parent.parent))
-
-import xncml
-
 # -- General configuration -----------------------------------------------------
-
-# To enable autodoc directives
-autodoc_mock_imports = ["xmltodict", "xsdata", "xarray", "cftime", "netCDF4", "dask"]
 
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'

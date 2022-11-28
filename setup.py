@@ -6,12 +6,11 @@ import os
 
 from setuptools import find_packages, setup
 
-if not os.getenv('READTHEDOCS'):
-    if os.path.exists('requirements.txt'):
-        with open('requirements.txt') as f:
-            install_requires = f.read().strip().split('\n')
-    else:
-        install_requires = ['xmltodict', 'xsdata']
+if os.path.exists('requirements.txt'):
+    with open('requirements.txt') as f:
+        install_requires = f.read().strip().split('\n')
+else:
+    install_requires = ['xmltodict', 'xsdata', 'xarray']
 
 if os.path.exists('README.md'):
     with open('README.md') as f:
