@@ -27,7 +27,7 @@ import xncml
 # -- General configuration -----------------------------------------------------
 
 # To enable autodoc directives
-autodoc_mock_imports = ["xmltodict", "xsdata", "xarray", "cftime", "netCDF4", "dask"]
+autodoc_mock_imports = ['xmltodict', 'xsdata', 'xarray', 'cftime', 'netCDF4', 'dask']
 
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
