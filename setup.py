@@ -2,18 +2,18 @@
 
 """The setup script."""
 
-from os.path import exists
+import os
 
 from setuptools import find_packages, setup
 
-if exists('requirements.txt'):
+if os.path.exists('requirements.txt'):
     with open('requirements.txt') as f:
         install_requires = f.read().strip().split('\n')
 else:
-    install_requires = ['xmltodict', 'xsdata']
+    install_requires = ['xmltodict', 'xsdata', 'xarray']
 
-if exists('README.rst'):
-    with open('README.rst') as f:
+if os.path.exists('README.md'):
+    with open('README.md') as f:
         long_description = f.read()
 else:
     long_description = ''
@@ -21,7 +21,7 @@ else:
 
 setup(
     name='xncml',
-    description='Tools for manipulating NCML (NetCDF Markup) files with/for xarray',
+    description='Tools for manipulating and opening NCML (NetCDF Markup) files with/for xarray',
     long_description=long_description,
     maintainer='Anderson Banihirwe',
     maintainer_email='abanihi@ucar.edu',
