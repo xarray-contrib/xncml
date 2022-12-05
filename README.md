@@ -1,17 +1,8 @@
 # xncml
 
-#.. image:: <https://img.shields.io/codecov/c/github/xarray-contrib/xncml.svg?style=for-the-badge>
-\#    :target: <https://codecov.io/gh/xarray-contrib/xncml>
+![Read the Docs](https://img.shields.io/readthedocs/xncml)
+![PyPI](https://img.shields.io/pypi/v/xncml)
 
-```{image} https://img.shields.io/readthedocs/xncml/latest.svg?style=for-the-badge
-:alt: Documentation Status
-:target: https://xncml.readthedocs.io/en/latest/?badge=latest
-```
-
-```{image} https://img.shields.io/pypi/v/xncml.svg?style=for-the-badge
-:alt: Python Package Index
-:target: https://pypi.org/project/xncml
-```
 
 Tools for opening and manipulating NcML (NetCDF Markup Language) files with/for xarray.
 
