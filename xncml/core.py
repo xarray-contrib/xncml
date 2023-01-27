@@ -211,7 +211,7 @@ class Dataset(object):
             self.ncroot['netcdf']['remove'] = [item]
 
     def rename_dataset_attribute(self, old_name, new_name):
-        attributes = self.ncroot['netcdf'].get('attribute', [])
+        attributes = self.ncroot['netcdf'].get('attribute', None)
         item = OrderedDict({'@name': new_name, 'orgName': old_name})
 
         if attributes:
@@ -224,7 +224,7 @@ class Dataset(object):
                     attr['@orgName'] = old_name
                     break
             else:
-                self.ncroot['netcdf']['attribute'] = [attributes, item]
+                self.ncroot['netcdf']['attribute'] = [*attributes, item]
 
         else:
             self.ncroot['netcdf']['attribute'] = item
