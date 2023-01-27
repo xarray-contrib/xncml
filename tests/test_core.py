@@ -40,11 +40,11 @@ def test_ncml_dataset_constructor():
 
     # Test with non-existing NcML
     nc = xncml.Dataset('example.ncml')
-    assert "@xmlns" in nc.ncroot["netcdf"]
+    assert '@xmlns' in nc.ncroot['netcdf']
 
     # Test with non-exising NcML and location
-    nc = xncml.Dataset('example.ncml', location=Path(here) / "data" / "nc" / "example1.nc")
-    assert "example1.nc" in nc.ncroot["netcdf"]["@location"]
+    nc = xncml.Dataset('example.ncml', location=Path(here) / 'data' / 'nc' / 'example1.nc')
+    assert 'example1.nc' in nc.ncroot['netcdf']['@location']
 
 
 def test_add_variable_attribute():
@@ -193,7 +193,7 @@ def test_rename_variable_attribute():
     # Rename non-existing attribute (could be in netCDF file but not in NcML)
     nc.rename_variable_attribute('lat', 'foo', 'bar')
     res = nc.ncroot['netcdf']['variable'][2]['attribute']
-    assert {"@name": "bar", "@orgName": "foo"} in res
+    assert {'@name': 'bar', '@orgName': 'foo'} in res
 
 
 def test_rename_dimension():
