@@ -1,5 +1,5 @@
-from pathlib import Path
 from collections import OrderedDict
+from pathlib import Path
 from warnings import warn
 
 import xmltodict
@@ -24,21 +24,23 @@ class Dataset(object):
         if self.filepath and self.filepath.exists():
             # Convert all dictionaries to lists of dicts to simplify the internal logic.
             self.ncroot = xmltodict.parse(self.filepath.read_text())
-            for key, item in self.ncroot["netcdf"].items():
+            for key, item in self.ncroot['netcdf'].items():
                 if isinstance(item, (dict, OrderedDict)):
-                    self.ncroot["netcdf"][key] = [item]
+                    self.ncroot['netcdf'][key] = [item]
 
-            if 'variable' in self.ncroot["netcdf"]:
-                for var in self.ncroot["netcdf"]['variable']:
+            if 'variable' in self.ncroot['netcdf']:
+                for var in self.ncroot['netcdf']['variable']:
                     for key, item in var.items():
                         if isinstance(item, (dict, OrderedDict)):
                             var[key] = [item]
 
         else:
             self.ncroot = OrderedDict()
-            self.ncroot["netcdf"] = OrderedDict({"@xmlns": "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"})
+            self.ncroot['netcdf'] = OrderedDict(
+                {'@xmlns': 'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2'}
+            )
             if location is not None:
-                self.ncroot["netcdf"]["@location"] = str(location)
+                self.ncroot['netcdf']['@location'] = str(location)
 
     def __repr__(self):
         return xmltodict.unparse(self.ncroot, pretty=True)
@@ -103,7 +105,7 @@ class Dataset(object):
             New variable name.
 
         """
-        item = OrderedDict({"@name": new_name, "@orgName": variable})
+        item = OrderedDict({'@name': new_name, '@orgName': variable})
         variables = self.ncroot['netcdf'].get('variable', [])
 
         for var in variables:
@@ -131,7 +133,7 @@ class Dataset(object):
             self.ncroot['netcdf']['remove'] = removes
 
     def rename_variable_attribute(self, variable, old_name, new_name):
-        item = OrderedDict({"@name": new_name, "@orgName": old_name})
+        item = OrderedDict({'@name': new_name, '@orgName': old_name})
         variables = self.ncroot['netcdf'].get('variable', [])
 
         for var in variables:
@@ -146,14 +148,14 @@ class Dataset(object):
                     attrs.append(item)
                     break
         else:
-            new_var = OrderedDict({"@name": "variable", "attribute": item})
+            new_var = OrderedDict({'@name': 'variable', 'attribute': item})
             variables.append(new_var)
-            self.ncroot['netcdf']["variable"] = variables
+            self.ncroot['netcdf']['variable'] = variables
 
     # Dimensions
 
     def rename_dimension(self, dimension, new_name):
-        item = OrderedDict({"@name": new_name, "@orgName": dimension})
+        item = OrderedDict({'@name': new_name, '@orgName': dimension})
         dimensions = self.ncroot['netcdf'].get('dimension', [])
 
         for dim in dimensions:
@@ -163,7 +165,7 @@ class Dataset(object):
                 break
         else:
             dimensions.append(item)
-            self.ncroot['netcdf']["dimensions"] = dimensions
+            self.ncroot['netcdf']['dimensions'] = dimensions
 
     # Dataset
 
