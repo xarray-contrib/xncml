@@ -228,5 +228,3 @@ class Dataset(object):
         xml_output = xmltodict.unparse(self.ncroot, pretty=True)
         with open(path, 'w') as fd:
             fd.write(xml_output)
-
-
