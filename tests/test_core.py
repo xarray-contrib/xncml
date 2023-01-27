@@ -157,7 +157,11 @@ def test_rename_variable():
             ('@type', 'float'),
             (
                 'attribute',
-                [OrderedDict([('@name', 'units'), ('@type', 'String'), ('@value', 'degrees_north')]),],
+                [
+                    OrderedDict(
+                        [('@name', 'units'), ('@type', 'String'), ('@value', 'degrees_north')]
+                    ),
+                ],
             ),
             ('values', '41.0 40.0 39.0'),
             ('@orgName', 'lat'),
@@ -212,7 +216,7 @@ def test_rename_dimension():
 
     # With non-existing dimension
     nc.rename_dimension('time_bound', 'time_bounds')
-    assert "@orgName" in res[-1]
+    assert '@orgName' in res[-1]
 
 
 def test_add_dataset_attribute():
