@@ -210,6 +210,25 @@ class Dataset(object):
         else:
             self.ncroot['netcdf']['remove'] = [item]
 
+    def rename_dataset_attribute(self, old_name, new_name):
+        attributes = self.ncroot['netcdf'].get('attribute', [])
+        item = OrderedDict({'@name': new_name, 'orgName': old_name})
+
+        if attributes:
+            if isinstance(attributes, (dict, OrderedDict)):
+                attributes = [attributes]
+
+            for attr in attributes:
+                if attr['@name'] == old_name:
+                    attr['@name'] = new_name
+                    attr['@orgName'] = old_name
+                    break
+            else:
+                self.ncroot['netcdf']['attribute'] = [attributes, item]
+
+        else:
+            self.ncroot['netcdf']['attribute'] = item
+
     def to_ncml(self, path=None):
         if not path:
             path = f'{self.filepath.strip(".ncml")}_modified.ncml'
