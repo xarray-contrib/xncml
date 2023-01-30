@@ -248,7 +248,7 @@ def test_rename_dataset_attribute():
     nc = xncml.Dataset(input_file)
     # Rename existing attribute
     nc.rename_dataset_attribute(old_name='title', new_name='Title')
-    assert nc.ncroot['netcdf']['attribute']['@name'] == 'Title'
+    assert nc.ncroot['netcdf']['attribute'][0]['@name'] == 'Title'
 
     # Rename attribute not in the NcML (but possibly in the netcdf `location`)
     nc.rename_dataset_attribute(old_name='foo', new_name='bar')
