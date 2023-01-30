@@ -276,3 +276,8 @@ def test_to_ncml():
         os.remove(default)
     except Exception:
         pass
+
+
+def test_to_json():
+    nc = xncml.Dataset(input_file)
+    nc.to_cf_dict()

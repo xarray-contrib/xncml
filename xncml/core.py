@@ -279,3 +279,99 @@ class Dataset(object):
         xml_output = xmltodict.unparse(self.ncroot, pretty=True)
         with open(path, 'w') as fd:
             fd.write(xml_output)
+
+    def to_cf_dict(self, mapping={}):
+        """Convert internal representation to a CF-JSON compliant dictionary."""
+        res = OrderedDict()
+        nc = self.ncroot["netcdf"]
+        AXIS_VAR = ['time', 'lat', 'latitude', 'lon', 'longitude', 'site']
+        SPECIAL_ATTRS = ['missing_value', 'cell_methods']
+
+        # Dimensions
+        res["dimensions"] = OrderedDict()
+        try:
+            dims = nc["dimension"]
+            for dim in dims:
+                if int(dim["@length"]) > 1:
+                    res["dimensions"][dim["@name"]] = int(dim["@length"])
+        except Exception as exc:
+            raise ValueError("Failed to export dimensions.", exc)
+
+        # Attributes
+        res['attributes'] = OrderedDict()
+        try:
+            for att in nc["attribute"]:
+                res['attributes'][att["@name"]] = cast(att)
+
+        except Exception as exc:
+            raise ValueError(f"Failed to export global attribute {att}", exc)
+
+        # Variables
+        res["variables"] = OrderedDict()
+        # Put axis variables first
+        for special_var in AXIS_VAR:
+            if special_var in [v["@name"] for v in nc["variable"]]:
+                res['variables'][special_var] = None
+
+        for var in nc["variable"]:
+            varout = mapping.get(var["@name"], var["@name"])
+
+            if var["@name"] == "dum1":
+                continue
+            if var == "time":
+                res['variables']['time'] = {
+                    'shape': ['time'],
+                    'type': 'string',
+                    'attributes': {'units': 'ISO8601 datetimes'}
+                }
+                continue
+            try:
+                res['variables'][varout] = {'attributes': OrderedDict()}
+                res['variables'][varout]['shape'] = var["@shape"]
+
+                for att in var["attribute"]:
+                    if att not in SPECIAL_ATTRS:
+                        res['variables'][varout]['attributes'][att["@name"]] = cast(att)
+
+            except Exception as exc:
+                raise ValueError(f'Failed to export variable {var["@name"]} description or attributes', exc)
+
+        return res
+
+    def to_json(self):
+        """Serialize dictionary to JSON."""
+        import json
+        return json.dump(self.to_cf_dict())
+
+
+def cast(obj: dict):
+    """Cast attribute value to the appropriate type."""
+    from xncml.parser import DataType, nctype
+
+    value = obj["@value"]
+    typ = DataType(obj["@type"])
+    if value:
+        if typ in [DataType.STRING, DataType.STRING_1]:
+            return value
+
+        sep = ' '
+        values = value.split(sep)
+        return tuple(map(nctype(obj), values))
+
+def _stddict(obj):
+    if isinstance(obj, list):
+        out = {}
+        for item in obj:
+            if isinstance(item, (dict, OrderedDict)):
+                if "@name" in item:
+                    out[item["@name"]] = item.get("@value", item.get("@length"))
+            else:
+                print(item)
+        return out
+    elif isinstance(obj, (dict, OrderedDict)):
+        return {key: _stddict(val) for key, val in obj.items()}
+    else:
+        return obj
+
+
+
