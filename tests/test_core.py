@@ -12,6 +12,8 @@ input_file = Path(here) / 'data' / 'exercise1.ncml'
 
 
 def test_ncml_dataset_constructor():
+
+    # Test with existing NcML
     nc = xncml.Dataset(input_file)
     expected = OrderedDict(
         [
@@ -36,8 +38,13 @@ def test_ncml_dataset_constructor():
     res = nc.ncroot['netcdf']['variable'][1]
     assert res == expected
 
-    with pytest.raises(Exception):
-        nc = xncml.Dataset('example.ncml')
+    # Test with non-existing NcML
+    nc = xncml.Dataset('example.ncml')
+    assert '@xmlns' in nc.ncroot['netcdf']
+
+    # Test with non-exising NcML and location
+    nc = xncml.Dataset('example.ncml', location=Path(here) / 'data' / 'nc' / 'example1.nc')
+    assert 'example1.nc' in nc.ncroot['netcdf']['@location']
 
 
 def test_add_variable_attribute():
@@ -139,6 +146,7 @@ def test_remove_variable_attribute(variable, key, expected, var_index):
 
 
 def test_rename_variable():
+    # Rename existing variable
     nc = xncml.Dataset(input_file)
     nc.rename_variable('lat', 'latitude')
     res = nc.ncroot['netcdf']['variable'][2]
@@ -149,7 +157,11 @@ def test_rename_variable():
             ('@type', 'float'),
             (
                 'attribute',
-                OrderedDict([('@name', 'units'), ('@type', 'String'), ('@value', 'degrees_north')]),
+                [
+                    OrderedDict(
+                        [('@name', 'units'), ('@type', 'String'), ('@value', 'degrees_north')]
+                    ),
+                ],
             ),
             ('values', '41.0 40.0 39.0'),
             ('@orgName', 'lat'),
@@ -158,11 +170,14 @@ def test_rename_variable():
 
     assert expected == res
 
-    with pytest.warns(UserWarning):
-        nc.rename_variable('Temp', 'Temperature')
+    # Rename non-existing variable
+    nc.rename_variable('Temp', 'Temperature')
+    res = nc.ncroot['netcdf']['variable'][-1]
+    assert res == OrderedDict([('@name', 'Temperature'), ('@orgName', 'Temp')])
 
 
 def test_rename_variable_attribute():
+    # Rename existing attribute
     nc = xncml.Dataset(input_file)
     expected = [
         OrderedDict(
@@ -179,8 +194,10 @@ def test_rename_variable_attribute():
     res = nc.ncroot['netcdf']['variable'][2]['attribute']
     assert res == expected
 
-    with pytest.warns(UserWarning):
-        nc.rename_variable_attribute('lat', 'units', 'Units')
+    # Rename non-existing attribute (could be in netCDF file but not in NcML)
+    nc.rename_variable_attribute('lat', 'foo', 'bar')
+    res = nc.ncroot['netcdf']['variable'][2]['attribute']
+    assert {'@name': 'bar', '@orgName': 'foo'} in res
 
 
 def test_rename_dimension():
@@ -197,8 +214,9 @@ def test_rename_dimension():
 
     assert res == expected
 
-    with pytest.warns(UserWarning):
-        nc.rename_dimension('time_bound', 'time_bounds')
+    # With non-existing dimension
+    nc.rename_dimension('time_bound', 'time_bounds')
+    assert '@orgName' in res[-1]
 
 
 def test_add_dataset_attribute():
@@ -243,9 +261,6 @@ def test_remove_variable():
     expected = [OrderedDict([('@name', 'lon'), ('@type', 'variable')])]
     res = nc.ncroot['netcdf']['remove']
     assert expected == res
-
-    with pytest.warns(UserWarning):
-        nc.remove_variable('Lon')
 
 
 def test_to_ncml():
