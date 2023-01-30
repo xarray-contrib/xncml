@@ -125,6 +125,17 @@ class Dataset(object):
                 warn(f'No {variable} variable found. Skipping')
 
     def rename_variable_attribute(self, variable, old_name, new_name):
+        """Rename variable attribute.
+
+        Parameters
+        ----------
+        variable : str
+          Variable name.
+        old_name : str
+          Original attribute name.
+        new_name : str
+          New attribute name.
+        """
         variables = self.ncroot['netcdf'].get('variable', [])
         if variables:
             for var in variables:
@@ -143,6 +154,15 @@ class Dataset(object):
     # Dimensions
 
     def rename_dimension(self, dimension, new_name):
+        """Rename dimension.
+
+        Parameters
+        ----------
+        dimension: str
+          Original dimension name.
+        new_name: str
+          New dimension name.
+        """
         dimensions = self.ncroot['netcdf'].get('dimension', [])
         if dimensions:
             for dim in dimensions:
@@ -211,6 +231,16 @@ class Dataset(object):
             self.ncroot['netcdf']['remove'] = [item]
 
     def rename_dataset_attribute(self, old_name, new_name):
+        """Rename dataset attribute.
+
+        Parameters
+        ----------
+        old_name: str
+          Original attribute name.
+        new_name: str
+          New attribute name.
+        """
+
         attributes = self.ncroot['netcdf'].get('attribute', None)
         item = OrderedDict({'@name': new_name, 'orgName': old_name})
 
