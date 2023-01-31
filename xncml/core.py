@@ -281,7 +281,23 @@ class Dataset(object):
             fd.write(xml_output)
 
     def to_cf_dict(self, mapping={}):
-        """Convert internal representation to a CF-JSON compliant dictionary."""
+        """Convert internal representation to a CF-JSON dictionary.
+
+        The CF-JSON specification includes `data` for variables, but this is not included here.
+
+        Parameters
+        ----------
+        mapping : dict
+          Map original variable names to new names.
+
+        Returns
+        -------
+        Dictionary with `dimensions`, `variables` and `attributes` keys.
+
+        References
+        ----------
+        http://cf-json.org/specification
+        """
         res = OrderedDict()
         nc = self.ncroot["netcdf"]
         AXIS_VAR = ['time', 'lat', 'latitude', 'lon', 'longitude', 'site']
@@ -358,20 +374,6 @@ def cast(obj: dict):
         values = value.split(sep)
         return tuple(map(nctype(obj), values))
 
-def _stddict(obj):
-    if isinstance(obj, list):
-        out = {}
-        for item in obj:
-            if isinstance(item, (dict, OrderedDict)):
-                if "@name" in item:
-                    out[item["@name"]] = item.get("@value", item.get("@length"))
-            else:
-                print(item)
-        return out
-    elif isinstance(obj, (dict, OrderedDict)):
-        return {key: _stddict(val) for key, val in obj.items()}
-    else:
-        return obj
 
 
 
