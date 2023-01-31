@@ -133,6 +133,17 @@ class Dataset(object):
             self.ncroot['netcdf']['remove'] = removes
 
     def rename_variable_attribute(self, variable, old_name, new_name):
+        """Rename variable attribute.
+
+        Parameters
+        ----------
+        variable : str
+          Variable name.
+        old_name : str
+          Original attribute name.
+        new_name : str
+          New attribute name.
+        """
         item = OrderedDict({'@name': new_name, '@orgName': old_name})
         variables = self.ncroot['netcdf'].get('variable', [])
 
@@ -155,6 +166,15 @@ class Dataset(object):
     # Dimensions
 
     def rename_dimension(self, dimension, new_name):
+        """Rename dimension.
+
+        Parameters
+        ----------
+        dimension: str
+          Original dimension name.
+        new_name: str
+          New dimension name.
+        """
         item = OrderedDict({'@name': new_name, '@orgName': dimension})
         dimensions = self.ncroot['netcdf'].get('dimension', [])
 
@@ -212,6 +232,35 @@ class Dataset(object):
                 removals.append(item)
         else:
             self.ncroot['netcdf']['remove'] = [item]
+
+    def rename_dataset_attribute(self, old_name, new_name):
+        """Rename dataset attribute.
+
+        Parameters
+        ----------
+        old_name: str
+          Original attribute name.
+        new_name: str
+          New attribute name.
+        """
+
+        attributes = self.ncroot['netcdf'].get('attribute', None)
+        item = OrderedDict({'@name': new_name, 'orgName': old_name})
+
+        if attributes:
+            if isinstance(attributes, (dict, OrderedDict)):
+                attributes = [attributes]
+
+            for attr in attributes:
+                if attr['@name'] == old_name:
+                    attr['@name'] = new_name
+                    attr['@orgName'] = old_name
+                    break
+            else:
+                self.ncroot['netcdf']['attribute'] = [*attributes, item]
+
+        else:
+            self.ncroot['netcdf']['attribute'] = item
 
     def to_ncml(self, path=None):
         """Write NcML file to disk.

@@ -244,6 +244,17 @@ def test_remove_dataset_attribute():
     assert len(expected_removals) == 2
 
 
+def test_rename_dataset_attribute():
+    nc = xncml.Dataset(input_file)
+    # Rename existing attribute
+    nc.rename_dataset_attribute(old_name='title', new_name='Title')
+    assert nc.ncroot['netcdf']['attribute'][0]['@name'] == 'Title'
+
+    # Rename attribute not in the NcML (but possibly in the netcdf `location`)
+    nc.rename_dataset_attribute(old_name='foo', new_name='bar')
+    assert nc.ncroot['netcdf']['attribute'][1]['@name'] == 'bar'
+
+
 def test_remove_variable():
     nc = xncml.Dataset(input_file)
     nc.remove_variable('lon')
