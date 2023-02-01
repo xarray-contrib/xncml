@@ -26,7 +26,7 @@ class Dataset(object):
             self.ncroot = xmltodict.parse(
                 self.filepath.read_text(),
                 process_namespaces=True,
-                force_list=["variable", "attribute", "group", "dimension"],
+                force_list=['variable', 'attribute', 'group', 'dimension'],
                 namespaces={
                     'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
                     'https://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
