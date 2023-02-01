@@ -403,17 +403,17 @@ def read_variable(target: xr.Dataset, ref: xr.Dataset, obj: Variable, dimensions
     if (obj.name in target) or (obj.name in target.dims):
         out = xr.as_variable(target[obj.name])
         if obj.type:
-            out = out.astype(nctype(obj))
+            out = out.astype(nctype(obj.type))
         ref_var = None
     elif (obj.name in ref) or (obj.name in ref.dims):
         out = xr.as_variable(ref[obj.name])
         if obj.type:
-            out = out.astype(nctype(obj))
+            out = out.astype(nctype(obj.type))
         ref_var = ref[obj.name]
     elif obj.shape:
         dims = obj.shape.split(' ')
         shape = [dimensions[dim].length for dim in dims]
-        out = xr.Variable(data=np.empty(shape, dtype=nctype(obj)), dims=dims)
+        out = xr.Variable(data=np.empty(shape, dtype=nctype(obj.type)), dims=dims)
     else:
         raise ValueError
 
@@ -537,22 +537,22 @@ def read_dimension(obj: Dimension) -> Dimension:
     return obj
 
 
-def nctype(obj: [Attribute, Variable]) -> type:
+def nctype(typ: DataType) -> type:
     """Return Python type corresponding to the NcML DataType of object."""
 
-    if obj.type in [DataType.STRING, DataType.STRING_1]:
+    if typ in [DataType.STRING, DataType.STRING_1]:
         return str
-    elif obj.type == DataType.BYTE:
+    elif typ == DataType.BYTE:
         return np.int8
-    elif obj.type == DataType.SHORT:
+    elif typ == DataType.SHORT:
         return np.int16
-    elif obj.type == DataType.INT:
+    elif typ == DataType.INT:
         return np.int32
-    elif obj.type == DataType.LONG:
+    elif typ == DataType.LONG:
         return int
-    elif obj.type == DataType.FLOAT:
+    elif typ == DataType.FLOAT:
         return np.float32
-    elif obj.type == DataType.DOUBLE:
+    elif typ == DataType.DOUBLE:
         return np.float64
 
     raise NotImplementedError
@@ -567,7 +567,7 @@ def cast(obj: Attribute):
 
         sep = obj.separator or ' '
         values = value.split(sep)
-        return tuple(map(nctype(obj), values))
+        return tuple(map(nctype(obj.type), values))
 
 
 def filter_by_class(iterable, klass):

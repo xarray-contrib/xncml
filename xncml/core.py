@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from pathlib import Path
 from warnings import warn
-
+from typing import Any
 import xmltodict
 
 
@@ -25,21 +25,13 @@ class Dataset(object):
             # Convert all dictionaries to lists of dicts to simplify the internal logic.
             self.ncroot = xmltodict.parse(
                 self.filepath.read_text(),
+                force_list=["variable", "attribute", "group", "dimension"],
                 process_namespaces=True,
                 namespaces={
                     'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
                     'https://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
                 },
             )
-            for key, item in self.ncroot['netcdf'].items():
-                if isinstance(item, (dict, OrderedDict)):
-                    self.ncroot['netcdf'][key] = [item]
-
-            if 'variable' in self.ncroot['netcdf']:
-                for var in self.ncroot['netcdf']['variable']:
-                    for key, item in var.items():
-                        if isinstance(item, (dict, OrderedDict)):
-                            var[key] = [item]
 
         else:
             self.ncroot = OrderedDict()
@@ -287,15 +279,10 @@ class Dataset(object):
         with open(path, 'w') as fd:
             fd.write(xml_output)
 
-    def to_cf_dict(self, mapping={}):
+    def to_cf_dict(self):
         """Convert internal representation to a CF-JSON dictionary.
 
         The CF-JSON specification includes `data` for variables, but this is not included here.
-
-        Parameters
-        ----------
-        mapping : dict
-          Map original variable names to new names.
 
         Returns
         -------
@@ -307,57 +294,18 @@ class Dataset(object):
         """
         res = OrderedDict()
         nc = self.ncroot["netcdf"]
-        AXIS_VAR = ['time', 'lat', 'latitude', 'lon', 'longitude', 'site']
-        SPECIAL_ATTRS = ['missing_value', 'cell_methods']
 
-        # Dimensions
-        res["dimensions"] = OrderedDict()
-        try:
-            dims = nc["dimension"]
-            for dim in dims:
-                if int(dim["@length"]) > 1:
-                    res["dimensions"][dim["@name"]] = int(dim["@length"])
-        except Exception as exc:
-            raise ValueError("Failed to export dimensions.", exc)
-
-        # Attributes
-        res['attributes'] = OrderedDict()
-        try:
-            for att in nc["attribute"]:
-                res['attributes'][att["@name"]] = cast(att)
-
-        except Exception as exc:
-            raise ValueError(f"Failed to export global attribute {att}", exc)
-
-        # Variables
-        res["variables"] = OrderedDict()
-        # Put axis variables first
-        for special_var in AXIS_VAR:
-            if special_var in [v["@name"] for v in nc["variable"]]:
-                res['variables'][special_var] = None
-
-        for var in nc["variable"]:
-            varout = mapping.get(var["@name"], var["@name"])
-
-            if var["@name"] == "dum1":
-                continue
-            if var == "time":
-                res['variables']['time'] = {
-                    'shape': ['time'],
-                    'type': 'string',
-                    'attributes': {'units': 'ISO8601 datetimes'}
-                }
-                continue
-            try:
-                res['variables'][varout] = {'attributes': OrderedDict()}
-                res['variables'][varout]['shape'] = var["@shape"]
-
-                for att in var["attribute"]:
-                    if att not in SPECIAL_ATTRS:
-                        res['variables'][varout]['attributes'][att["@name"]] = cast(att)
-
-            except Exception as exc:
-                raise ValueError(f'Failed to export variable {var["@name"]} description or attributes', exc)
+        for key, val in nc.items():
+            if key[0] == "@":
+                res[key] = val
+            if key == "dimension":
+                res.update(_dims_to_json(val))
+            if key == "group":
+                res.update(_groups_to_json(val))
+            if key == "attribute":
+                res.update(_attributes_to_json(val))
+            if key == "variable":
+                res.update(_variables_to_json(val))
 
         return res
 
@@ -367,20 +315,70 @@ class Dataset(object):
         return json.dump(self.to_cf_dict())
 
 
-def cast(obj: dict):
+
+def _dims_to_json(dims: list) -> dict:
+    out = OrderedDict()
+    for dim in dims:
+        if int(dim["@length"]) > 1:
+            out[dim["@name"]] = int(dim["@length"])
+    return {"dimensions": out}
+
+def _groups_to_json(groups: list) -> dict:
+    out = OrderedDict()
+    for group in groups:
+        name = group["@name"]
+        out[name] = OrderedDict()
+        if "attribute" in group:
+            out[name].update(_attributes_to_json(group["attribute"]))
+        if "group" in group:
+            out[name].update(_groups_to_json(group["group"]))
+    return {"groups": out}
+
+
+def _attributes_to_json(attrs: list) -> dict:
+    SPECIAL_ATTRS = ['missing_value', 'cell_methods']
+
+    out = OrderedDict()
+    for attr in attrs:
+        if attr["@name"] not in SPECIAL_ATTRS:
+            try:
+                out[attr["@name"]] = cast(attr)
+            except ValueError as exc:
+                warn(f"Could not cast {attr['@name']}")
+    return {"attributes": out}
+
+
+def _variables_to_json(variables: list) -> dict:
+    AXIS_VAR = ['time', 'lat', 'latitude', 'lon', 'longitude', 'site']
+
+    out = OrderedDict()
+
+    # Put axis variables first
+    for special_var in AXIS_VAR:
+        if special_var in [v["@name"] for v in variables]:
+            out[special_var] = None
+
+    for var in variables:
+        name = var["@name"]
+        out[name] = OrderedDict()
+        out[name]['shape'] = var["@shape"]
+
+        if "attribute" in var:
+            out[name].update(_attributes_to_json(var["attribute"]))
+
+    return {"variables": out}
+
+
+def cast(obj: dict) -> Any:
     """Cast attribute value to the appropriate type."""
     from xncml.parser import DataType, nctype
 
     value = obj["@value"]
-    typ = DataType(obj["@type"])
+    typ = DataType(obj.get("@type", "String"))
     if value:
         if typ in [DataType.STRING, DataType.STRING_1]:
             return value
 
         sep = ' '
         values = value.split(sep)
-        return tuple(map(nctype(obj), values))
-
-
-
-
+        return tuple(map(nctype(typ), values))
