@@ -12,7 +12,6 @@ input_file = Path(here) / 'data' / 'exercise1.ncml'
 
 
 def test_ncml_dataset_constructor():
-
     # Test with existing NcML
     nc = xncml.Dataset(input_file)
     expected = OrderedDict(
