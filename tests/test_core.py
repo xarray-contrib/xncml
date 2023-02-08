@@ -12,7 +12,6 @@ input_file = Path(here) / 'data' / 'exercise1.ncml'
 
 
 def test_ncml_dataset_constructor():
-
     # Test with existing NcML
     nc = xncml.Dataset(input_file)
     expected = OrderedDict(
@@ -282,6 +281,20 @@ def test_to_ncml():
         pass
 
 
-def test_to_json():
+def test_to_dict():
     nc = xncml.Dataset(input_file)
-    nc.to_cf_dict()
+    out = nc.to_cf_dict()
+    assert out['attributes']['title'] == 'Example Data'
+    assert out['variables']['rh']['attributes']['long_name'] == 'relative humidity'
+    assert out['variables']['rh']['type'] == 'int'
+    assert out['variables']['rh']['shape'] == ['time', 'lat', 'lon']
+    assert out['dimensions']['time'] == 2
+    assert 'groups' not in out
+
+    nc = xncml.Dataset(Path(here) / 'data' / 'aggNewCoord.ncml')
+    out = nc.to_cf_dict()
+    assert out['variables']['time']['data'] == [0, 1, 2]
+
+    nc = xncml.Dataset(Path(here) / 'data' / 'subsetCoordEdges.ncml')
+    with pytest.raises(NotImplementedError):
+        out = nc.to_cf_dict()

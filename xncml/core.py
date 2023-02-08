@@ -1,12 +1,20 @@
 from collections import OrderedDict
 from pathlib import Path
-from warnings import warn
 from typing import Any
+from warnings import warn
+
 import xmltodict
 
 
 class Dataset(object):
-    """This is a class for reading and manipulating NcML file"""
+    """This is a class for reading and manipulating NcML file.
+
+    Note that NcML documents are used for two distinct purposes:
+      - an XML description of NetCDF structure and metadata;
+      - create virtual NetCDF datasets, e.g. an aggregation of multiple files.
+
+    This class supports both types of uses.
+    """
 
     def __init__(self, filepath: str = None, location: str = None):
         """
@@ -25,7 +33,7 @@ class Dataset(object):
             # Convert all dictionaries to lists of dicts to simplify the internal logic.
             self.ncroot = xmltodict.parse(
                 self.filepath.read_text(),
-                force_list=["variable", "attribute", "group", "dimension"],
+                force_list=['variable', 'attribute', 'group', 'dimension'],
                 process_namespaces=True,
                 namespaces={
                     'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
@@ -286,99 +294,115 @@ class Dataset(object):
 
         Returns
         -------
-        Dictionary with `dimensions`, `variables` and `attributes` keys.
+        Dictionary with `dimensions` and `variables` keys. May also optionally include an `attributes` key and a
+        `groups` key.
 
         References
         ----------
         http://cf-json.org/specification
         """
         res = OrderedDict()
-        nc = self.ncroot["netcdf"]
+        nc = self.ncroot['netcdf']
 
         for key, val in nc.items():
-            if key[0] == "@":
+            if key[0] == '@':
                 res[key] = val
-            if key == "dimension":
+            if key == 'dimension':
                 res.update(_dims_to_json(val))
-            if key == "group":
+            if key == 'group':
                 res.update(_groups_to_json(val))
-            if key == "attribute":
+            if key == 'attribute':
                 res.update(_attributes_to_json(val))
-            if key == "variable":
+            if key == 'variable':
                 res.update(_variables_to_json(val))
 
         return res
 
-    def to_json(self):
-        """Serialize dictionary to JSON."""
-        import json
-        return json.dump(self.to_cf_dict())
-
-
 
 def _dims_to_json(dims: list) -> dict:
+    """The dimensions object has dimension id:size as its key:value members."""
     out = OrderedDict()
     for dim in dims:
-        if int(dim["@length"]) > 1:
-            out[dim["@name"]] = int(dim["@length"])
-    return {"dimensions": out}
+        if int(dim['@length']) > 1:
+            out[dim['@name']] = int(dim['@length'])
+
+    return {'dimensions': out}
+
 
 def _groups_to_json(groups: list) -> dict:
     out = OrderedDict()
     for group in groups:
-        name = group["@name"]
+        name = group['@name']
         out[name] = OrderedDict()
-        if "attribute" in group:
-            out[name].update(_attributes_to_json(group["attribute"]))
-        if "group" in group:
-            out[name].update(_groups_to_json(group["group"]))
-    return {"groups": out}
+        if 'attribute' in group:
+            out[name].update(_attributes_to_json(group['attribute']))
+        if 'group' in group:
+            out[name].update(_groups_to_json(group['group']))
+
+    return {'groups': out}
 
 
 def _attributes_to_json(attrs: list) -> dict:
+    """The attributes object contains arbitrary attributes as its key:value members."""
     SPECIAL_ATTRS = ['missing_value', 'cell_methods']
 
     out = OrderedDict()
     for attr in attrs:
-        if attr["@name"] not in SPECIAL_ATTRS:
+        if attr['@name'] not in SPECIAL_ATTRS:
             try:
-                out[attr["@name"]] = cast(attr)
+                out[attr['@name']] = _cast(attr)
             except ValueError as exc:
-                warn(f"Could not cast {attr['@name']}")
-    return {"attributes": out}
+                warn(f"Could not cast {attr['@name']}:\n{exc}")
+
+    return {'attributes': out}
 
 
 def _variables_to_json(variables: list) -> dict:
+    """The variables definition object has variable id:object as its key:value members.
+
+    Each variable object MUST include shape, attributes and data objects.
+    The shape field is an array of dimension IDs which correspond to the array ordering of the variable data.
+    """
     AXIS_VAR = ['time', 'lat', 'latitude', 'lon', 'longitude', 'site']
 
     out = OrderedDict()
 
     # Put axis variables first
     for special_var in AXIS_VAR:
-        if special_var in [v["@name"] for v in variables]:
+        if special_var in [v['@name'] for v in variables]:
             out[special_var] = None
 
     for var in variables:
-        name = var["@name"]
+        name = var['@name']
         out[name] = OrderedDict()
-        out[name]['shape'] = var["@shape"]
 
-        if "attribute" in var:
-            out[name].update(_attributes_to_json(var["attribute"]))
+        if '@shape' in var:
+            out[name]['shape'] = var['@shape'].split(' ')
 
-    return {"variables": out}
+        if '@type' in var:
+            out[name]['type'] = var['@type']
+
+        if 'attribute' in var:
+            out[name].update(_attributes_to_json(var['attribute']))
+
+        if 'values' in var:
+            out[name]['data'] = _cast(var)
+
+    return {'variables': out}
 
 
-def cast(obj: dict) -> Any:
+def _cast(obj: dict) -> Any:
     """Cast attribute value to the appropriate type."""
     from xncml.parser import DataType, nctype
 
-    value = obj["@value"]
-    typ = DataType(obj.get("@type", "String"))
-    if value:
+    value = obj.get('@value') or obj.get('values')
+    typ = DataType(obj.get('@type', 'String'))
+    if isinstance(value, str):
         if typ in [DataType.STRING, DataType.STRING_1]:
             return value
 
         sep = ' '
         values = value.split(sep)
-        return tuple(map(nctype(typ), values))
+        return list(map(nctype(typ), values))
+    else:
+        raise NotImplementedError
