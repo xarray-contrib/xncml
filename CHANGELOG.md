@@ -1,3 +1,11 @@
+0.2 (unreleased)
+================
+
+- Implement `Dataset.rename_dataset_attribute`. By @huard
+- Allow empty `Dataset` creation. By @huard
+- Add support in `Dataset` for NcML documents using the `ncml` namespace. By @huard
+
+
 0.1 Initial release (2022-11-24)
 ================================
 

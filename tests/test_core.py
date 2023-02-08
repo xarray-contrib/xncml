@@ -12,7 +12,6 @@ input_file = Path(here) / 'data' / 'exercise1.ncml'
 
 
 def test_ncml_dataset_constructor():
-
     # Test with existing NcML
     nc = xncml.Dataset(input_file)
     expected = OrderedDict(
@@ -45,6 +44,10 @@ def test_ncml_dataset_constructor():
     # Test with non-exising NcML and location
     nc = xncml.Dataset('example.ncml', location=Path(here) / 'data' / 'nc' / 'example1.nc')
     assert 'example1.nc' in nc.ncroot['netcdf']['@location']
+
+    # Test with namespace
+    nc = xncml.Dataset(Path(here) / 'data' / 'testReadHttps.xml')
+    assert nc.ncroot['netcdf']['attribute'][0]['@value'] == 'Example Data'
 
 
 def test_add_variable_attribute():
