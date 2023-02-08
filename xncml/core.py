@@ -295,7 +295,8 @@ class Dataset(object):
         Returns
         -------
         Dictionary with `dimensions` and `variables` keys. May also optionally include an `attributes` key and a
-        `groups` key.
+        `groups` key. Additional keys prefixed with `@` may be included for <netcdf> tag attributes,
+        for example `@location`.
 
         References
         ----------
@@ -397,12 +398,15 @@ def _cast(obj: dict) -> Any:
 
     value = obj.get('@value') or obj.get('values')
     typ = DataType(obj.get('@type', 'String'))
-    if isinstance(value, str):
-        if typ in [DataType.STRING, DataType.STRING_1]:
-            return value
+    if value is not None:
+        if isinstance(value, str):
+            if typ in [DataType.STRING, DataType.STRING_1]:
+                return value
 
-        sep = ' '
-        values = value.split(sep)
-        return list(map(nctype(typ), values))
-    else:
-        raise NotImplementedError
+            sep = ' '
+            values = value.split(sep)
+            return list(map(nctype(typ), values))
+        elif isinstance(value, dict):
+            raise NotImplementedError(obj)
+        else:
+            return value
