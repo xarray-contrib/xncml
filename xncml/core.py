@@ -23,16 +23,15 @@ class Dataset(object):
 
         if self.filepath and self.filepath.exists():
             # Convert all dictionaries to lists of dicts to simplify the internal logic.
-            self.ncroot = xmltodict.parse(self.filepath.read_text())
-            for key, item in self.ncroot['netcdf'].items():
-                if isinstance(item, (dict, OrderedDict)):
-                    self.ncroot['netcdf'][key] = [item]
-
-            if 'variable' in self.ncroot['netcdf']:
-                for var in self.ncroot['netcdf']['variable']:
-                    for key, item in var.items():
-                        if isinstance(item, (dict, OrderedDict)):
-                            var[key] = [item]
+            self.ncroot = xmltodict.parse(
+                self.filepath.read_text(),
+                process_namespaces=True,
+                force_list=['variable', 'attribute', 'group', 'dimension'],
+                namespaces={
+                    'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
+                    'https://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
+                },
+            )
 
         else:
             self.ncroot = OrderedDict()

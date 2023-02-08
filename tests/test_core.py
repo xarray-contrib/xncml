@@ -45,6 +45,10 @@ def test_ncml_dataset_constructor():
     nc = xncml.Dataset('example.ncml', location=Path(here) / 'data' / 'nc' / 'example1.nc')
     assert 'example1.nc' in nc.ncroot['netcdf']['@location']
 
+    # Test with namespace
+    nc = xncml.Dataset(Path(here) / 'data' / 'testReadHttps.xml')
+    assert nc.ncroot['netcdf']['attribute'][0]['@value'] == 'Example Data'
+
 
 def test_add_variable_attribute():
     nc = xncml.Dataset(input_file)
