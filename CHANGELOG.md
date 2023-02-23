@@ -1,4 +1,4 @@
-0.2 (unreleased)
+0.2 (2023-02-23)
 ================
 
 - Implement `Dataset.rename_dataset_attribute`. By @huard
