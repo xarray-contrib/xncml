@@ -290,7 +290,8 @@ class Dataset(object):
     def to_cf_dict(self):
         """Convert internal representation to a CF-JSON dictionary.
 
-        The CF-JSON specification includes `data` for variables, but this is not included here.
+        The CF-JSON specification includes `data` for variables, but if the data is not within the NcML,
+        it cannot be included in the JSON representation.
 
         Returns
         -------
@@ -345,15 +346,12 @@ def _groups_to_json(groups: list) -> dict:
 
 def _attributes_to_json(attrs: list) -> dict:
     """The attributes object contains arbitrary attributes as its key:value members."""
-    SPECIAL_ATTRS = ['missing_value', 'cell_methods']
-
     out = OrderedDict()
     for attr in attrs:
-        if attr['@name'] not in SPECIAL_ATTRS:
-            try:
-                out[attr['@name']] = _cast(attr)
-            except ValueError as exc:
-                warn(f"Could not cast {attr['@name']}:\n{exc}")
+        try:
+            out[attr['@name']] = _cast(attr)
+        except ValueError as exc:
+            warn(f"Could not cast {attr['@name']}:\n{exc}")
 
     return {'attributes': out}
 
@@ -364,14 +362,12 @@ def _variables_to_json(variables: list) -> dict:
     Each variable object MUST include shape, attributes and data objects.
     The shape field is an array of dimension IDs which correspond to the array ordering of the variable data.
     """
-    AXIS_VAR = ['time', 'lat', 'latitude', 'lon', 'longitude', 'site']
-
     out = OrderedDict()
 
-    # Put axis variables first
-    for special_var in AXIS_VAR:
-        if special_var in [v['@name'] for v in variables]:
-            out[special_var] = None
+    # Put coordinate variables first
+    for var in variables:
+        if _is_coordinate(var):
+            out[var['@name']] = None
 
     for var in variables:
         name = var['@name']
@@ -410,3 +406,40 @@ def _cast(obj: dict) -> Any:
             raise NotImplementedError(obj)
         else:
             return value
+
+
+def _is_coordinate(var):
+    """Return True is variable is a coordinate."""
+
+    # Variable is 1D and has same name as dimension
+    if var.get('@shape', '').split(' ') == [var['@name']]:
+        return True
+
+    lat_units = ['degrees_north', 'degreeN', 'degree_N', 'degree_north', 'degreesN', 'degrees_N']
+    lon_units = ['degrees_east', 'degreeE', 'degree_E', 'degree_east', 'degreesE', 'degrees_E']
+    names = [
+        'latitude',
+        'longitude',
+        'time',
+        'air_pressure',
+        'altitude',
+        'depth',
+        'geopotential_height',
+        'height',
+        'height_above_geopotential_datum',
+        'height_above_mean_sea_level',
+        'height_above_reference_ellipsoid',
+    ]
+
+    if 'attribute' in var:
+        attrs = _attributes_to_json(var['attribute'])
+
+        # Check units
+        if attrs.get('units', '') in lon_units + lat_units:
+            return True
+
+        # Check long_name and standard_name
+        if attrs.get('long_name', attrs.get('standard_name', '')) in names:
+            return True
+
+    return False

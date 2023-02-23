@@ -291,6 +291,9 @@ def test_to_dict():
     assert out['dimensions']['time'] == 2
     assert 'groups' not in out
 
+    # Check coordinates are first
+    assert list(out['variables'].keys())[:3] == ['lat', 'lon', 'time']
+
     nc = xncml.Dataset(Path(here) / 'data' / 'aggNewCoord.ncml')
     out = nc.to_cf_dict()
     assert out['variables']['time']['data'] == [0, 1, 2]
