@@ -279,3 +279,25 @@ def test_to_ncml():
         os.remove(default)
     except Exception:
         pass
+
+
+def test_to_dict():
+    nc = xncml.Dataset(input_file)
+    out = nc.to_cf_dict()
+    assert out['attributes']['title'] == 'Example Data'
+    assert out['variables']['rh']['attributes']['long_name'] == 'relative humidity'
+    assert out['variables']['rh']['type'] == 'int'
+    assert out['variables']['rh']['shape'] == ['time', 'lat', 'lon']
+    assert out['dimensions']['time'] == 2
+    assert 'groups' not in out
+
+    # Check coordinates are first
+    assert list(out['variables'].keys())[:3] == ['lat', 'lon', 'time']
+
+    nc = xncml.Dataset(Path(here) / 'data' / 'aggNewCoord.ncml')
+    out = nc.to_cf_dict()
+    assert out['variables']['time']['data'] == [0, 1, 2]
+
+    nc = xncml.Dataset(Path(here) / 'data' / 'subsetCoordEdges.ncml')
+    with pytest.raises(NotImplementedError):
+        out = nc.to_cf_dict()
