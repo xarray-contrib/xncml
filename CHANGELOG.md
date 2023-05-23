@@ -1,3 +1,10 @@
+0.3 (unreleased)
+================
+
+- Add `add_aggregation` to `Dataset` class. By @huard
+- Add `add_scan` to `Dataset` class. By @huard
+
+
 0.2 (2023-02-23)
 ================
 
