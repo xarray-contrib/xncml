@@ -35,6 +35,8 @@ Support for these attributes is missing:
 from __future__ import annotations
 
 import datetime as dt
+from functools import partial
+from itertools import chain
 from pathlib import Path
 
 import numpy as np
@@ -165,11 +167,14 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     for attr in obj.promote_global_attribute:
         raise NotImplementedError
 
-    # Create list of items to aggregate.
-    items = []
+    # Create list of datasets to aggregate.
+    datasets = []
+    closers = []
+
     for item in obj.netcdf:
         # Open dataset defined in <netcdf>'s `location` attribute
         tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml)
+        closers.append(getattr(tar, '_close'))
 
         # Select variables
         if names:
@@ -180,31 +185,35 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
             dtypes = [i[obj.dim_name].dtype.type for i in [tar, target] if obj.dim_name in i]
             coords = read_coord_value(item, obj, dtypes=dtypes)
             tar = tar.assign_coords({obj.dim_name: coords})
-        items.append(tar)
+        datasets.append(tar)
 
     # Handle <scan> element
     for item in obj.scan:
-        items.extend(read_scan(item, ncml))
+        dss = read_scan(item, ncml)
+        datasets.extend([ds.chunk() for ds in dss])
+        closers.extend([getattr(ds, '_close') for ds in dss])
 
     # Need to decode time variable
     if obj.time_units_change:
-        for i, ds in enumerate(items):
+        for i, ds in enumerate(datasets):
             t = xr.as_variable(ds[obj.dim_name], obj.dim_name)  # Maybe not the same name...
             encoded = CFDatetimeCoder(use_cftime=True).decode(t, name=t.name)
-            items[i] = ds.assign_coords({obj.dim_name: encoded})
+            datasets[i] = ds.assign_coords({obj.dim_name: encoded})
 
     # Translate different types of aggregation into xarray instructions.
     if obj.type == AggregationType.JOIN_EXISTING:
-        agg = xr.concat(items, obj.dim_name)
+        agg = xr.concat(datasets, obj.dim_name)
     elif obj.type == AggregationType.JOIN_NEW:
-        agg = xr.concat(items, obj.dim_name)
+        agg = xr.concat(datasets, obj.dim_name)
     elif obj.type == AggregationType.UNION:
-        agg = xr.merge(items)
+        agg = xr.merge(datasets)
     else:
         raise NotImplementedError
 
     agg = read_group(agg, None, obj)
-    return target.merge(agg, combine_attrs='no_conflicts')
+    out = target.merge(agg, combine_attrs='no_conflicts')
+    out.set_close(partial(_multi_file_closer, closers))
+    return out
 
 
 def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
@@ -319,7 +328,7 @@ def read_scan(obj: Aggregation.Scan, ncml: Path) -> [xr.Dataset]:
 
     files.sort()
 
-    return [xr.open_dataset(f, decode_times=False).chunk() for f in files]
+    return [xr.open_dataset(f, decode_times=False) for f in files]
 
 
 def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
@@ -575,3 +584,12 @@ def filter_by_class(iterable, klass):
     for item in iterable:
         if isinstance(item, klass):
             yield item
+
+
+def _multi_file_closer(closers):
+    """Close multiple files."""
+    # Note that if a closer is None, it probably means an alteration was made to the original dataset. Make sure
+    # that the `_close` attribute is obtained directly from the object returned by `open_dataset`.
+    for closer in closers:
+        if closer is not None:
+            closer()
