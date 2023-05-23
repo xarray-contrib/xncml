@@ -38,9 +38,12 @@ import datetime as dt
 from functools import partial
 from itertools import chain
 from pathlib import Path
+from typing import Union
 
+import dask
 import numpy as np
 import xarray as xr
+from dask.delayed import Delayed
 from xsdata.formats.dataclass.parsers import XmlParser
 
 from .generated import (
@@ -81,7 +84,7 @@ def parse(path: Path) -> Netcdf:
     return parser.from_path(path, Netcdf)
 
 
-def open_ncml(ncml: str | Path) -> xr.Dataset:
+def open_ncml(ncml: str | Path, parallel: bool = False) -> xr.Dataset:
     """
     Convert NcML document to a dataset.
 
@@ -89,6 +92,8 @@ def open_ncml(ncml: str | Path) -> xr.Dataset:
     ----------
     ncml : str | Path
       Path to NcML file.
+    parallel : bool
+      If True, use dask to read data in parallel.
 
     Returns
     -------
@@ -99,10 +104,12 @@ def open_ncml(ncml: str | Path) -> xr.Dataset:
     ncml = Path(ncml)
     obj = parse(ncml)
 
-    return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml)
+    return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml, parallel=parallel)
 
 
-def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) -> xr.Dataset:
+def read_netcdf(
+    target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path, parallel: bool
+) -> xr.Dataset:
     """
     Return content of <netcdf> element.
 
@@ -116,6 +123,8 @@ def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) ->
        <netcdf> object description.
     ncml : Path
       Path to NcML document, sometimes required to follow relative links.
+    parallel : bool
+      If True, use dask to read data in parallel.
 
     Returns
     -------
@@ -123,7 +132,8 @@ def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) ->
       Dataset holding variables and attributes defined in <netcdf> element.
     """
     # Open location if any
-    ref = read_ds(obj, ncml) or ref
+    if obj.location:
+        ref = read_ds(obj, ncml, parallel=parallel)
 
     # <explicit/> element means that only content specifically mentioned in NcML document is included in dataset.
     if obj.explicit is not None:
@@ -133,7 +143,7 @@ def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) ->
         target = ref
 
     for item in filter_by_class(obj.choice, Aggregation):
-        target = read_aggregation(target, item, ncml)
+        target = read_aggregation(target, item, ncml, parallel=parallel)
 
     # Handle <variable>, <attribute> and <remove> elements
     target = read_group(target, ref, obj)
@@ -141,7 +151,9 @@ def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) ->
     return target
 
 
-def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dataset:
+def read_aggregation(
+    target: xr.Dataset, obj: Aggregation, ncml: Path, parallel: bool
+) -> xr.Dataset:
     """
     Return merged or concatenated content of <aggregation> element.
 
@@ -153,6 +165,8 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
        <aggregation> object description.
     ncml : Path
       Path to NcML document, sometimes required to follow relative links.
+    parallel : bool
+      If True, use dask to read data in parallel.
 
     Returns
     -------
@@ -167,14 +181,19 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     for attr in obj.promote_global_attribute:
         raise NotImplementedError
 
+    if parallel:
+        getattr_ = dask.delayed(getattr)
+    else:
+        getattr_ = getattr
+
     # Create list of datasets to aggregate.
     datasets = []
     closers = []
 
     for item in obj.netcdf:
         # Open dataset defined in <netcdf>'s `location` attribute
-        tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml)
-        closers.append(getattr(tar, '_close'))
+        tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml, parallel=parallel)
+        closers.append(getattr_(tar, '_close'))
 
         # Select variables
         if names:
@@ -189,9 +208,12 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
 
     # Handle <scan> element
     for item in obj.scan:
-        dss = read_scan(item, ncml)
+        dss = read_scan(item, ncml, parallel=parallel)
         datasets.extend([ds.chunk() for ds in dss])
-        closers.extend([getattr(ds, '_close') for ds in dss])
+        closers.extend([getattr_(ds, '_close') for ds in dss])
+
+    if parallel:
+        datasets, closers = dask.compute(datasets, closers)
 
     # Need to decode time variable
     if obj.time_units_change:
@@ -210,38 +232,44 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     else:
         raise NotImplementedError
 
+    # Merge aggregated dataset into target dataset
     agg = read_group(agg, None, obj)
     out = target.merge(agg, combine_attrs='no_conflicts')
+
+    # Set close method to close all opened datasets
     out.set_close(partial(_multi_file_closer, closers))
     return out
 
 
-def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
+def read_ds(obj: Netcdf, ncml: Path, parallel: bool) -> Union[xr.Dataset, Delayed]:
     """
     Return dataset defined in <netcdf> element.
 
     Parameters
     ----------
     obj : Netcdf
-      <netcdf> object description.
+      <netcdf> object description. Must have `location` attribute.
     ncml : Path
       Path to NcML document, sometimes required to follow relative links.
+    parallel : bool
+      If True, use dask to read data in parallel.
 
     Returns
     -------
     xr.Dataset
       Dataset defined at <netcdf>' `location` attribute.
     """
-    if obj.location:
-        try:
-            # Python >= 3.9
-            location = obj.location.removeprefix('file:')
-        except AttributeError:
-            location = obj.location.strip('file:')
 
-        if not Path(location).is_absolute():
-            location = ncml.parent / location
-        return xr.open_dataset(location, decode_times=False)
+    try:
+        # Python >= 3.9
+        location = obj.location.removeprefix('file:')
+    except AttributeError:
+        location = obj.location.strip('file:')
+
+    if not Path(location).is_absolute():
+        location = ncml.parent / location
+
+    return xr.open_dataset(location, decode_times=False)
 
 
 def read_group(target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf) -> xr.Dataset:
@@ -284,7 +312,7 @@ def read_group(target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf) -> xr.D
     return target
 
 
-def read_scan(obj: Aggregation.Scan, ncml: Path) -> [xr.Dataset]:
+def read_scan(obj: Aggregation.Scan, ncml: Path, parallel: bool) -> [xr.Dataset]:
     """
     Return list of datasets defined in <scan> element.
 
@@ -294,6 +322,8 @@ def read_scan(obj: Aggregation.Scan, ncml: Path) -> [xr.Dataset]:
       <scan> object description.
     ncml : Path
       Path to NcML document, sometimes required to follow relative links.
+    parallel : bool
+      If True, use dask to read data in parallel.
 
     Returns
     -------
@@ -328,7 +358,12 @@ def read_scan(obj: Aggregation.Scan, ncml: Path) -> [xr.Dataset]:
 
     files.sort()
 
-    return [xr.open_dataset(f, decode_times=False) for f in files]
+    if parallel:
+        open_dataset_ = dask.delayed(xr.open_dataset)
+    else:
+        open_dataset_ = xr.open_dataset
+
+    return [open_dataset_(f, decode_times=False) for f in files]
 
 
 def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):

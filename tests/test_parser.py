@@ -45,6 +45,17 @@ def test_aggexisting():
         ds.close()
 
 
+def test_parallel_agg_existing():
+    with CheckClose():
+        ds = xncml.open_ncml(data / 'aggExisting.xml', parallel=True)
+        check_dimension(ds)
+        check_coord_var(ds)
+        check_agg_coord_var(ds)
+        check_read_data(ds)
+        assert ds['time'].attrs['ncmlAdded'] == 'timeAtt'
+        ds.close()
+
+
 def test_aggexisting_w_coords():
     with CheckClose():
         ds = xncml.open_ncml(data / 'aggExistingWcoords.xml')
@@ -156,13 +167,16 @@ def test_agg_syn_no_coords_dir():
     ds = xncml.open_ncml(data / 'aggSynNoCoordsDir.xml')
     assert len(ds.lat) == 3
     assert len(ds.lon) == 4
+    print(ds.time)
     assert len(ds.time) == 3
 
 
 def test_agg_synthetic():
-    ds = xncml.open_ncml(data / 'aggSynthetic.xml')
-    assert len(ds.time) == 3
-    assert all(ds.time == [0, 10, 99])
+    with CheckClose():
+        ds = xncml.open_ncml(data / 'aggSynthetic.xml')
+        assert len(ds.time) == 3
+        assert all(ds.time == [0, 10, 99])
+        ds.close()
 
 
 def test_agg_synthetic_2():
@@ -180,6 +194,14 @@ def test_agg_synthetic_3():
 def test_agg_syn_scan():
     with CheckClose():
         ds = xncml.open_ncml(data / 'aggSynScan.xml')
+        assert len(ds.time) == 3
+        assert all(ds.time == [0, 10, 20])
+        ds.close()
+
+
+def test_parallel_agg_syn_scan():
+    with CheckClose():
+        ds = xncml.open_ncml(data / 'aggSynScan.xml', parallel=True)
         assert len(ds.time) == 3
         assert all(ds.time == [0, 10, 20])
         ds.close()
@@ -333,3 +355,16 @@ def check_read_data(ds):
     assert t.shape == (59, 3, 4)
     assert t.dtype == float
     assert 'T' in ds.data_vars
+
+
+def test_read_scan_parallel():
+    import dask
+
+    ncml = data / 'aggSynScan.xml'
+    obj = xncml.parser.parse(ncml)
+    agg = obj.choice[1]
+    scan = agg.scan[0]
+    datasets = xncml.parser.read_scan(scan, ncml, parallel=True)
+    assert len(datasets) == 3
+    (datasets,) = dask.compute(datasets)
+    assert len(datasets) == 3
