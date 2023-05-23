@@ -271,8 +271,15 @@ def test_add_aggregation():
     nc.add_aggregation('new_dim', 'joinNew')
     nc.add_variable_agg('new_dim', 'newVar')
 
-    expected = [OrderedDict([('@dimName', 'new_dim'), ('@type', 'joinNew'),
-                             ('variableAgg', [OrderedDict([('@name', 'newVar')])])])]
+    expected = [
+        OrderedDict(
+            [
+                ('@dimName', 'new_dim'),
+                ('@type', 'joinNew'),
+                ('variableAgg', [OrderedDict([('@name', 'newVar')])]),
+            ]
+        )
+    ]
     res = nc.ncroot['netcdf']['aggregation']
 
     assert expected == res
@@ -283,11 +290,18 @@ def test_add_scan():
     nc.add_aggregation('new_dim', 'joinExisting')
     nc.add_scan('new_dim', location='foo', suffix='.nc')
 
-    expected = [OrderedDict([('@dimName', 'new_dim'), ('@type', 'joinExisting'),
-                                ('scan', [OrderedDict([
-                                    ('@location', 'foo'),
-                                    ('@subdirs', 'true'),
-                                    ('@suffix', '.nc')])])])]
+    expected = [
+        OrderedDict(
+            [
+                ('@dimName', 'new_dim'),
+                ('@type', 'joinExisting'),
+                (
+                    'scan',
+                    [OrderedDict([('@location', 'foo'), ('@subdirs', 'true'), ('@suffix', '.nc')])],
+                ),
+            ]
+        )
+    ]
 
     res = nc.ncroot['netcdf']['aggregation']
     assert expected == res

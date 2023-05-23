@@ -1,8 +1,8 @@
 from collections import OrderedDict
+from enum import Enum
 from pathlib import Path
 from typing import Any
 from warnings import warn
-from enum import Enum
 
 import xmltodict
 
@@ -54,7 +54,9 @@ class Dataset(object):
         return xmltodict.unparse(self.ncroot, pretty=True)
 
     # Aggregations and scans
-    def add_aggregation(self, dim_name: str, type_: str, recheck_every: str = None, time_units_change: bool = None):
+    def add_aggregation(
+        self, dim_name: str, type_: str, recheck_every: str = None, time_units_change: bool = None
+    ):
         """Add aggregation.
 
         Parameters
@@ -69,10 +71,14 @@ class Dataset(object):
             Whether the time units change. Only used if `type_` is `AggregationType.scan`.
         """
         at = AggregationType(type_)
-        item = OrderedDict({'@dimName': dim_name,
-                            '@type': at.value,
-                            '@recheckEvery': recheck_every,
-                            '@timeUnitsChange': time_units_change})
+        item = OrderedDict(
+            {
+                '@dimName': dim_name,
+                '@type': at.value,
+                '@recheckEvery': recheck_every,
+                '@timeUnitsChange': time_units_change,
+            }
+        )
         item = preparse(item)
 
         aggregations = self.ncroot['netcdf'].get('aggregation', [])
@@ -107,8 +113,17 @@ class Dataset(object):
                     variables.append(item)
                     agg['variableAgg'] = variables
 
-    def add_scan(self, dim_name: str, location: str, reg_exp: str = None, suffix: str = None, subdirs: bool = True,
-                 older_than: str = None, date_format_mark: str = None, enhance: bool = None):
+    def add_scan(
+        self,
+        dim_name: str,
+        location: str,
+        reg_exp: str = None,
+        suffix: str = None,
+        subdirs: bool = True,
+        older_than: str = None,
+        date_format_mark: str = None,
+        enhance: bool = None,
+    ):
         """
         Add scan element.
 
@@ -131,13 +146,17 @@ class Dataset(object):
         enhance : bool
             Whether to enhance the scan.
         """
-        item = OrderedDict({'@location': location,
-                            '@regExp': reg_exp,
-                            '@suffix': suffix,
-                            '@subdirs': subdirs,
-                            '@olderThan': older_than,
-                            '@dateFormatMark': date_format_mark,
-                            '@enhance': enhance})
+        item = OrderedDict(
+            {
+                '@location': location,
+                '@regExp': reg_exp,
+                '@suffix': suffix,
+                '@subdirs': subdirs,
+                '@olderThan': older_than,
+                '@dateFormatMark': date_format_mark,
+                '@enhance': enhance,
+            }
+        )
 
         item = preparse(item)
 
@@ -150,7 +169,6 @@ class Dataset(object):
                 break
         else:
             raise ValueError(f'No aggregation found for dimension {dim_name}.')
-
 
     # Variable
     def add_variable_attribute(self, variable, key, value, type_='String'):
@@ -557,6 +575,7 @@ def preparse(obj: dict) -> dict:
 
 class AggregationType(Enum):
     """Type of aggregation."""
+
     FORECAST_MODEL_RUN_COLLECTION = 'forecastModelRunCollection'
     FORECAST_MODEL_RUN_SINGLE_COLLECTION = 'forecastModelRunSingleCollection'
     JOIN_EXISTING = 'joinExisting'
