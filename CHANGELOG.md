@@ -2,6 +2,9 @@
 ================
 
 - Closing the dataset returned by `open_ncml` will close the underlying opened files. By @huard
+- Add `add_aggregation` and `add_variable_agg` to `Dataset` class. By @huard
+- Add `add_scan` to `Dataset` class. By @huard
+
 
 
 0.2 (2023-02-23)
