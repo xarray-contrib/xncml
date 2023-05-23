@@ -2,6 +2,7 @@ import datetime as dt
 from pathlib import Path
 
 import numpy as np
+import psutil
 import pytest
 
 import xncml
@@ -15,22 +16,44 @@ import xncml
 data = Path(__file__).parent / 'data'
 
 
+class CheckClose(object):
+    """Check that files are closed after the test. Note that `close` has to be explicitly called within the
+    context manager for this to work."""
+
+    def __init__(self):
+        self.proc = psutil.Process()
+        self.before = None
+
+    def __enter__(self):
+        self.before = len(self.proc.open_files())
+
+    def __exit__(self, *args):
+        """Raise error if files are left open at the end of the test."""
+        after = len(self.proc.open_files())
+        if after != self.before:
+            raise AssertionError(f'Files left open after test: {after - self.before}')
+
+
 def test_aggexisting():
-    ds = xncml.open_ncml(data / 'aggExisting.xml')
-    check_dimension(ds)
-    check_coord_var(ds)
-    check_agg_coord_var(ds)
-    check_read_data(ds)
-    assert ds['time'].attrs['ncmlAdded'] == 'timeAtt'
+    with CheckClose():
+        ds = xncml.open_ncml(data / 'aggExisting.xml')
+        check_dimension(ds)
+        check_coord_var(ds)
+        check_agg_coord_var(ds)
+        check_read_data(ds)
+        assert ds['time'].attrs['ncmlAdded'] == 'timeAtt'
+        ds.close()
 
 
 def test_aggexisting_w_coords():
-    ds = xncml.open_ncml(data / 'aggExistingWcoords.xml')
-    check_dimension(ds)
-    check_coord_var(ds)
-    check_agg_coord_var(ds)
-    check_read_data(ds)
-    assert ds['time'].attrs['ncmlAdded'] == 'timeAtt'
+    with CheckClose():
+        ds = xncml.open_ncml(data / 'aggExistingWcoords.xml')
+        check_dimension(ds)
+        check_coord_var(ds)
+        check_agg_coord_var(ds)
+        check_read_data(ds)
+        assert ds['time'].attrs['ncmlAdded'] == 'timeAtt'
+        ds.close()
 
 
 def test_aggexisting_coords_var():
@@ -155,9 +178,11 @@ def test_agg_synthetic_3():
 
 
 def test_agg_syn_scan():
-    ds = xncml.open_ncml(data / 'aggSynScan.xml')
-    assert len(ds.time) == 3
-    assert all(ds.time == [0, 10, 20])
+    with CheckClose():
+        ds = xncml.open_ncml(data / 'aggSynScan.xml')
+        assert len(ds.time) == 3
+        assert all(ds.time == [0, 10, 20])
+        ds.close()
 
 
 def test_agg_syn_rename():
