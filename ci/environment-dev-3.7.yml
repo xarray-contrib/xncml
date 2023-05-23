@@ -15,6 +15,7 @@ dependencies:
   - numpy
   - numpydoc
   - pip
+  - psutil
   - pytest
   - pytest-cov
   - python=3.7
