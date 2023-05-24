@@ -1,9 +1,12 @@
 import datetime as dt
 from pathlib import Path
 
+import dask
 import numpy as np
 import psutil
 import pytest
+import xarray as xr
+from dask.delayed import Delayed
 
 import xncml
 
@@ -358,13 +361,25 @@ def check_read_data(ds):
 
 
 def test_read_scan_parallel():
-    import dask
-
+    """Confirm that read_scan returns a list of dask.delayed objects."""
     ncml = data / 'aggSynScan.xml'
     obj = xncml.parser.parse(ncml)
     agg = obj.choice[1]
     scan = agg.scan[0]
     datasets = xncml.parser.read_scan(scan, ncml, parallel=True)
+    assert type(datasets[0]) == Delayed
     assert len(datasets) == 3
     (datasets,) = dask.compute(datasets)
     assert len(datasets) == 3
+
+
+def test_read_netcdf_parallel():
+    """Confirm that read_netcdf returns a dask.delayed object."""
+    ncml = data / 'aggExisting.xml'
+    obj = xncml.parser.parse(ncml)
+    agg = obj.choice[1]
+    nc = agg.netcdf[0]
+    datasets = xncml.parser.read_netcdf(
+        xr.Dataset(), ref=xr.Dataset(), obj=nc, ncml=ncml, parallel=True
+    )
+    assert type(datasets) == Delayed

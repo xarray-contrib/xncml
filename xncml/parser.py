@@ -181,10 +181,7 @@ def read_aggregation(
     for attr in obj.promote_global_attribute:
         raise NotImplementedError
 
-    if parallel:
-        getattr_ = dask.delayed(getattr)
-    else:
-        getattr_ = getattr
+    getattr_ = dask.delayed(getattr) if parallel else getattr
 
     # Create list of datasets to aggregate.
     datasets = []
@@ -269,7 +266,9 @@ def read_ds(obj: Netcdf, ncml: Path, parallel: bool) -> Union[xr.Dataset, Delaye
     if not Path(location).is_absolute():
         location = ncml.parent / location
 
-    return xr.open_dataset(location, decode_times=False)
+    open_dataset_ = dask.delayed(xr.open_dataset) if parallel else xr.open_dataset
+
+    return open_dataset_(location, decode_times=False)
 
 
 def read_group(target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf) -> xr.Dataset:
@@ -358,10 +357,7 @@ def read_scan(obj: Aggregation.Scan, ncml: Path, parallel: bool) -> [xr.Dataset]
 
     files.sort()
 
-    if parallel:
-        open_dataset_ = dask.delayed(xr.open_dataset)
-    else:
-        open_dataset_ = xr.open_dataset
+    open_dataset_ = dask.delayed(xr.open_dataset) if parallel else xr.open_dataset
 
     return [open_dataset_(f, decode_times=False) for f in files]
 
