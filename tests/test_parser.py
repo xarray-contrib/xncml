@@ -170,7 +170,6 @@ def test_agg_syn_no_coords_dir():
     ds = xncml.open_ncml(data / 'aggSynNoCoordsDir.xml')
     assert len(ds.lat) == 3
     assert len(ds.lon) == 4
-    print(ds.time)
     assert len(ds.time) == 3
 
 
