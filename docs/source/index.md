@@ -5,7 +5,7 @@
 
 # Xncml Documentation
 
-`xncml` adds NcML support to xarray. It includes utilities to modify NcML documents, and open NcML files as `xarray.Dataset`.
+`xncml` adds NcML support to xarray. It includes utilities to modify NcML documents, and open NcML files as `xarray.Dataset`. For more information on NcML, take a look at [tutorials and examples](https://docs.unidata.ucar.edu/netcdf-java/current/userguide/basic_ncml_tutorial.html) and the [annotated schema](https://docs.unidata.ucar.edu/netcdf-java/current/userguide/annotated_ncml_schema.html).
 
 ## Installing
 
@@ -27,6 +27,8 @@ tutorial
 
 - [Changelog](changelog.md)
 - [Github](https://github.com/xarray-contrib/xncml/)
+
+Note the existence of a similar [project](https://github.com/ioos/ncml) to edit NcML documents, now archived.
 
 
 ## Feedback
