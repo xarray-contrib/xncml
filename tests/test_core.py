@@ -342,3 +342,12 @@ def test_to_dict():
     nc = xncml.Dataset(Path(here) / 'data' / 'subsetCoordEdges.ncml')
     with pytest.raises(NotImplementedError):
         out = nc.to_cf_dict()
+
+
+def test_from_xml():
+    nc1 = xncml.Dataset(input_file)
+
+    xml = input_file.read_text()
+    nc2 = xncml.Dataset.from_text(xml)
+
+    assert str(nc2) == str(nc1)
