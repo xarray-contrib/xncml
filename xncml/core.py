@@ -16,6 +16,7 @@ class Dataset(object):
 
     This class supports both types of uses.
     """
+
     def __init__(self, filepath: str = None, location: str = None):
         """
 
@@ -34,11 +35,11 @@ class Dataset(object):
 
         else:
             self.ncroot = OrderedDict()
-            self.ncroot["netcdf"] = OrderedDict(
-                {"@xmlns": "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"}
+            self.ncroot['netcdf'] = OrderedDict(
+                {'@xmlns': 'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2'}
             )
             if location is not None:
-                self.ncroot["netcdf"]["@location"] = str(location)
+                self.ncroot['netcdf']['@location'] = str(location)
 
     @classmethod
     def from_text(cls, xml: str):
@@ -52,11 +53,11 @@ class Dataset(object):
         """Return dictionary from xml."""
         return xmltodict.parse(
             xml,
-            force_list=["variable", "attribute", "group", "dimension"],
+            force_list=['variable', 'attribute', 'group', 'dimension'],
             process_namespaces=True,
             namespaces={
-                "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2": None,
-                "https://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2": None,
+                'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
+                'https://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
             },
         )
 
