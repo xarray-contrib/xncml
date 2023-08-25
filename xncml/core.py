@@ -61,26 +61,6 @@ class Dataset(object):
             },
         )
 
-    @classmethod
-    def from_text(cls, xml: str):
-        """Create Dataset from xml string."""
-        self = cls()
-        self.ncroot = self._parse_xml(xml)
-        return self
-
-    @staticmethod
-    def _parse_xml(xml: str) -> dict:
-        """Return dictionary from xml."""
-        return xmltodict.parse(
-            xml,
-            force_list=['variable', 'attribute', 'group', 'dimension'],
-            process_namespaces=True,
-            namespaces={
-                'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
-                'https://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
-            },
-        )
-
     def __repr__(self):
         return xmltodict.unparse(self.ncroot, pretty=True)
 
