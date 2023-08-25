@@ -343,6 +343,7 @@ def test_to_dict():
     with pytest.raises(NotImplementedError):
         out = nc.to_cf_dict()
 
+
 def test_from_xml():
     nc1 = xncml.Dataset(input_file)
 
