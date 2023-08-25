@@ -1,4 +1,4 @@
-0.3 (unreleased)
+0.3 (2023-08-25)
 ================
 
 - Add `add_aggregation` and `add_variable_agg` to `Dataset` class. By @huard
