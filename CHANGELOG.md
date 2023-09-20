@@ -1,9 +1,9 @@
 0.4 (unreleased)
 ================
 
-- Support parallel reads in `open_ncml` using `dask`. By @huard 
+- Support parallel reads in `open_ncml` using `dask`. By @huard
 
- 
+
 0.3 (2023-08-28)
 ================
 
