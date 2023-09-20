@@ -1,10 +1,16 @@
-0.3 (unreleased)
+0.4 (unreleased)
 ================
 
-- Support parallel reads in `open_ncml` using `dask`. By @huard
-- Closing the dataset returned by `open_ncml` will close the underlying opened files. By @huard
+- Support parallel reads in `open_ncml` using `dask`. By @huard 
+
+ 
+0.3 (2023-08-28)
+================
+
 - Add `add_aggregation` and `add_variable_agg` to `Dataset` class. By @huard
 - Add `add_scan` to `Dataset` class. By @huard
+- Closing the dataset returned by `open_ncml` will close the underlying opened files. By @huard
+- Add `Dataset.from_text` classmethod  to create a `Dataset` from an XML string. By @huard
 
 
 0.2 (2023-02-23)

@@ -29,18 +29,9 @@ class Dataset(object):
             NetCDF file location. Set this to create a NcML file modifying an existing NetCDF document.
         """
         self.filepath = Path(filepath) if filepath is not None else None
-
         if self.filepath and self.filepath.exists():
             # Convert all dictionaries to lists of dicts to simplify the internal logic.
-            self.ncroot = xmltodict.parse(
-                self.filepath.read_text(),
-                force_list=['variable', 'attribute', 'group', 'dimension'],
-                process_namespaces=True,
-                namespaces={
-                    'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
-                    'https://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
-                },
-            )
+            self.ncroot = self._parse_xml(self.filepath.read_text())
 
         else:
             self.ncroot = OrderedDict()
@@ -49,6 +40,26 @@ class Dataset(object):
             )
             if location is not None:
                 self.ncroot['netcdf']['@location'] = str(location)
+
+    @classmethod
+    def from_text(cls, xml: str):
+        """Create Dataset from xml string."""
+        self = cls()
+        self.ncroot = self._parse_xml(xml)
+        return self
+
+    @staticmethod
+    def _parse_xml(xml: str) -> dict:
+        """Return dictionary from xml."""
+        return xmltodict.parse(
+            xml,
+            force_list=['variable', 'attribute', 'group', 'dimension'],
+            process_namespaces=True,
+            namespaces={
+                'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
+                'https://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
+            },
+        )
 
     def __repr__(self):
         return xmltodict.unparse(self.ncroot, pretty=True)
