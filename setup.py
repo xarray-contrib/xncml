@@ -38,5 +38,5 @@ setup(
     setup_requires=['setuptools_scm', 'setuptools>=30.3.0', 'setuptools_scm_git_archive'],
     extras_require={
         'dev': ['pytest', 'flake8'],
-    }
+    },
 )
