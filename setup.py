@@ -34,5 +34,9 @@ setup(
     zip_safe=False,
     keywords='xncml, xarray, netcdf',
     use_scm_version=True,
+    python_requires='>=3.9, <4',
     setup_requires=['setuptools_scm', 'setuptools>=30.3.0', 'setuptools_scm_git_archive'],
+    extras_require={
+        'dev': ['pytest', 'flake8'],
+    }
 )
