@@ -1,7 +1,14 @@
 0.4 (unreleased)
 ================
 
+- Add support for <EnumTypeDef>. By @bzah
 - Support parallel reads in `open_ncml` using `dask`. By @huard
+
+0.3.1 (2023-11-10)
+==================
+
+- Add support for Python 3.12
+- Drop support for Python 3.8
 
 
 0.3 (2023-08-28)

@@ -290,17 +290,18 @@ def read_group(target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf) -> xr.D
       Dataset holding variables and attributes defined in <netcdf> element.
     """
     dims = {}
+    enums = {}
     for item in obj.choice:
         if isinstance(item, Dimension):
             dims[item.name] = read_dimension(item)
         elif isinstance(item, Variable):
-            target = read_variable(target, ref, item, dims)
+            target = read_variable(target, ref, item, dims, enums)
         elif isinstance(item, Attribute):
             read_attribute(target, item, ref)
         elif isinstance(item, Remove):
             target = read_remove(target, item)
         elif isinstance(item, EnumTypedef):
-            raise NotImplementedError
+            enums[item.name] = read_enum(item)
         elif isinstance(item, Group):
             target = read_group(target, ref, item)
         elif isinstance(item, Aggregation):
@@ -407,7 +408,37 @@ def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
     return typ(coord)
 
 
-def read_variable(target: xr.Dataset, ref: xr.Dataset, obj: Variable, dimensions: dict):
+def read_enum(obj: EnumTypedef) -> dict[str, list]:
+    """
+    Parse <enumTypeDef> element.
+
+    Example
+    -------
+    <enumTypedef name="trilean" type="enum1">
+        <enum key="0">false</enum>
+        <enum key="1">true</enum>
+        <enum key="2">undefined</enum>
+    </enumTypedef>
+
+    Parameters
+    ----------
+    obj: EnumTypeDef
+      <enumTypeDef> object.
+
+    Returns
+    -------
+    dict:
+        A dictionary with CF flag_values and flag_meanings that describe the Enum.
+    """
+    return {
+        'flag_values': list(map(lambda e: e.key, obj.enum)),
+        'flag_meanings': list(map(lambda e: e.content[0], obj.enum)),
+    }
+
+
+def read_variable(
+    target: xr.Dataset, ref: xr.Dataset, obj: Variable, dimensions: dict, enums: dict
+):
     """
     Parse <variable> element.
 
@@ -421,6 +452,7 @@ def read_variable(target: xr.Dataset, ref: xr.Dataset, obj: Variable, dimensions
        <variable> object description.
     dimensions : dict
       Dimension attributes keyed by name.
+    enums: dict[str, dict]
 
     Returns
     -------
@@ -454,6 +486,9 @@ def read_variable(target: xr.Dataset, ref: xr.Dataset, obj: Variable, dimensions
         dims = obj.shape.split(' ')
         shape = [dimensions[dim].length for dim in dims]
         out = xr.Variable(data=np.empty(shape, dtype=nctype(obj.type)), dims=dims)
+    elif obj.shape == '':
+        # scalar variable
+        out = xr.Variable(data=None, dims=())
     else:
         raise ValueError
 
@@ -478,7 +513,12 @@ def read_variable(target: xr.Dataset, ref: xr.Dataset, obj: Variable, dimensions
     if obj.logical_reduce:
         raise NotImplementedError
 
-    if obj.typedef:
+    if obj.typedef in enums.keys():
+        # TODO: Also update encoding when https://github.com/pydata/xarray/pull/8147
+        #       is merged in xarray.
+        out.attrs['flag_values'] = enums[obj.typedef]['flag_values']
+        out.attrs['flag_meanings'] = enums[obj.typedef]['flag_meanings']
+    elif obj.typedef is not None:
         raise NotImplementedError
 
     target[obj.name] = out
@@ -582,11 +622,11 @@ def nctype(typ: DataType) -> type:
 
     if typ in [DataType.STRING, DataType.STRING_1]:
         return str
-    elif typ == DataType.BYTE:
+    elif typ in [DataType.BYTE, DataType.ENUM1]:
         return np.int8
-    elif typ == DataType.SHORT:
+    elif typ in [DataType.SHORT, DataType.ENUM2]:
         return np.int16
-    elif typ == DataType.INT:
+    elif typ in [DataType.INT, DataType.ENUM4]:
         return np.int32
     elif typ == DataType.LONG:
         return int
