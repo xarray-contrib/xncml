@@ -302,6 +302,9 @@ def test_read_meta_data():
     assert ds.attrs['title'] == 'Example Data'
     assert ds.variables['T'].attrs['units'] == 'degC'
 
+def test_unsigned_type():
+    ds = xncml.open_ncml(data/ "testUnsignedType.xml")
+    assert ds['be_or_not_to_be'].dtype == np.uintc
 
 def test_read_enum():
     ds = xncml.open_ncml(data / 'testEnums.xml')

@@ -457,7 +457,7 @@ def read_variable(
         out = xr.Variable(data=np.empty(shape, dtype=nctype(obj.type)), dims=dims)
     elif obj.shape == '':
         # scalar variable
-        out = xr.Variable(data=None, dims=())
+        out = xr.Variable(data=np.array(obj.values.content[0], dtype=nctype(obj.type))[()], dims=())
     else:
         raise ValueError
 
@@ -522,6 +522,8 @@ def read_values(v: xr.Variable, obj: Values) -> xr.Variable:
         else:
             raise NotImplementedError
 
+    if len(data) == 1 and len(v.dims) == 0:
+        data = data[0]
     data = v.dtype.type(data)
     return xr.Variable(v.dims, data, v.attrs)
 
