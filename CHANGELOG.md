@@ -2,6 +2,9 @@
 ==================
 
 - Add support for <EnumTypeDef>. By @bzah
+- Update XSD schema and dataclasses to latest version from netcdf-java to add support
+  for unsigned types. By @bzah
+
 
 0.3.1 (2023-11-10)
 ==================
