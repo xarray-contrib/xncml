@@ -400,8 +400,8 @@ def read_enum(obj: EnumTypedef) -> dict[str, list]:
         A dictionary with CF flag_values and flag_meanings that describe the Enum.
     """
     return {
-        'flag_values': list(map(lambda e: e.key, obj.enum)),
-        'flag_meanings': list(map(lambda e: e.content[0], obj.enum)),
+        'flag_values': list(map(lambda e: e.key, obj.content)),
+        'flag_meanings': list(map(lambda e: e.content[0], obj.content)),
     }
 
 
@@ -603,6 +603,14 @@ def nctype(typ: DataType) -> type:
         return np.float32
     elif typ == DataType.DOUBLE:
         return np.float64
+    elif typ == DataType.UBYTE:
+        return np.ubyte
+    elif typ == DataType.USHORT:
+        return np.ushort
+    elif typ == DataType.UINT:
+        return np.uintc
+    elif typ == DataType.LONG:
+        return np.uint
 
     raise NotImplementedError
 
