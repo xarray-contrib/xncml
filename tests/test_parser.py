@@ -303,6 +303,12 @@ def test_read_meta_data():
     assert ds.variables['T'].attrs['units'] == 'degC'
 
 
+def test_read_enum():
+    ds = xncml.open_ncml(data / 'testEnums.xml')
+    assert ds['be_or_not_to_be'].attrs['flag_values'] == [0, 1]
+    assert ds['be_or_not_to_be'].attrs['flag_meanings'] == ['false', 'true']
+
+
 # --- #
 def check_dimension(ds):
     assert len(ds['lat']) == 3

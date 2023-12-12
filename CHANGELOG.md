@@ -1,5 +1,10 @@
+0.4.0 (unreleased)
+==================
+
+- Add support for <EnumTypeDef>. By @bzah
+
 0.3.1 (2023-11-10)
-================
+==================
 
 - Add support for Python 3.12
 - Drop support for Python 3.8
