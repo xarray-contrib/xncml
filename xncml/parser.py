@@ -617,7 +617,7 @@ def nctype(typ: DataType) -> type:
     raise NotImplementedError
 
 
-def cast(obj: Attribute):
+def cast(obj: Attribute) -> tuple | str:
     """Cast attribute value to the appropriate type."""
     value = obj.value or obj.content
     if value:
@@ -627,6 +627,7 @@ def cast(obj: Attribute):
         sep = obj.separator or ' '
         values = value.split(sep)
         return tuple(map(nctype(obj.type), values))
+    return ""
 
 
 def filter_by_class(iterable, klass):

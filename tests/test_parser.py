@@ -311,6 +311,10 @@ def test_read_enum():
     assert ds['be_or_not_to_be'].attrs['flag_values'] == [0, 1]
     assert ds['be_or_not_to_be'].attrs['flag_meanings'] == ['false', 'true']
 
+def test_empty_attr():
+    """A empty attribute is valid."""
+    ds = xncml.open_ncml(data/ "testEmptyAttr.xml")
+    assert ds.attrs['comment'] == ""
 
 # --- #
 def check_dimension(ds):
