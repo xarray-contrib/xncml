@@ -314,7 +314,6 @@ def read_group(
     return target
 
 
-
 def read_scan(obj: Aggregation.Scan, ncml: Path, parallel: bool) -> list[xr.Dataset]:
     """
     Return list of datasets defined in <scan> element.
