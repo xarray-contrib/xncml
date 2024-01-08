@@ -1,4 +1,4 @@
-0.4.0 (unreleased)
+0.4.0 (2024-01-08)
 ==================
 
 - Add support for <EnumTypeDef>. By @bzah
