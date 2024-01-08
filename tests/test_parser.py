@@ -327,10 +327,44 @@ def test_read_meta_data():
     assert ds.variables['T'].attrs['units'] == 'degC'
 
 
+def test_unsigned_type():
+    ds = xncml.open_ncml(data / 'testUnsignedType.xml')
+    assert ds['be_or_not_to_be'].dtype == np.uintc
+
+
+def test_empty_scalar__no_values_tag():
+    """
+    Scalar without values loose their type because we can't create a typed numpy
+    scalar which is empty
+    """
+    ds = xncml.open_ncml(data / 'testEmptyScalar.xml')
+    assert ds['empty_scalar_var'].dtype == np.dtype('O')
+    assert ds['empty_scalar_var'].item() is None
+
+
+def test_empty_scalar__with_empty_values_tag():
+    """A scalar variable with an empty <values> tag is invalid."""
+    with pytest.raises(ValueError, match='No values found for variable .*'):
+        xncml.open_ncml(data / 'testEmptyScalar_withValuesTag.xml')
+
+
+def test_multiple_values_for_scalar():
+    """Scalar with an multiple values in <values> tag is invalid."""
+    with pytest.raises(ValueError, match='The expected size for variable .* was 1, .*'):
+        xncml.open_ncml(data / 'testEmptyScalar_withMultipleValues.xml')
+
+
 def test_read_enum():
+    """A enum should be turned into CF flag_values and flag_meanings attributes."""
     ds = xncml.open_ncml(data / 'testEnums.xml')
     assert ds['be_or_not_to_be'].attrs['flag_values'] == [0, 1]
     assert ds['be_or_not_to_be'].attrs['flag_meanings'] == ['false', 'true']
+
+
+def test_empty_attr():
+    """A empty attribute is valid."""
+    ds = xncml.open_ncml(data / 'testEmptyAttr.xml')
+    assert ds.attrs['comment'] == ''
 
 
 # --- #

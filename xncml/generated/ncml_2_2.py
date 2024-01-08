@@ -32,6 +32,10 @@ class DataType(Enum):
     ENUM1 = 'enum1'
     ENUM2 = 'enum2'
     ENUM4 = 'enum4'
+    UBYTE = 'ubyte'
+    USHORT = 'ushort'
+    UINT = 'uint'
+    ULONG = 'ulong'
 
 
 class ObjectType(Enum):
@@ -289,13 +293,6 @@ class EnumTypedef:
         name = 'enumTypedef'
         namespace = 'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2'
 
-    enum: List['EnumTypedef.EnumType'] = field(
-        default_factory=list,
-        metadata={
-            'type': 'Element',
-            'min_occurs': 1,
-        },
-    )
     name: Optional[str] = field(
         default=None,
         metadata={
@@ -307,6 +304,20 @@ class EnumTypedef:
         default=DataType.ENUM1,
         metadata={
             'type': 'Attribute',
+        },
+    )
+    content: List[object] = field(
+        default_factory=list,
+        metadata={
+            'type': 'Wildcard',
+            'namespace': '##any',
+            'mixed': True,
+            'choices': (
+                {
+                    'name': 'enum',
+                    'type': Type['EnumTypedef.EnumType'],
+                },
+            ),
         },
     )
 
