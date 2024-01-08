@@ -1,9 +1,12 @@
 import datetime as dt
 from pathlib import Path
 
+import dask
 import numpy as np
 import psutil
 import pytest
+import xarray as xr
+from dask.delayed import Delayed
 
 import xncml
 
@@ -37,6 +40,17 @@ class CheckClose(object):
 def test_aggexisting():
     with CheckClose():
         ds = xncml.open_ncml(data / 'aggExisting.xml')
+        check_dimension(ds)
+        check_coord_var(ds)
+        check_agg_coord_var(ds)
+        check_read_data(ds)
+        assert ds['time'].attrs['ncmlAdded'] == 'timeAtt'
+        ds.close()
+
+
+def test_parallel_agg_existing():
+    with CheckClose():
+        ds = xncml.open_ncml(data / 'aggExisting.xml', parallel=True)
         check_dimension(ds)
         check_coord_var(ds)
         check_agg_coord_var(ds)
@@ -160,9 +174,11 @@ def test_agg_syn_no_coords_dir():
 
 
 def test_agg_synthetic():
-    ds = xncml.open_ncml(data / 'aggSynthetic.xml')
-    assert len(ds.time) == 3
-    assert all(ds.time == [0, 10, 99])
+    with CheckClose():
+        ds = xncml.open_ncml(data / 'aggSynthetic.xml')
+        assert len(ds.time) == 3
+        assert all(ds.time == [0, 10, 99])
+        ds.close()
 
 
 def test_agg_synthetic_2():
@@ -180,6 +196,14 @@ def test_agg_synthetic_3():
 def test_agg_syn_scan():
     with CheckClose():
         ds = xncml.open_ncml(data / 'aggSynScan.xml')
+        assert len(ds.time) == 3
+        assert all(ds.time == [0, 10, 20])
+        ds.close()
+
+
+def test_parallel_agg_syn_scan():
+    with CheckClose():
+        ds = xncml.open_ncml(data / 'aggSynScan.xml', parallel=True)
         assert len(ds.time) == 3
         assert all(ds.time == [0, 10, 20])
         ds.close()
@@ -373,3 +397,28 @@ def check_read_data(ds):
     assert t.shape == (59, 3, 4)
     assert t.dtype == float
     assert 'T' in ds.data_vars
+
+
+def test_read_scan_parallel():
+    """Confirm that read_scan returns a list of dask.delayed objects."""
+    ncml = data / 'aggSynScan.xml'
+    obj = xncml.parser.parse(ncml)
+    agg = obj.choice[1]
+    scan = agg.scan[0]
+    datasets = xncml.parser.read_scan(scan, ncml, parallel=True)
+    assert type(datasets[0]) == Delayed
+    assert len(datasets) == 3
+    (datasets,) = dask.compute(datasets)
+    assert len(datasets) == 3
+
+
+def test_read_netcdf_parallel():
+    """Confirm that read_netcdf returns a dask.delayed object."""
+    ncml = data / 'aggExisting.xml'
+    obj = xncml.parser.parse(ncml)
+    agg = obj.choice[1]
+    nc = agg.netcdf[0]
+    datasets = xncml.parser.read_netcdf(
+        xr.Dataset(), ref=xr.Dataset(), obj=nc, ncml=ncml, parallel=True
+    )
+    assert type(datasets) == Delayed
