@@ -36,8 +36,8 @@ from __future__ import annotations
 
 import datetime as dt
 from functools import partial
-from itertools import chain
 from pathlib import Path
+from warnings import warn
 
 import numpy as np
 import xarray as xr
@@ -244,7 +244,9 @@ def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
         return xr.open_dataset(location, decode_times=False)
 
 
-def read_group(target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf) -> xr.Dataset:
+def read_group(
+    target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf, dims: dict = None
+) -> xr.Dataset:
     """
     Parse <group> items, typically <dimension>, <variable>, <attribute> and <remove> elements.
 
@@ -262,7 +264,7 @@ def read_group(target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf) -> xr.D
     xr.Dataset
       Dataset holding variables and attributes defined in <netcdf> element.
     """
-    dims = {}
+    dims = {} if dims is None else dims
     enums = {}
     for item in obj.choice:
         if isinstance(item, Dimension):
@@ -276,7 +278,7 @@ def read_group(target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf) -> xr.D
         elif isinstance(item, EnumTypedef):
             enums[item.name] = read_enum(item)
         elif isinstance(item, Group):
-            target = read_group(target, ref, item)
+            target = read_group(target, ref, item, dims)
         elif isinstance(item, Aggregation):
             pass  # <aggregation> elements are parsed in `read_netcdf`
         else:
@@ -285,7 +287,7 @@ def read_group(target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf) -> xr.D
     return target
 
 
-def read_scan(obj: Aggregation.Scan, ncml: Path) -> [xr.Dataset]:
+def read_scan(obj: Aggregation.Scan, ncml: Path) -> list[xr.Dataset]:
     """
     Return list of datasets defined in <scan> element.
 
@@ -400,8 +402,8 @@ def read_enum(obj: EnumTypedef) -> dict[str, list]:
         A dictionary with CF flag_values and flag_meanings that describe the Enum.
     """
     return {
-        'flag_values': list(map(lambda e: e.key, obj.enum)),
-        'flag_meanings': list(map(lambda e: e.content[0], obj.enum)),
+        'flag_values': list(map(lambda e: e.key, obj.content)),
+        'flag_meanings': list(map(lambda e: e.content[0], obj.content)),
     }
 
 
@@ -456,10 +458,10 @@ def read_variable(
         shape = [dimensions[dim].length for dim in dims]
         out = xr.Variable(data=np.empty(shape, dtype=nctype(obj.type)), dims=dims)
     elif obj.shape == '':
-        # scalar variable
-        out = xr.Variable(data=None, dims=())
+        out = build_scalar_variable(var_name=obj.name, values_tag=obj.values, var_type=obj.type)
     else:
-        raise ValueError
+        error_msg = f'Could not build variable `{obj.name}`.'
+        raise ValueError(error_msg)
 
     # Set variable attributes
     for item in obj.attribute:
@@ -469,9 +471,15 @@ def read_variable(
     for item in obj.remove:
         read_remove(out, item)
 
-    # Read values
-    if obj.values:
-        out = read_values(out, obj.values)
+    # Read values for arrays (already done for a scalar)
+    if obj.values and obj.shape != '':
+        data = read_values(obj.name, out.size, obj.values)
+        data = out.dtype.type(data)
+        out = xr.Variable(
+            out.dims,
+            data,
+            out.attrs,
+        )
 
     if obj.logical_section:
         raise NotImplementedError
@@ -494,36 +502,93 @@ def read_variable(
     return target
 
 
-def read_values(v: xr.Variable, obj: Values) -> xr.Variable:
+def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
     """Read values for <variable> element.
 
     Parameters
     ----------
-    v : xr.DataArray
-      Array whose values are to be updated.
-    obj : Values instance
+    var_name : str
+      The variable name.
+    size: int
+      The variable expected size.
+    values_tag : Values instance
       <values> object description
 
     Returns
     -------
-    xr.Variable
-      Array filled with values from <values> element.
+    list
+      A list filled with values from <values> element.
     """
-    if obj.from_attribute is not None:
-        raise NotImplementedError
+    if values_tag.from_attribute is not None:
+        error_msg = (
+            'xncml cannot yet fetch values from a global or a '
+            f' variable attribute using <from_attribute>, here on variable {var_name}.'
+        )
+        raise NotImplementedError(error_msg)
+    if values_tag.start is not None and values_tag.increment is not None:
+        number_of_values = int(values_tag.npts or expected_size)
+        return values_tag.start + np.arange(number_of_values) * values_tag.increment
+    if not isinstance(values_tag.content, list):
+        error_msg = f'Unsupported format of the <values> tag from variable {var_name}.'
+        raise NotImplementedError(error_msg)
+    if len(values_tag.content) == 0:
+        error_msg = (
+            f'No values found for variable {var_name}, but a {expected_size}'
+            ' values were expected.'
+        )
+        raise ValueError(error_msg)
+    if not isinstance(values_tag.content[0], str):
+        error_msg = f'Unsupported format of the <values> tag from variable {var_name}.'
+        raise NotImplementedError(error_msg)
+    separator = values_tag.separator or ' '
+    data = values_tag.content[0].split(separator)
+    if len(data) > expected_size:
+        error_msg = (
+            f'The expected size for variable {var_name} was {expected_size},'
+            f' but {len(data)} values were found in its <values> tag.'
+        )
+        raise ValueError(error_msg)
+    return data
 
-    n = int(obj.npts or v.size)
-    if obj.start is not None and obj.increment is not None:
-        data = obj.start + np.arange(n) * obj.increment
-    else:
-        sep = obj.separator or ' '
-        if isinstance(obj.content, list) and isinstance(obj.content[0], str):
-            data = obj.content[0].split(sep)
-        else:
-            raise NotImplementedError
 
-    data = v.dtype.type(data)
-    return xr.Variable(v.dims, data, v.attrs)
+def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> xr.Variable:
+    """Read values for <variable> element.
+
+    Parameters
+    ----------
+    var_name : str
+      The variable name.
+    values_tag : Values instance
+      <values> object description
+    var_type: str
+      The variable expected type.
+
+    Returns
+    -------
+    xr.Variable
+      A xr.Variable filled with values from <values> element.
+
+    Raises
+    ------
+    ValueError
+      If the <values> tag is not a valid scalar.
+    """
+    if values_tag is None:
+        warn(
+            f'Could not set the type for the scalar variable {var_name}, as its'
+            ' <values> is empty. Provide a single values within <values></values>'
+            ' to preserve the type.'
+        )
+        return xr.Variable(data=None, dims=())
+    values_content = read_values(var_name, expected_size=1, values_tag=values_tag)
+    if len(values_content) == 1:
+        return xr.Variable(data=np.array(values_content[0], dtype=nctype(var_type))[()], dims=())
+    if len(values_content) > 1:
+        error_msg = (
+            f'Multiple values found for variable {var_name} but its'
+            ' shape is "" thus a single scalar is expected within its <values> tag.'
+        )
+    raise ValueError(error_msg)
 
 
 def read_remove(target: xr.Dataset | xr.Variable, obj: Remove) -> xr.Dataset:
@@ -603,11 +668,19 @@ def nctype(typ: DataType) -> type:
         return np.float32
     elif typ == DataType.DOUBLE:
         return np.float64
+    elif typ == DataType.UBYTE:
+        return np.ubyte
+    elif typ == DataType.USHORT:
+        return np.ushort
+    elif typ == DataType.UINT:
+        return np.uintc
+    elif typ == DataType.LONG:
+        return np.uint
 
     raise NotImplementedError
 
 
-def cast(obj: Attribute):
+def cast(obj: Attribute) -> tuple | str:
     """Cast attribute value to the appropriate type."""
     value = obj.value or obj.content
     if value:
@@ -617,6 +690,7 @@ def cast(obj: Attribute):
         sep = obj.separator or ' '
         values = value.split(sep)
         return tuple(map(nctype(obj.type), values))
+    return ''
 
 
 def filter_by_class(iterable, klass):

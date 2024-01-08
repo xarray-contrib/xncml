@@ -2,6 +2,10 @@
 ==================
 
 - Add support for <EnumTypeDef>. By @bzah
+- Update XSD schema and dataclasses to latest version from netcdf-java to add support
+  for unsigned types. By @bzah
+- Add support for scalar variables. By @Bzah
+- [fix] empty attributes now are parsed into an empty string instead of crashing the parser.  By @Bzah
 
 0.3.1 (2023-11-10)
 ==================
