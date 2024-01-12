@@ -22,7 +22,6 @@ Support for these elements is missing:
 - <logicalSection>
 - <logicalSlice>
 - <promoteGlobalAttribute>
-- <enumTypedef>
 - <scanFmrc>
 
 Support for these attributes is missing:
@@ -62,6 +61,9 @@ __author__ = 'David Huard'
 __date__ = 'July 2022'
 __contact__ = 'huard.david@ouranos.ca'
 
+FLATTEN_GROUPS = '*'
+ROOT_GROUP = '/'
+
 
 def parse(path: Path) -> Netcdf:
     """
@@ -81,7 +83,7 @@ def parse(path: Path) -> Netcdf:
     return parser.from_path(path, Netcdf)
 
 
-def open_ncml(ncml: str | Path) -> xr.Dataset:
+def open_ncml(ncml: str | Path, group: str = '/') -> xr.Dataset:
     """
     Convert NcML document to a dataset.
 
@@ -89,6 +91,10 @@ def open_ncml(ncml: str | Path) -> xr.Dataset:
     ----------
     ncml : str | Path
       Path to NcML file.
+    group : str
+      Path of the group to parse within the ncml.
+      The special value ``*`` opens every group and flatten the variables into a single
+      dataset.
 
     Returns
     -------
@@ -99,10 +105,12 @@ def open_ncml(ncml: str | Path) -> xr.Dataset:
     ncml = Path(ncml)
     obj = parse(ncml)
 
-    return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml)
+    return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml, group)
 
 
-def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) -> xr.Dataset:
+def read_netcdf(
+    target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path, group: str
+) -> xr.Dataset:
     """
     Return content of <netcdf> element.
 
@@ -116,6 +124,10 @@ def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) ->
        <netcdf> object description.
     ncml : Path
       Path to NcML document, sometimes required to follow relative links.
+    group : str
+      Path of the group to parse within the ncml.
+      The special value ``*`` opens every group and flatten the variables into a single
+      dataset.
 
     Returns
     -------
@@ -136,8 +148,10 @@ def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) ->
         target = read_aggregation(target, item, ncml)
 
     # Handle <variable>, <attribute> and <remove> elements
-    target = read_group(target, ref, obj)
-
+    if group == FLATTEN_GROUPS:
+        target = flatten_groups(target, ref, obj)
+    else:
+        target = read_group(target, ref, obj, group)
     return target
 
 
@@ -173,7 +187,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
 
     for item in obj.netcdf:
         # Open dataset defined in <netcdf>'s `location` attribute
-        tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml)
+        tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml, group=ROOT_GROUP)
         closers.append(getattr(tar, '_close'))
 
         # Select variables
@@ -210,7 +224,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     else:
         raise NotImplementedError
 
-    agg = read_group(agg, None, obj)
+    agg = read_group(agg, None, obj, group=ROOT_GROUP)
     out = target.merge(agg, combine_attrs='no_conflicts')
     out.set_close(partial(_multi_file_closer, closers))
     return out
@@ -244,8 +258,13 @@ def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
         return xr.open_dataset(location, decode_times=False)
 
 
+def flatten_groups(target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf):
+    """TODO doc"""
+    raise NotImplementedError('TODO')
+
+
 def read_group(
-    target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf, dims: dict = None
+    target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf, group: str, dims: dict = None
 ) -> xr.Dataset:
     """
     Parse <group> items, typically <dimension>, <variable>, <attribute> and <remove> elements.
@@ -258,6 +277,10 @@ def read_group(
       Reference dataset used to copy content into `target`.
     obj : Group | Netcdf
        <netcdf> object description.
+    group : str
+      Path of the group to parse within the ncml.
+      The special value ``*`` opens every group and flatten the variables into a single
+      dataset.
 
     Returns
     -------
@@ -266,11 +289,18 @@ def read_group(
     """
     dims = {} if dims is None else dims
     enums = {}
+    if not group.startswith('/'):
+        group = f'/{group}'
+    prefix, _, child_path = group.partition('/')
+    if group == ROOT_GROUP or prefix == '':
+        current_group = ROOT_GROUP
+    else:
+        current_group = prefix
     for item in obj.choice:
         if isinstance(item, Dimension):
             dims[item.name] = read_dimension(item)
         elif isinstance(item, Variable):
-            target = read_variable(target, ref, item, dims, enums)
+            target = read_variable(target, ref, item, dims, enums, group_path=group)
         elif isinstance(item, Attribute):
             read_attribute(target, item, ref)
         elif isinstance(item, Remove):
@@ -278,7 +308,11 @@ def read_group(
         elif isinstance(item, EnumTypedef):
             enums[item.name] = read_enum(item)
         elif isinstance(item, Group):
-            target = read_group(target, ref, item, dims)
+            if item.name in child_path:
+                target = read_group(target, ref, item, current_group, dims)
+            else:
+                # ignore group
+                continue
         elif isinstance(item, Aggregation):
             pass  # <aggregation> elements are parsed in `read_netcdf`
         else:
@@ -408,7 +442,12 @@ def read_enum(obj: EnumTypedef) -> dict[str, list]:
 
 
 def read_variable(
-    target: xr.Dataset, ref: xr.Dataset, obj: Variable, dimensions: dict, enums: dict
+    target: xr.Dataset,
+    ref: xr.Dataset,
+    obj: Variable,
+    dimensions: dict,
+    enums: dict,
+    group_path: str,
 ):
     """
     Parse <variable> element.
@@ -424,6 +463,9 @@ def read_variable(
     dimensions : dict
       Dimension attributes keyed by name.
     enums: dict[str, dict]
+      The enums types that have been read in the upper groups.
+    group_path: str
+      Full path to the parent group
 
     Returns
     -------
@@ -466,6 +508,10 @@ def read_variable(
     # Set variable attributes
     for item in obj.attribute:
         read_attribute(out, item, ref=ref_var)
+    out.attrs['group_path'] = group_path
+    # TODO (@bzah): Maybe rename the variable using the parent full path
+    #       if we are flattening, this would avoid overriding an existing
+    #       variable of target.
 
     # Remove attributes or dimensions
     for item in obj.remove:

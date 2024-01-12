@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+    <variable name="toto" shape="" type="ushort">
+    </variable>
+    <group name="a_sub_group">
+        <variable name="group_var" shape="" type="ushort"></variable>
+    </group>
+    <group name="another_sub_group">
+        <variable name="other_group_var" shape="" type="ushort"></variable>
+    </group>
+</netcdf>
