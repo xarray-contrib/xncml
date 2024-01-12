@@ -360,14 +360,37 @@ def test_read_group__read_sub_group():
     assert ds.get('other_group_var') is None
 
 
+def test_read_group__conflicting_dims():
+    """Read a group and ensure its dimension is correct"""
+    ds = xncml.open_ncml(data / 'testGroupConflictingDims.xml', group='gr_b')
+    assert ds.dims['index'] == 94
+    assert 'index' in ds.gr_b_var.dims
+
+
 def test_flatten_groups():
     """Read every group and flatten everything in a single dataset/group."""
     ds = xncml.open_ncml(data / 'testGroup.xml', group='*')
     assert ds.toto is not None
+    assert ds.get('toto__1') is None
     assert ds.get('group_var') is not None
     ds.group_var.attrs['group_path'] = '/a_sub_group'
     assert ds.get('other_group_var') is not None
     ds.other_group_var.attrs['group_path'] = '/another_sub_group'
+
+
+def test_flatten_groups__conflicting_dims():
+    """Read every group and rename dimensions"""
+    ds = xncml.open_ncml(data / 'testGroupConflictingDims.xml', group='*')
+    assert 'index' in ds.gr_a_var.dims
+    assert ds.dims['index'] is not None
+    assert 'index__1' in ds.gr_b_var.dims
+    assert ds.dims['index__1'] is not None
+
+
+def test_flatten_groups__sub_groups():
+    """Read every group and rename dimensions"""
+    ds = xncml.open_ncml(data / 'testGroupMultiLayers.xml', group='*')
+    assert ds.dims['index'] is not None
 
 
 # --- #
