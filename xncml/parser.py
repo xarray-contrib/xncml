@@ -354,16 +354,6 @@ def read_group(
     return target
 
 
-def _build_snake_name(prefix: str, suffix: str) -> str:
-    if prefix == ROOT_GROUP:
-        pre = ''
-    else:
-        pre = prefix.removeprefix('/')
-        pre = pre.replace('/', '_')
-        pre += '_'
-    return f'{pre}{suffix}'
-
-
 def read_scan(obj: Aggregation.Scan, ncml: Path) -> list[xr.Dataset]:
     """
     Return list of datasets defined in <scan> element.
