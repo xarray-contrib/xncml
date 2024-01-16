@@ -534,7 +534,6 @@ def read_variable(
         shape = []
         for dim in obj.shape.split(' '):
             if dimensions.get(dim) is None:
-                # TODO: Add test for this branch, might be useless.
                 err = (
                     f"Unknown dimension '{dim}'."
                     ' Make sure it is declared before being used in the NCML.'
@@ -589,10 +588,6 @@ def read_variable(
         raise NotImplementedError
 
     var_name = obj.name
-    # TODO (abel): Fix for aggregation: we must override the variable and not create a new one in aggregation case
-    #               How to differentiate this case with variables in different groups that bear the same name ?
-    #               Should we carry a flag `override` from read_aggregation ?
-    #               Or when a flag to know we are in sub-groups ?
     if (
         (existing_var := target.get(var_name)) is not None
         and existing_var.attrs.get('group_path')

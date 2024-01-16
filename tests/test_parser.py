@@ -367,6 +367,11 @@ def test_read_group__conflicting_dims():
     assert 'index' in ds.gr_b_var.dims
 
 
+def test_read__invalid_dim():
+    with pytest.raises(ValueError, match="Unknown dimension 'myDim'.*"):
+        xncml.open_ncml(data / 'testGroupInvalidDim.xml')
+
+
 def test_flatten_groups():
     """Read every group and flatten everything in a single dataset/group."""
     ds = xncml.open_ncml(data / 'testGroup.xml', group='*')
