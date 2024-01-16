@@ -258,18 +258,27 @@ def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
         return xr.open_dataset(location, decode_times=False)
 
 
-def _get_leaf_groups(group: Netcdf | Group) -> list[str]:
+def _get_netcdf_leaves(netcdf: Netcdf) -> list[str]:
+    parent = ''
+    root_children = [child for child in netcdf.choice if isinstance(child, Group)]
+    if len(root_children) == 0:
+        return ['/']
+    leaves = []
+    for child in root_children:
+        leaves += list(_get_group_leaves(child, parent=parent))
+    return leaves
+
+
+def _get_group_leaves(group: Netcdf | Group, parent: str) -> str:
     group_children = [child for child in group.choice if isinstance(child, Group)]
     if len(group_children) == 0:
-        return [group.name]
-    leafs = []
+        yield f'{parent}/{group.name}'
     for child in group_children:
-        leafs += _get_leaf_groups(child)
-    return leafs
+        yield from _get_group_leaves(child, parent=f'{parent}/{group.name}')
 
 
 def flatten_groups(target: xr.Dataset, ref: xr.Dataset, root_group: Netcdf) -> xr.Dataset:
-    leaf_groups = _get_leaf_groups(root_group)
+    leaf_groups = _get_netcdf_leaves(root_group)
     dims = {}
     enums = {}
     for leaf_group in leaf_groups:
@@ -649,7 +658,7 @@ def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
 
 
 def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> xr.Variable:
-    """Read values for <variable> element.
+    """Build an xr.Variable for scalar variables.
 
     Parameters
     ----------
@@ -676,7 +685,8 @@ def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> x
             ' <values> is empty. Provide a single values within <values></values>'
             ' to preserve the type.'
         )
-        return xr.Variable(data=None, dims=())
+        default_value = nctype(var_type)()
+        return xr.Variable(data=default_value, dims=())
     values_content = read_values(var_name, expected_size=1, values_tag=values_tag)
     if len(values_content) == 1:
         return xr.Variable(data=np.array(values_content[0], dtype=nctype(var_type))[()], dims=())

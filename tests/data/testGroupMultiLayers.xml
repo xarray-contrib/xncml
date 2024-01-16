@@ -2,8 +2,14 @@
 <netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
     <group name="gr_a">
         <dimension name="index" length="42"/>
-        <group name="sub_gr_a">
+        <group name="sub_gr">
             <variable name="gr_a_var" shape="index" type="ushort"></variable>
+        </group>
+    </group>
+    <group name="gr_b">
+        <dimension name="index" length="22"/>
+        <group name="sub_gr">
+            <variable name="gr_b_var" shape="index" type="ushort"></variable>
         </group>
     </group>
 </netcdf>

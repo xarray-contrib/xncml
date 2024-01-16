@@ -314,8 +314,8 @@ def test_empty_scalar__no_values_tag():
     filled, because numpy can't create an empty typed scalar.
     """
     ds = xncml.open_ncml(data / 'testEmptyScalar.xml')
-    assert ds['empty_scalar_var'].dtype == np.dtype('O')
-    assert ds['empty_scalar_var'].item() is None
+    assert ds['empty_scalar_var'].dtype == np.dtype('float64')
+    assert ds['empty_scalar_var'].item() == 0
 
 
 def test_empty_scalar__with_empty_values_tag():
@@ -396,6 +396,8 @@ def test_flatten_groups__sub_groups():
     """Read every group and rename dimensions"""
     ds = xncml.open_ncml(data / 'testGroupMultiLayers.xml', group='*')
     assert ds.dims['index'] is not None
+    assert ds['gr_a_var'] is not None
+    assert ds['gr_b_var'] is not None
 
 
 # --- #
