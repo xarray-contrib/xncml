@@ -31,7 +31,6 @@ Support for these attributes is missing:
 - tiled aggregations
 """
 
-
 from __future__ import annotations
 
 import datetime as dt
