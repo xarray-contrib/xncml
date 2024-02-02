@@ -155,7 +155,7 @@ def read_netcdf(
     else:
         if not group.startswith('/'):
             group = f'/{group}'
-        target = read_group(target, ref, obj, group_to_read=group)
+        target = read_group(target, ref, obj, groups_to_read=[group])
     return target
 
 
@@ -228,7 +228,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     else:
         raise NotImplementedError
 
-    agg = read_group(agg, ref=None, obj=obj)
+    agg = read_group(agg, ref=None, obj=obj, groups_to_read=['/'])
     out = target.merge(agg, combine_attrs='no_conflicts')
     out.set_close(partial(_multi_file_closer, closers))
     return out
@@ -264,7 +264,7 @@ def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
 
 def _get_leaves(group: Netcdf | Group, parent: str | None = None) -> Iterator[str]:
     group_children = [child for child in group.choice if isinstance(child, Group)]
-    current_path = '/' if parent is None else f'{parent}/{group.name}'
+    current_path = '' if parent is None else f'{parent}/{group.name}'
     if len(group_children) == 0:
         yield current_path
     for child in group_children:
@@ -274,9 +274,8 @@ def _get_leaves(group: Netcdf | Group, parent: str | None = None) -> Iterator[st
 def flatten_groups(target: xr.Dataset, ref: xr.Dataset, root_group: Netcdf) -> xr.Dataset:
     dims = {}
     enums = {}
-    for leaf_group in _get_leaves(root_group):
-        # Mutate target to add leaf_group to it
-        read_group(target, ref, root_group, group_to_read=leaf_group, dims=dims, enums=enums)
+    leaves_group = list(_get_leaves(root_group))
+    read_group(target, ref, root_group, groups_to_read=leaves_group, dims=dims, enums=enums)
     return target
 
 
@@ -284,8 +283,8 @@ def read_group(
     target: xr.Dataset,
     ref: xr.Dataset | None,
     obj: Group | Netcdf,
-    group_to_read: str = '/',
-    parent_group_path: str = '',
+    groups_to_read: list[str],
+    parent_group_path: str = '/',
     dims: dict = None,
     enums: dict = None,
 ) -> xr.Dataset:
@@ -328,14 +327,14 @@ def read_group(
         elif isinstance(item, EnumTypedef):
             enums[item.name] = read_enum(item)
         elif isinstance(item, Group):
-            if item.name in group_to_read:
+            if any(item.name in group_name for group_name in groups_to_read):
                 target = read_group(
                     target,
                     ref,
                     item,
-                    parent_group_path=f'{parent_group_path}/{item.name}',
+                    parent_group_path=f'{parent_group_path}{item.name}/',
                     dims=dims,
-                    group_to_read=group_to_read,
+                    groups_to_read=groups_to_read,
                 )
             else:
                 # ignore group
@@ -510,17 +509,22 @@ def read_variable(
     else:
         ref_var = None
 
+    var_name = obj.name
     # Read existing data or create empty DataArray
-    if obj.name in target or obj.name in target.dims:
-        out = xr.as_variable(target[obj.name])
+    if (existing_var := target.get(var_name)) is not None and existing_var.attrs.get(
+        'group_path'
+    ) in [None, group_path]:
+        out = xr.as_variable(target[var_name])
         if obj.type:
             out = out.astype(nctype(obj.type))
         ref_var = None
-    elif obj.name in ref or obj.name in ref.dims:
-        out = xr.as_variable(ref[obj.name])
+    elif (existing_var := ref.get(var_name)) is not None and existing_var.attrs.get(
+        'group_path'
+    ) in [None, group_path]:
+        out = xr.as_variable(ref[var_name])
         if obj.type:
             out = out.astype(nctype(obj.type))
-        ref_var = ref[obj.name]
+        ref_var = ref[var_name]
     elif obj.shape:
         var_dims = []
         shape = []
@@ -537,16 +541,15 @@ def read_variable(
             var_dims.append(dim)
         out = xr.Variable(data=np.empty(shape, dtype=nctype(obj.type)), dims=var_dims)
     elif obj.shape == '':
-        out = build_scalar_variable(var_name=obj.name, values_tag=obj.values, var_type=obj.type)
+        out = build_scalar_variable(var_name=var_name, values_tag=obj.values, var_type=obj.type)
     else:
-        error_msg = f'Could not build variable `{obj.name}`.'
+        error_msg = f'Could not build variable `{var_name }`.'
         raise ValueError(error_msg)
 
     # Set variable attributes
     for item in obj.attribute:
         read_attribute(out, item, ref=ref_var)
-    if group_path:
-        out.attrs['group_path'] = group_path
+    out.attrs['group_path'] = group_path
 
     # Remove attributes or dimensions
     for item in obj.remove:
@@ -554,7 +557,7 @@ def read_variable(
 
     # Read values for arrays (already done for a scalar)
     if obj.values and obj.shape != '':
-        data = read_values(obj.name, out.size, obj.values)
+        data = read_values(var_name, out.size, obj.values)
         data = out.dtype.type(data)
         out = xr.Variable(
             out.dims,
@@ -578,15 +581,16 @@ def read_variable(
         out.attrs['flag_meanings'] = enums[obj.typedef]['flag_meanings']
     elif obj.typedef is not None:
         raise NotImplementedError
+    import re
 
-    var_name = obj.name
-    if (
-        (existing_var := target.get(var_name)) is not None
-        and existing_var.attrs.get('group_path')
-        and existing_var.attrs.get('group_path') != group_path
-    ):
-        similar_var_count = len([v for v in target.variables.keys() if f'{var_name}__' in v])
-        var_name = f'{var_name}__{similar_var_count + 1}'
+    reg = re.compile(f'^{var_name}__|{var_name}')
+    similar_vars_but_diff_path = [
+        v
+        for v in target.data_vars
+        if reg.match(v) and target[v].attrs.get('group_path') not in [None, group_path]
+    ]
+    if len(similar_vars_but_diff_path) > 0:
+        var_name = f'{var_name}__{len(similar_vars_but_diff_path)}'
     target[var_name] = out
     return target
 
@@ -611,7 +615,8 @@ def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
     if values_tag.from_attribute is not None:
         error_msg = (
             'xncml cannot yet fetch values from a global or a '
-            f' variable attribute using <from_attribute>, here on variable {var_name}.'
+            ' variable attribute using <from_attribute>, here on variable'
+            f' {var_name}.'
         )
         raise NotImplementedError(error_msg)
     if values_tag.start is not None and values_tag.increment is not None:
@@ -663,12 +668,12 @@ def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> x
       If the <values> tag is not a valid scalar.
     """
     if values_tag is None:
+        default_value = nctype(var_type)()
         warn(
-            f'Could not set the type for the scalar variable {var_name}, as its'
-            ' <values> is empty. Provide a single values within <values></values>'
+            f'The scalar variable {var_name} has no values set within'
+            f' <values></values>. A default value of {default_value} is set'
             ' to preserve the type.'
         )
-        default_value = nctype(var_type)()
         return xr.Variable(data=default_value, dims=())
     values_content = read_values(var_name, expected_size=1, values_tag=values_tag)
     if len(values_content) == 1:

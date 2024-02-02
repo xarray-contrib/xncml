@@ -395,9 +395,12 @@ def test_flatten_groups__conflicting_dims():
 def test_flatten_groups__sub_groups():
     """Read every group and rename dimensions"""
     ds = xncml.open_ncml(data / 'testGroupMultiLayers.xml', group='*')
-    assert ds.dims['index'] is not None
-    assert ds['gr_a_var'] is not None
-    assert ds['gr_b_var'] is not None
+    assert ds.dims['index'] == 42
+    assert ds.dims['index__1'] == 22
+    assert ds['a_var'].size == 1
+    assert ds['a_var'] == 2
+    assert ds['a_var__1'].size == 42
+    assert ds['a_var__2'].size == 22
 
 
 # --- #
