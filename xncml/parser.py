@@ -36,6 +36,7 @@ from __future__ import annotations
 import datetime as dt
 from functools import partial
 from pathlib import Path
+from typing import TYPE_CHECKING
 from warnings import warn
 
 import numpy as np
@@ -56,6 +57,9 @@ from .generated import (
     Values,
     Variable,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 __author__ = 'David Huard'
 __date__ = 'July 2022'
@@ -258,30 +262,19 @@ def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
         return xr.open_dataset(location, decode_times=False)
 
 
-def _get_netcdf_leaves(netcdf: Netcdf) -> list[str]:
-    parent = ''
-    root_children = [child for child in netcdf.choice if isinstance(child, Group)]
-    if len(root_children) == 0:
-        return ['/']
-    leaves = []
-    for child in root_children:
-        leaves += list(_get_group_leaves(child, parent=parent))
-    return leaves
-
-
-def _get_group_leaves(group: Netcdf | Group, parent: str) -> str:
+def _get_leaves(group: Netcdf | Group, parent: str | None = None) -> Iterator[str]:
     group_children = [child for child in group.choice if isinstance(child, Group)]
+    current_path = '/' if parent is None else f'{parent}/{group.name}'
     if len(group_children) == 0:
-        yield f'{parent}/{group.name}'
+        yield current_path
     for child in group_children:
-        yield from _get_group_leaves(child, parent=f'{parent}/{group.name}')
+        yield from _get_leaves(child, parent=current_path)
 
 
 def flatten_groups(target: xr.Dataset, ref: xr.Dataset, root_group: Netcdf) -> xr.Dataset:
-    leaf_groups = _get_netcdf_leaves(root_group)
     dims = {}
     enums = {}
-    for leaf_group in leaf_groups:
+    for leaf_group in _get_leaves(root_group):
         # Mutate target to add leaf_group to it
         read_group(target, ref, root_group, group_to_read=leaf_group, dims=dims, enums=enums)
     return target
