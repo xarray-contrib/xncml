@@ -150,7 +150,7 @@ def read_netcdf(
     for item in filter_by_class(obj.choice, Aggregation):
         target = read_aggregation(target, item, ncml)
     if group == FLATTEN_GROUPS:
-        target = flatten_groups(target, ref, obj)
+        target = _flatten_groups(target, ref, obj)
     else:
         if not group.startswith('/'):
             group = f'/{group}'
@@ -263,14 +263,14 @@ def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
 
 def _get_leaves(group: Netcdf | Group, parent: str | None = None) -> Iterator[str]:
     group_children = [child for child in group.choice if isinstance(child, Group)]
-    current_path = '' if parent is None else f'{parent}/{group.name}'
+    current_path = ROOT_GROUP if parent is None else f'{parent}{group.name}/'
     if len(group_children) == 0:
         yield current_path
     for child in group_children:
         yield from _get_leaves(child, parent=current_path)
 
 
-def flatten_groups(target: xr.Dataset, ref: xr.Dataset, root_group: Netcdf) -> xr.Dataset:
+def _flatten_groups(target: xr.Dataset, ref: xr.Dataset, root_group: Netcdf) -> xr.Dataset:
     dims = {}
     enums = {}
     leaves_group = list(_get_leaves(root_group))
@@ -298,8 +298,10 @@ def read_group(
       Reference dataset used to copy content into `target`.
     obj : Group | Netcdf
       <netcdf> object description.
-    parent_group : str
-      Path of the group to parse within the ncml.
+    groups_to_read : list[str]
+      List of groups that must be read and included in `target`.
+    parent_group_path : str
+      Path of parent group, by default the root group '/'.
     dims: dict[str, Dimension]
       Dictionary of the dimensions of this dataset.
 
@@ -311,7 +313,6 @@ def read_group(
     dims = {} if dims is None else dims
     enums = {} if enums is None else enums
     for item in obj.choice:
-
         if isinstance(item, Dimension):
             dim_name = item.name
             if dims.get(dim_name):
