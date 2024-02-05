@@ -60,7 +60,7 @@ from .generated import (
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-__author__ = 'David Huard'
+__author__ = 'David Huard, Abel Aoun'
 __date__ = 'July 2022'
 __contact__ = 'huard.david@ouranos.ca'
 
@@ -96,7 +96,7 @@ def open_ncml(ncml: str | Path, group: str = ROOT_GROUP) -> xr.Dataset:
       Path to NcML file.
     group : str
       Path of the group to parse within the ncml.
-      The special value ``*`` opens every group and flatten the variables into a single
+      The special value ``*`` opens every group and flattens the variables into a single
       dataset, renaming variables and dimensions if conflicting names are found.
 
     Returns
@@ -129,7 +129,7 @@ def read_netcdf(
       Path to NcML document, sometimes required to follow relative links.
     group : str
       Path of the group to parse within the ncml.
-      The special value ``*`` opens every group and flatten the variables into a single
+      The special value ``*`` opens every group and flattens the variables into a single
       dataset.
 
     Returns
@@ -488,9 +488,9 @@ def read_variable(
     dimensions : dict
       Dimension attributes keyed by name.
     enums: dict[str, dict]
-      The enums types that have been read in the upper groups.
+      The enums types that have been read in the parent groups.
     group_path: str
-      Path to the parent group
+      Path to the parent group.
 
     Returns
     -------
