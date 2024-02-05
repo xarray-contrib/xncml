@@ -333,8 +333,8 @@ def test_multiple_values_for_scalar():
 def test_read_enum():
     """A enum should be turned into CF flag_values and flag_meanings attributes."""
     ds = xncml.open_ncml(data / 'testEnums.xml')
-    assert ds['be_or_not_to_be'].attrs['flag_values'] == [0, 1]
-    assert ds['be_or_not_to_be'].attrs['flag_meanings'] == ['false', 'true']
+    assert ds.be_or_not_to_be.dtype.metadata['enum'] == {'false': 0, 'true': 1}
+    assert ds.be_or_not_to_be.dtype.metadata['enum_name'] == 'boolean'
 
 
 def test_empty_attr():
