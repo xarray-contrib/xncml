@@ -310,8 +310,8 @@ def test_unsigned_type():
 
 def test_empty_scalar__no_values_tag():
     """
-    A scalar without a <values> tag will not be typed, even if the 'type' attribute is
-    filled, because numpy can't create an empty typed scalar.
+    A scalar variable which <values> is missing will have its value set to
+    the default value of its type.
     """
     ds = xncml.open_ncml(data / 'testEmptyScalar.xml')
     assert ds['empty_scalar_var'].dtype == np.dtype('float64')
@@ -319,13 +319,13 @@ def test_empty_scalar__no_values_tag():
 
 
 def test_empty_scalar__with_empty_values_tag():
-    """A scalar with an empty in its <values> tag is invalid."""
+    """A scalar with an empty <values> tag is invalid."""
     with pytest.raises(ValueError, match='No values found for variable .*'):
         xncml.open_ncml(data / 'testEmptyScalar_withValuesTag.xml')
 
 
 def test_multiple_values_for_scalar():
-    """a scalar with multiple values in its <values> tag is invalid."""
+    """A scalar with multiple values in its <values> tag is invalid."""
     with pytest.raises(ValueError, match='The expected size for variable .* was 1, .*'):
         xncml.open_ncml(data / 'testEmptyScalar_withMultipleValues.xml')
 

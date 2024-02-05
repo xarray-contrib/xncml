@@ -86,7 +86,7 @@ def parse(path: Path) -> Netcdf:
     return parser.from_path(path, Netcdf)
 
 
-def open_ncml(ncml: str | Path, group: str = '/') -> xr.Dataset:
+def open_ncml(ncml: str | Path, group: str = ROOT_GROUP) -> xr.Dataset:
     """
     Convert NcML document to a dataset.
 
@@ -227,7 +227,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     else:
         raise NotImplementedError
 
-    agg = read_group(agg, ref=None, obj=obj, groups_to_read=['/'])
+    agg = read_group(agg, ref=None, obj=obj, groups_to_read=[ROOT_GROUP])
     out = target.merge(agg, combine_attrs='no_conflicts')
     out.set_close(partial(_multi_file_closer, closers))
     return out
@@ -283,7 +283,7 @@ def read_group(
     ref: xr.Dataset | None,
     obj: Group | Netcdf,
     groups_to_read: list[str],
-    parent_group_path: str = '/',
+    parent_group_path: str = ROOT_GROUP,
     dims: dict = None,
     enums: dict = None,
 ) -> xr.Dataset:
@@ -311,6 +311,7 @@ def read_group(
     dims = {} if dims is None else dims
     enums = {} if enums is None else enums
     for item in obj.choice:
+
         if isinstance(item, Dimension):
             dim_name = item.name
             if dims.get(dim_name):
