@@ -1,3 +1,11 @@
+0.5.0 (unreleased)
+==================
+
+**Breaking changes**
+- Nested group handling:
+  Before this version, all groups were read, but conflicting variable names in-between groups would shadow data.  Now, similarly to xarray ``open_dataset``, ``open_ncml`` accepts an optional ``group`` argument to specify which group should be read. When ``group`` is not specified, it defaults to the root group. Additionally ``group`` can be set to ``'*'`` so that every group is read and the hierarchy is flattened.   In the event of conflicting variable/dimension names across groups, the conflicting name will be modified by appending ``'__n'`` where n is incremented.
+
+
 0.4.0 (2024-01-08)
 ==================
 

@@ -22,7 +22,6 @@ Support for these elements is missing:
 - <logicalSection>
 - <logicalSlice>
 - <promoteGlobalAttribute>
-- <enumTypedef>
 - <scanFmrc>
 
 Support for these attributes is missing:
@@ -36,6 +35,7 @@ from __future__ import annotations
 import datetime as dt
 from functools import partial
 from pathlib import Path
+from typing import TYPE_CHECKING
 from warnings import warn
 
 import numpy as np
@@ -57,9 +57,15 @@ from .generated import (
     Variable,
 )
 
-__author__ = 'David Huard'
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+__author__ = 'David Huard, Abel Aoun'
 __date__ = 'July 2022'
 __contact__ = 'huard.david@ouranos.ca'
+
+FLATTEN_GROUPS = '*'
+ROOT_GROUP = '/'
 
 
 def parse(path: Path) -> Netcdf:
@@ -80,7 +86,7 @@ def parse(path: Path) -> Netcdf:
     return parser.from_path(path, Netcdf)
 
 
-def open_ncml(ncml: str | Path) -> xr.Dataset:
+def open_ncml(ncml: str | Path, group: str = ROOT_GROUP) -> xr.Dataset:
     """
     Convert NcML document to a dataset.
 
@@ -88,6 +94,10 @@ def open_ncml(ncml: str | Path) -> xr.Dataset:
     ----------
     ncml : str | Path
       Path to NcML file.
+    group : str
+      Path of the group to parse within the ncml.
+      The special value ``*`` opens every group and flattens the variables into a single
+      dataset, renaming variables and dimensions if conflicting names are found.
 
     Returns
     -------
@@ -98,10 +108,12 @@ def open_ncml(ncml: str | Path) -> xr.Dataset:
     ncml = Path(ncml)
     obj = parse(ncml)
 
-    return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml)
+    return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml, group)
 
 
-def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) -> xr.Dataset:
+def read_netcdf(
+    target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path, group: str
+) -> xr.Dataset:
     """
     Return content of <netcdf> element.
 
@@ -115,6 +127,10 @@ def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) ->
        <netcdf> object description.
     ncml : Path
       Path to NcML document, sometimes required to follow relative links.
+    group : str
+      Path of the group to parse within the ncml.
+      The special value ``*`` opens every group and flattens the variables into a single
+      dataset.
 
     Returns
     -------
@@ -133,10 +149,12 @@ def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path) ->
 
     for item in filter_by_class(obj.choice, Aggregation):
         target = read_aggregation(target, item, ncml)
-
-    # Handle <variable>, <attribute> and <remove> elements
-    target = read_group(target, ref, obj)
-
+    if group == FLATTEN_GROUPS:
+        target = _flatten_groups(target, ref, obj)
+    else:
+        if not group.startswith('/'):
+            group = f'/{group}'
+        target = read_group(target, ref, obj, groups_to_read=[group])
     return target
 
 
@@ -172,7 +190,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
 
     for item in obj.netcdf:
         # Open dataset defined in <netcdf>'s `location` attribute
-        tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml)
+        tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml, group=ROOT_GROUP)
         closers.append(getattr(tar, '_close'))
 
         # Select variables
@@ -209,7 +227,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     else:
         raise NotImplementedError
 
-    agg = read_group(agg, None, obj)
+    agg = read_group(agg, ref=None, obj=obj, groups_to_read=[ROOT_GROUP])
     out = target.merge(agg, combine_attrs='no_conflicts')
     out.set_close(partial(_multi_file_closer, closers))
     return out
@@ -243,8 +261,31 @@ def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
         return xr.open_dataset(location, decode_times=False)
 
 
+def _get_leaves(group: Netcdf | Group, parent: str | None = None) -> Iterator[str]:
+    group_children = [child for child in group.choice if isinstance(child, Group)]
+    current_path = ROOT_GROUP if parent is None else f'{parent}{group.name}/'
+    if len(group_children) == 0:
+        yield current_path
+    for child in group_children:
+        yield from _get_leaves(child, parent=current_path)
+
+
+def _flatten_groups(target: xr.Dataset, ref: xr.Dataset, root_group: Netcdf) -> xr.Dataset:
+    dims = {}
+    enums = {}
+    leaves_group = list(_get_leaves(root_group))
+    read_group(target, ref, root_group, groups_to_read=leaves_group, dims=dims, enums=enums)
+    return target
+
+
 def read_group(
-    target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf, dims: dict = None
+    target: xr.Dataset,
+    ref: xr.Dataset | None,
+    obj: Group | Netcdf,
+    groups_to_read: list[str],
+    parent_group_path: str = ROOT_GROUP,
+    dims: dict = None,
+    enums: dict = None,
 ) -> xr.Dataset:
     """
     Parse <group> items, typically <dimension>, <variable>, <attribute> and <remove> elements.
@@ -253,10 +294,16 @@ def read_group(
     ----------
     target : xr.Dataset
       Target dataset to be updated.
-    ref : xr.Dataset
+    ref : xr.Dataset | None
       Reference dataset used to copy content into `target`.
     obj : Group | Netcdf
-       <netcdf> object description.
+      <netcdf> object description.
+    groups_to_read : list[str]
+      List of groups that must be read and included in `target`.
+    parent_group_path : str
+      Path of parent group, by default the root group '/'.
+    dims: dict[str, Dimension]
+      Dictionary of the dimensions of this dataset.
 
     Returns
     -------
@@ -264,12 +311,16 @@ def read_group(
       Dataset holding variables and attributes defined in <netcdf> element.
     """
     dims = {} if dims is None else dims
-    enums = {}
+    enums = {} if enums is None else enums
     for item in obj.choice:
         if isinstance(item, Dimension):
-            dims[item.name] = read_dimension(item)
+            dim_name = item.name
+            if dims.get(dim_name):
+                dims[dim_name].append(read_dimension(item))
+            else:
+                dims[dim_name] = [read_dimension(item)]
         elif isinstance(item, Variable):
-            target = read_variable(target, ref, item, dims, enums)
+            target = read_variable(target, ref, item, dims, enums, group_path=parent_group_path)
         elif isinstance(item, Attribute):
             read_attribute(target, item, ref)
         elif isinstance(item, Remove):
@@ -277,12 +328,22 @@ def read_group(
         elif isinstance(item, EnumTypedef):
             enums[item.name] = read_enum(item)
         elif isinstance(item, Group):
-            target = read_group(target, ref, item, dims)
+            if any(item.name in group_name for group_name in groups_to_read):
+                target = read_group(
+                    target,
+                    ref,
+                    item,
+                    parent_group_path=f'{parent_group_path}{item.name}/',
+                    dims=dims,
+                    groups_to_read=groups_to_read,
+                )
+            else:
+                # ignore group
+                continue
         elif isinstance(item, Aggregation):
             pass  # <aggregation> elements are parsed in `read_netcdf`
         else:
             raise AttributeError
-
     return target
 
 
@@ -407,8 +468,13 @@ def read_enum(obj: EnumTypedef) -> dict[str, list]:
 
 
 def read_variable(
-    target: xr.Dataset, ref: xr.Dataset, obj: Variable, dimensions: dict, enums: dict
-):
+    target: xr.Dataset,
+    ref: xr.Dataset,
+    obj: Variable,
+    dimensions: dict,
+    enums: dict,
+    group_path: str,
+) -> xr.Dataset:
     """
     Parse <variable> element.
 
@@ -423,6 +489,9 @@ def read_variable(
     dimensions : dict
       Dimension attributes keyed by name.
     enums: dict[str, dict]
+      The enums types that have been read in the parent groups.
+    group_path: str
+      Path to the parent group.
 
     Returns
     -------
@@ -441,30 +510,47 @@ def read_variable(
     else:
         ref_var = None
 
+    var_name = obj.name
     # Read existing data or create empty DataArray
-    if (obj.name in target) or (obj.name in target.dims):
-        out = xr.as_variable(target[obj.name])
+    if (existing_var := target.get(var_name)) is not None and existing_var.attrs.get(
+        'group_path'
+    ) in [None, group_path]:
+        out = xr.as_variable(target[var_name])
         if obj.type:
             out = out.astype(nctype(obj.type))
         ref_var = None
-    elif (obj.name in ref) or (obj.name in ref.dims):
-        out = xr.as_variable(ref[obj.name])
+    elif (existing_var := ref.get(var_name)) is not None and existing_var.attrs.get(
+        'group_path'
+    ) in [None, group_path]:
+        out = xr.as_variable(ref[var_name])
         if obj.type:
             out = out.astype(nctype(obj.type))
-        ref_var = ref[obj.name]
+        ref_var = ref[var_name]
     elif obj.shape:
-        dims = obj.shape.split(' ')
-        shape = [dimensions[dim].length for dim in dims]
-        out = xr.Variable(data=np.empty(shape, dtype=nctype(obj.type)), dims=dims)
+        var_dims = []
+        shape = []
+        for dim in obj.shape.split(' '):
+            if dimensions.get(dim) is None:
+                err = (
+                    f"Unknown dimension '{dim}'."
+                    ' Make sure it is declared before being used in the NCML.'
+                )
+                raise ValueError(err)
+            shape.append(dimensions[dim][-1].length)
+            if (dim_count := len(dimensions[dim])) > 1:
+                dim = f'{dim}__{dim_count - 1}'
+            var_dims.append(dim)
+        out = xr.Variable(data=np.empty(shape, dtype=nctype(obj.type)), dims=var_dims)
     elif obj.shape == '':
-        out = build_scalar_variable(var_name=obj.name, values_tag=obj.values, var_type=obj.type)
+        out = build_scalar_variable(var_name=var_name, values_tag=obj.values, var_type=obj.type)
     else:
-        error_msg = f'Could not build variable `{obj.name}`.'
+        error_msg = f'Could not build variable `{var_name }`.'
         raise ValueError(error_msg)
 
     # Set variable attributes
     for item in obj.attribute:
         read_attribute(out, item, ref=ref_var)
+    out.attrs['group_path'] = group_path
 
     # Remove attributes or dimensions
     for item in obj.remove:
@@ -472,7 +558,7 @@ def read_variable(
 
     # Read values for arrays (already done for a scalar)
     if obj.values and obj.shape != '':
-        data = read_values(obj.name, out.size, obj.values)
+        data = read_values(var_name, out.size, obj.values)
         data = out.dtype.type(data)
         out = xr.Variable(
             out.dims,
@@ -490,14 +576,23 @@ def read_variable(
         raise NotImplementedError
 
     if obj.typedef in enums.keys():
-        # TODO: Also update encoding when https://github.com/pydata/xarray/pull/8147
-        #       is merged in xarray.
+        # TODO (@bzah): Update this once Enums are merged in xarray
+        #      https://github.com/pydata/xarray/pull/8147
         out.attrs['flag_values'] = enums[obj.typedef]['flag_values']
         out.attrs['flag_meanings'] = enums[obj.typedef]['flag_meanings']
     elif obj.typedef is not None:
         raise NotImplementedError
+    import re
 
-    target[obj.name] = out
+    reg = re.compile(f'^{var_name}__|{var_name}')
+    similar_vars_but_diff_path = [
+        v
+        for v in target.data_vars
+        if reg.match(v) and target[v].attrs.get('group_path') not in [None, group_path]
+    ]
+    if len(similar_vars_but_diff_path) > 0:
+        var_name = f'{var_name}__{len(similar_vars_but_diff_path)}'
+    target[var_name] = out
     return target
 
 
@@ -521,7 +616,8 @@ def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
     if values_tag.from_attribute is not None:
         error_msg = (
             'xncml cannot yet fetch values from a global or a '
-            f' variable attribute using <from_attribute>, here on variable {var_name}.'
+            ' variable attribute using <from_attribute>, here on variable'
+            f' {var_name}.'
         )
         raise NotImplementedError(error_msg)
     if values_tag.start is not None and values_tag.increment is not None:
@@ -551,7 +647,7 @@ def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
 
 
 def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> xr.Variable:
-    """Read values for <variable> element.
+    """Build an xr.Variable for scalar variables.
 
     Parameters
     ----------
@@ -573,12 +669,13 @@ def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> x
       If the <values> tag is not a valid scalar.
     """
     if values_tag is None:
+        default_value = nctype(var_type)()
         warn(
-            f'Could not set the type for the scalar variable {var_name}, as its'
-            ' <values> is empty. Provide a single values within <values></values>'
+            f'The scalar variable {var_name} has no values set within'
+            f' <values></values>. A default value of {default_value} is set'
             ' to preserve the type.'
         )
-        return xr.Variable(data=None, dims=())
+        return xr.Variable(data=default_value, dims=())
     values_content = read_values(var_name, expected_size=1, values_tag=values_tag)
     if len(values_content) == 1:
         return xr.Variable(data=np.array(values_content[0], dtype=nctype(var_type))[()], dims=())
