@@ -459,12 +459,9 @@ def read_enum(obj: EnumTypedef) -> dict[str, list]:
     Returns
     -------
     dict:
-        A dictionary with CF flag_values and flag_meanings that describe the Enum.
+        A dictionary describing the Enum.
     """
-    return {
-        'flag_values': list(map(lambda e: e.key, obj.content)),
-        'flag_meanings': list(map(lambda e: e.content[0], obj.content)),
-    }
+    return {e.content[0]: e.key for e in obj.content}
 
 
 def read_variable(
@@ -472,7 +469,7 @@ def read_variable(
     ref: xr.Dataset,
     obj: Variable,
     dimensions: dict,
-    enums: dict,
+    enums: dict[str, dict[str, int]],
     group_path: str,
 ) -> xr.Dataset:
     """
@@ -576,10 +573,10 @@ def read_variable(
         raise NotImplementedError
 
     if obj.typedef in enums.keys():
-        # TODO (@bzah): Update this once Enums are merged in xarray
-        #      https://github.com/pydata/xarray/pull/8147
-        out.attrs['flag_values'] = enums[obj.typedef]['flag_values']
-        out.attrs['flag_meanings'] = enums[obj.typedef]['flag_meanings']
+        dtype = out.dtype
+        new_dtype = np.dtype(dtype, metadata={'enum': enums[obj.typedef], 'enum_name': obj.typedef})
+        out.encoding['dtype'] = new_dtype
+        out = out.astype(new_dtype)
     elif obj.typedef is not None:
         raise NotImplementedError
     import re
