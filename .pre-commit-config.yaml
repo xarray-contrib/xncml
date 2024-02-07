@@ -11,6 +11,7 @@ repos:
       -   id: check-docstring-first
       -   id: check-json
       -   id: check-yaml
+      -   id: check-toml
       -   id: double-quote-string-fixer
 
   -   repo: https://github.com/psf/black-pre-commit-mirror

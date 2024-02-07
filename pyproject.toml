@@ -1,0 +1,58 @@
+[build-system]
+requires = [ "setuptools>=60", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xncml"
+authors = [
+  {name = "Anderson Banihirwe", email = "abanihi@ucar.edu"}
+]
+maintainers = [
+  {name = "Anderson Banihirwe", email = "abanihi@ucar.edu"},
+  {name = "David Huard"},
+]
+description = "Tools for manipulating and opening NCML (NetCDF Markup) files with/for xarray"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.9.0"
+keywords = ["xncml", "xarray", "netcdf", "ncml" ]
+license = {file = "LICENSE"}
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Topic :: Scientific/Engineering :: Atmospheric Science"
+]
+dynamic = ["version"]
+dependencies = [
+   "xmltodict",
+   "xsdata",
+   "xarray",
+   "cftime",
+   "netCDF4",
+   "dask",
+   "psutil",
+   "setuptools",  # explicitly required for python 3.12
+]
+
+[project.optional-dependencies]
+dev = [
+   "pytest",
+   "flake8",
+]
+
+[project.urls]
+Homepage="https://github.com/xarray-contrib/xncml"
+Issues="https://github.com/xarray-contrib/xncml/issues"
+Changelog="https://github.com/xarray-contrib/xncml/blob/master/CHANGELOG.md"
+
+[tool.setuptools]
+packages = ["xncml"]
+
+[tool.setuptools_scm]
+# empty but needed to ensure setuptools_scm is used
