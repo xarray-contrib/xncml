@@ -2,7 +2,6 @@ default_language_version:
   python: python3
 
 repos:
-
   -   repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v4.5.0
       hooks:
@@ -13,24 +12,45 @@ repos:
       -   id: check-yaml
       -   id: check-toml
       -   id: double-quote-string-fixer
-
-  -   repo: https://github.com/psf/black-pre-commit-mirror
-      rev: 24.1.1
+  -   repo: https://github.com/pappasam/toml-sort
+      rev: v0.23.1
       hooks:
-      - id: black
-        args: ["--line-length", "100", "--skip-string-normalization"]
-
-  -   repo: https://github.com/PyCQA/flake8
+      -   id: toml-sort-fix
+  -   repo: https://github.com/pre-commit/pygrep-hooks
+      rev: v1.10.0
+      hooks:
+      -   id: python-check-blanket-noqa
+      -   id: python-no-eval
+      -   id: python-no-log-warn
+      -   id: python-use-type-annotations
+      -   id: rst-inline-touching-normal
+  -   repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.3.7
+      hooks:
+      -   id: ruff
+          args: [ --fix ]
+      -   id: ruff-format
+  -   repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.3.7
+      hooks:
+      -   id: ruff
+  -   repo: https://github.com/pycqa/flake8
       rev: 7.0.0
       hooks:
-      - id: flake8
-
-  -   repo: https://github.com/asottile/seed-isort-config
-      rev: v2.2.0
+      -   id: flake8
+          additional_dependencies: [ 'flake8-alphabetize', 'flake8-rst-docstrings' ]
+          args: [ '--config=.flake8' ]
+  -   repo: https://github.com/adrienverge/yamllint.git
+      rev: v1.35.1
       hooks:
-      -   id: seed-isort-config
-
-  -   repo: https://github.com/PyCQA/isort
-      rev: 5.13.2
+      -   id: yamllint
+          args: [ '--config-file=.yamllint.yaml' ]
+  -   repo: https://github.com/python-jsonschema/check-jsonschema
+      rev: 0.28.2
       hooks:
-      -   id: isort
+      -   id: check-github-workflows
+      -   id: check-readthedocs
+  -   repo: meta
+      hooks:
+      -   id: check-hooks-apply
+      -   id: check-useless-excludes

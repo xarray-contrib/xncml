@@ -1,6 +1,6 @@
 [build-system]
-requires = [ "setuptools>=60", "setuptools-scm>=8.0"]
-build-backend = "setuptools.build_meta"
+requires = ["flit_core >=3.8,<4"]
+build-backend = "flit_core.buildapi"
 
 [project]
 name = "xncml"
@@ -10,11 +10,12 @@ authors = [
 maintainers = [
   {name = "Anderson Banihirwe", email = "abanihi@ucar.edu"},
   {name = "David Huard"},
+  {name = "Abel Aoun"}
 ]
 description = "Tools for manipulating and opening NCML (NetCDF Markup) files with/for xarray"
-readme = {file = "README.md", content-type = "text/markdown"}
+readme = {file = "README.rst", content-type = "text/x-rst"}
 requires-python = ">=3.9.0"
-keywords = ["xncml", "xarray", "netcdf", "ncml" ]
+keywords = ["xncml", "xarray", "netcdf", "ncml"]
 license = {file = "LICENSE"}
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -26,33 +27,195 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
   "Topic :: Scientific/Engineering :: Atmospheric Science"
 ]
 dynamic = ["version"]
 dependencies = [
-   "xmltodict",
-   "xsdata",
-   "xarray",
-   "cftime",
-   "netCDF4",
-   "dask",
-   "psutil",
-   "setuptools",  # explicitly required for python 3.12
+  "xmltodict",
+  "xsdata",
+  "xarray",
+  "cftime",
+  "netCDF4",
+  "dask",
+  "psutil"
 ]
 
 [project.optional-dependencies]
 dev = [
-   "pytest",
-   "flake8",
+  # Dev tools and testing
+  "pip >=23.1.2",
+  "bump-my-version >=0.18.3",
+  "watchdog >=3.0.0",
+  "flake8 >=6.1.0",
+  "flake8-alphabetize >=0.0.21",
+  "flake8-rst-docstrings >=0.3.0",
+  "flit >=3.9.0",
+  "tox >=4.5.1",
+  "coverage >=6.2.2,<7.0.0",
+  "coveralls >=3.3.1",
+  "pytest >=7.3.1",
+  "pytest-cov >=4.0.0",
+  "ruff >=0.2.0",
+  "pre-commit >=3.3.2"
+]
+docs = [
+  # Documentation and examples
+  "sphinx",
+  "sphinx-codeautolink",
+  "sphinx-copybutton",
+  "sphinx-rtd-theme >=1.0",
+  "nbsphinx",
+  "pandoc",
+  "ipython",
+  "ipykernel",
+  "jupyter_client"
 ]
 
 [project.urls]
-Homepage="https://github.com/xarray-contrib/xncml"
-Issues="https://github.com/xarray-contrib/xncml/issues"
-Changelog="https://github.com/xarray-contrib/xncml/blob/master/CHANGELOG.md"
+"Source" = "https://github.com/xarray-contrib/xncml"
+"Issue tracker" = "https://github.com/xarray-contrib/xncml/issues"
+"Changelog" = "https://github.com/xarray-contrib/xncml/blob/master/CHANGELOG.md"
 
-[tool.setuptools]
-packages = ["xncml"]
+[tool.bumpversion]
+current_version = "0.5.0"
+commit = true
+commit_args = "--no-verify"
+tag = false
+tag_name = "v{new_version}"
+allow_dirty = false
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(\\-(?P<release>[a-z]+)(\\.(?P<build>\\d+)))?"
+serialize = [
+  "{major}.{minor}.{patch}-{release}.{build}",
+  "{major}.{minor}.{patch}"
+]
 
-[tool.setuptools_scm]
-# empty but needed to ensure setuptools_scm is used
+[[tool.bumpversion.files]]
+filename = "xncml/__init__.py"
+search = "__version__ = \"{current_version}\""
+replace = "__version__ = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "tests/test_xncml.py"
+search = "__version__ = \"{current_version}\""
+replace = "__version__ = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = ".cruft.json"
+search = "\"version\": \"{current_version}\""
+replace = "\"version\": \"{new_version}\""
+
+[tool.bumpversion.parts.build]
+independent = false
+
+[tool.bumpversion.parts.release]
+optional_value = "release"
+values = [
+  "dev",
+  "release"
+]
+
+[tool.coverage.run]
+relative_files = true
+include = ["xncml/*"]
+omit = ["tests/*.py"]
+
+[tool.flit.sdist]
+include = [
+  ".zenodo.json",
+  "AUTHORS.rst",
+  "CHANGELOG.rst",
+  "CONTRIBUTING.rst",
+  "LICENSE",
+  "Makefile",
+  "README.rst",
+  "environment-docs.yml",
+  "docs/_static/_images/*.gif",
+  "docs/_static/_images/*.jpg",
+  "docs/_static/_images/*.png",
+  "docs/_static/_images/*.rst",
+  "docs/Makefile",
+  "docs/conf.py",
+  "docs/make.bat",
+  "tests/*.py",
+  "tox.ini",
+  "xncml"
+]
+exclude = [
+  "*.py[co]",
+  "__pycache__",
+  ".coveralls.yml",
+  ".editorconfig",
+  ".flake8",
+  ".gitignore",
+  ".pre-commit-config.yaml",
+  ".readthedocs.yml",
+  ".yamllint.yaml",
+  "docs/_*",
+  "docs/apidoc/modules.rst",
+  "docs/apidoc/xncml*.rst"
+]
+
+[tool.mypy]
+python_version = "3.9"
+show_error_codes = true
+warn_return_any = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = []
+ignore_missing_imports = true
+
+[tool.ruff]
+src = ["src"]
+line-length = 150
+target-version = "py39"
+exclude = [
+  ".eggs",
+  ".git",
+  "build",
+  "docs"
+]
+
+[tool.ruff.format]
+# Enable reformatting of code snippets in docstrings.
+docstring-code-format = true
+line-ending = "auto"
+
+[tool.ruff.lint]
+select = [
+  "C9",
+  "D",
+  "E",
+  "F",
+  "W"
+]
+ignore = [
+  "D205",
+  "D400",
+  "D401"
+]
+
+[tool.ruff.lint.flake8-bandit]
+check-typed-exception = true
+
+[tool.ruff.lint.isort]
+known-first-party = ["xncml"]
+case-sensitive = true
+detect-same-package = false
+lines-after-imports = 1
+no-lines-before = ["future", "standard-library"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.per-file-ignores]
+"xncml/**/__init__.py" = ["F401", "F403"]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 180
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"

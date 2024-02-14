@@ -60,12 +60,12 @@ from .generated import (
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-__author__ = 'David Huard, Abel Aoun'
-__date__ = 'July 2022'
-__contact__ = 'huard.david@ouranos.ca'
+__author__ = "David Huard, Abel Aoun"
+__date__ = "July 2022"
+__contact__ = "huard.david@ouranos.ca"
 
-FLATTEN_GROUPS = '*'
-ROOT_GROUP = '/'
+FLATTEN_GROUPS = "*"
+ROOT_GROUP = "/"
 
 
 def parse(path: Path) -> Netcdf:
@@ -111,9 +111,7 @@ def open_ncml(ncml: str | Path, group: str = ROOT_GROUP) -> xr.Dataset:
     return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml, group)
 
 
-def read_netcdf(
-    target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path, group: str
-) -> xr.Dataset:
+def read_netcdf(target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path, group: str) -> xr.Dataset:
     """
     Return content of <netcdf> element.
 
@@ -152,8 +150,8 @@ def read_netcdf(
     if group == FLATTEN_GROUPS:
         target = _flatten_groups(target, ref, obj)
     else:
-        if not group.startswith('/'):
-            group = f'/{group}'
+        if not group.startswith("/"):
+            group = f"/{group}"
         target = read_group(target, ref, obj, groups_to_read=[group])
     return target
 
@@ -191,7 +189,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     for item in obj.netcdf:
         # Open dataset defined in <netcdf>'s `location` attribute
         tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml, group=ROOT_GROUP)
-        closers.append(getattr(tar, '_close'))
+        closers.append(getattr(tar, "_close"))
 
         # Select variables
         if names:
@@ -208,7 +206,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     for item in obj.scan:
         dss = read_scan(item, ncml)
         datasets.extend([ds.chunk() for ds in dss])
-        closers.extend([getattr(ds, '_close') for ds in dss])
+        closers.extend([getattr(ds, "_close") for ds in dss])
 
     # Need to decode time variable
     if obj.time_units_change:
@@ -228,7 +226,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
         raise NotImplementedError
 
     agg = read_group(agg, ref=None, obj=obj, groups_to_read=[ROOT_GROUP])
-    out = target.merge(agg, combine_attrs='no_conflicts')
+    out = target.merge(agg, combine_attrs="no_conflicts")
     out.set_close(partial(_multi_file_closer, closers))
     return out
 
@@ -252,9 +250,9 @@ def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
     if obj.location:
         try:
             # Python >= 3.9
-            location = obj.location.removeprefix('file:')
+            location = obj.location.removeprefix("file:")
         except AttributeError:
-            location = obj.location.strip('file:')
+            location = obj.location.strip("file:")
 
         if not Path(location).is_absolute():
             location = ncml.parent / location
@@ -263,7 +261,7 @@ def read_ds(obj: Netcdf, ncml: Path) -> xr.Dataset:
 
 def _get_leaves(group: Netcdf | Group, parent: str | None = None) -> Iterator[str]:
     group_children = [child for child in group.choice if isinstance(child, Group)]
-    current_path = ROOT_GROUP if parent is None else f'{parent}{group.name}/'
+    current_path = ROOT_GROUP if parent is None else f"{parent}{group.name}/"
     if len(group_children) == 0:
         yield current_path
     for child in group_children:
@@ -333,7 +331,7 @@ def read_group(
                     target,
                     ref,
                     item,
-                    parent_group_path=f'{parent_group_path}{item.name}/',
+                    parent_group_path=f"{parent_group_path}{item.name}/",
                     dims=dims,
                     groups_to_read=groups_to_read,
                 )
@@ -373,21 +371,21 @@ def read_scan(obj: Aggregation.Scan, ncml: Path) -> list[xr.Dataset]:
     if not path.is_absolute():
         path = ncml.parent / path
 
-    files = list(path.rglob('*') if obj.subdirs else path.glob('*'))
+    files = list(path.rglob("*") if obj.subdirs else path.glob("*"))
 
     if not files:
-        raise ValueError(f'No files found in {path}')
+        raise ValueError(f"No files found in {path}")
 
     fns = map(str, files)
     if obj.reg_exp:
         pat = re.compile(obj.reg_exp)
         files = list(filter(pat.match, fns))
     elif obj.suffix:
-        pat = '*' + obj.suffix
+        pat = "*" + obj.suffix
         files = glob.fnmatch.filter(fns, pat)
 
     if not files:
-        raise ValueError('regular expression or suffix matches no file.')
+        raise ValueError("regular expression or suffix matches no file.")
 
     files.sort()
 
@@ -422,7 +420,7 @@ def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
     if agg.type == AggregationType.JOIN_NEW:
         coord = val
     elif agg.type == AggregationType.JOIN_EXISTING:
-        coord = val.replace(',', ' ').split()
+        coord = val.replace(",", " ").split()
     else:
         raise NotImplementedError
 
@@ -431,7 +429,7 @@ def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
         typ = dtypes[0]
     else:
         try:
-            dt.datetime.strptime(coord, '%Y-%m-%d %H:%M:%SZ')
+            dt.datetime.strptime(coord, "%Y-%m-%d %H:%M:%SZ")
             typ = str
         except ValueError:
             typ = np.float64
@@ -509,16 +507,12 @@ def read_variable(
 
     var_name = obj.name
     # Read existing data or create empty DataArray
-    if (existing_var := target.get(var_name)) is not None and existing_var.attrs.get(
-        'group_path'
-    ) in [None, group_path]:
+    if (existing_var := target.get(var_name)) is not None and existing_var.attrs.get("group_path") in [None, group_path]:
         out = xr.as_variable(target[var_name])
         if obj.type:
             out = out.astype(nctype(obj.type))
         ref_var = None
-    elif (existing_var := ref.get(var_name)) is not None and existing_var.attrs.get(
-        'group_path'
-    ) in [None, group_path]:
+    elif (existing_var := ref.get(var_name)) is not None and existing_var.attrs.get("group_path") in [None, group_path]:
         out = xr.as_variable(ref[var_name])
         if obj.type:
             out = out.astype(nctype(obj.type))
@@ -526,35 +520,32 @@ def read_variable(
     elif obj.shape:
         var_dims = []
         shape = []
-        for dim in obj.shape.split(' '):
+        for dim in obj.shape.split(" "):
             if dimensions.get(dim) is None:
-                err = (
-                    f"Unknown dimension '{dim}'."
-                    ' Make sure it is declared before being used in the NCML.'
-                )
+                err = f"Unknown dimension '{dim}'." " Make sure it is declared before being used in the NCML."
                 raise ValueError(err)
             shape.append(dimensions[dim][-1].length)
             if (dim_count := len(dimensions[dim])) > 1:
-                dim = f'{dim}__{dim_count - 1}'
+                dim = f"{dim}__{dim_count - 1}"
             var_dims.append(dim)
         out = xr.Variable(data=np.empty(shape, dtype=nctype(obj.type)), dims=var_dims)
-    elif obj.shape == '':
+    elif obj.shape == "":
         out = build_scalar_variable(var_name=var_name, values_tag=obj.values, var_type=obj.type)
     else:
-        error_msg = f'Could not build variable `{var_name }`.'
+        error_msg = f"Could not build variable `{var_name }`."
         raise ValueError(error_msg)
 
     # Set variable attributes
     for item in obj.attribute:
         read_attribute(out, item, ref=ref_var)
-    out.attrs['group_path'] = group_path
+    out.attrs["group_path"] = group_path
 
     # Remove attributes or dimensions
     for item in obj.remove:
         read_remove(out, item)
 
     # Read values for arrays (already done for a scalar)
-    if obj.values and obj.shape != '':
+    if obj.values and obj.shape != "":
         data = read_values(var_name, out.size, obj.values)
         data = out.dtype.type(data)
         out = xr.Variable(
@@ -574,21 +565,17 @@ def read_variable(
 
     if obj.typedef in enums.keys():
         dtype = out.dtype
-        new_dtype = np.dtype(dtype, metadata={'enum': enums[obj.typedef], 'enum_name': obj.typedef})
-        out.encoding['dtype'] = new_dtype
+        new_dtype = np.dtype(dtype, metadata={"enum": enums[obj.typedef], "enum_name": obj.typedef})
+        out.encoding["dtype"] = new_dtype
         out = out.astype(new_dtype)
     elif obj.typedef is not None:
         raise NotImplementedError
     import re
 
-    reg = re.compile(f'^{var_name}__|{var_name}')
-    similar_vars_but_diff_path = [
-        v
-        for v in target.data_vars
-        if reg.match(v) and target[v].attrs.get('group_path') not in [None, group_path]
-    ]
+    reg = re.compile(f"^{var_name}__|{var_name}")
+    similar_vars_but_diff_path = [v for v in target.data_vars if reg.match(v) and target[v].attrs.get("group_path") not in [None, group_path]]
     if len(similar_vars_but_diff_path) > 0:
-        var_name = f'{var_name}__{len(similar_vars_but_diff_path)}'
+        var_name = f"{var_name}__{len(similar_vars_but_diff_path)}"
     target[var_name] = out
     return target
 
@@ -611,34 +598,24 @@ def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
       A list filled with values from <values> element.
     """
     if values_tag.from_attribute is not None:
-        error_msg = (
-            'xncml cannot yet fetch values from a global or a '
-            ' variable attribute using <from_attribute>, here on variable'
-            f' {var_name}.'
-        )
+        error_msg = "xncml cannot yet fetch values from a global or a " " variable attribute using <from_attribute>, here on variable" f" {var_name}."
         raise NotImplementedError(error_msg)
     if values_tag.start is not None and values_tag.increment is not None:
         number_of_values = int(values_tag.npts or expected_size)
         return values_tag.start + np.arange(number_of_values) * values_tag.increment
     if not isinstance(values_tag.content, list):
-        error_msg = f'Unsupported format of the <values> tag from variable {var_name}.'
+        error_msg = f"Unsupported format of the <values> tag from variable {var_name}."
         raise NotImplementedError(error_msg)
     if len(values_tag.content) == 0:
-        error_msg = (
-            f'No values found for variable {var_name}, but a {expected_size}'
-            ' values were expected.'
-        )
+        error_msg = f"No values found for variable {var_name}, but a {expected_size}" " values were expected."
         raise ValueError(error_msg)
     if not isinstance(values_tag.content[0], str):
-        error_msg = f'Unsupported format of the <values> tag from variable {var_name}.'
+        error_msg = f"Unsupported format of the <values> tag from variable {var_name}."
         raise NotImplementedError(error_msg)
-    separator = values_tag.separator or ' '
+    separator = values_tag.separator or " "
     data = values_tag.content[0].split(separator)
     if len(data) > expected_size:
-        error_msg = (
-            f'The expected size for variable {var_name} was {expected_size},'
-            f' but {len(data)} values were found in its <values> tag.'
-        )
+        error_msg = f"The expected size for variable {var_name} was {expected_size}," f" but {len(data)} values were found in its <values> tag."
         raise ValueError(error_msg)
     return data
 
@@ -668,19 +645,16 @@ def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> x
     if values_tag is None:
         default_value = nctype(var_type)()
         warn(
-            f'The scalar variable {var_name} has no values set within'
-            f' <values></values>. A default value of {default_value} is set'
-            ' to preserve the type.'
+            f"The scalar variable {var_name} has no values set within"
+            f" <values></values>. A default value of {default_value} is set"
+            " to preserve the type."
         )
         return xr.Variable(data=default_value, dims=())
     values_content = read_values(var_name, expected_size=1, values_tag=values_tag)
     if len(values_content) == 1:
         return xr.Variable(data=np.array(values_content[0], dtype=nctype(var_type))[()], dims=())
     if len(values_content) > 1:
-        error_msg = (
-            f'Multiple values found for variable {var_name} but its'
-            ' shape is "" thus a single scalar is expected within its <values> tag.'
-        )
+        error_msg = f"Multiple values found for variable {var_name} but its" ' shape is "" thus a single scalar is expected within its <values> tag.'
     raise ValueError(error_msg)
 
 
@@ -699,7 +673,6 @@ def read_remove(target: xr.Dataset | xr.Variable, obj: Remove) -> xr.Dataset:
     xr.Dataset or xr.Variable
       Dataset with attribute, variable or dimension removed, or variable with attribute removed.
     """
-
     if obj.type == ObjectType.ATTRIBUTE:
         target.attrs.pop(obj.name)
     elif obj.type == ObjectType.VARIABLE:
@@ -746,7 +719,6 @@ def read_dimension(obj: Dimension) -> Dimension:
 
 def nctype(typ: DataType) -> type:
     """Return Python type corresponding to the NcML DataType of object."""
-
     if typ in [DataType.STRING, DataType.STRING_1]:
         return str
     elif typ in [DataType.BYTE, DataType.ENUM1]:
@@ -780,10 +752,10 @@ def cast(obj: Attribute) -> tuple | str:
         if obj.type in [DataType.STRING, DataType.STRING_1]:
             return value
 
-        sep = obj.separator or ' '
+        sep = obj.separator or " "
         values = value.split(sep)
         return tuple(map(nctype(obj.type), values))
-    return ''
+    return ""
 
 
 def filter_by_class(iterable, klass):

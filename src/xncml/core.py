@@ -21,7 +21,7 @@ class Dataset(object):
         """
 
         Parameters
-        -----------
+        ----------
         filepath : str
             File path to dataset NcML file. If it does not exist, an empty NcML document will be created and this will
             be the default filename when writing to disk with `to_ncml`.
@@ -35,11 +35,9 @@ class Dataset(object):
 
         else:
             self.ncroot = OrderedDict()
-            self.ncroot['netcdf'] = OrderedDict(
-                {'@xmlns': 'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2'}
-            )
+            self.ncroot["netcdf"] = OrderedDict({"@xmlns": "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"})
             if location is not None:
-                self.ncroot['netcdf']['@location'] = str(location)
+                self.ncroot["netcdf"]["@location"] = str(location)
 
     @classmethod
     def from_text(cls, xml: str):
@@ -53,11 +51,11 @@ class Dataset(object):
         """Return dictionary from xml."""
         return xmltodict.parse(
             xml,
-            force_list=['variable', 'attribute', 'group', 'dimension'],
+            force_list=["variable", "attribute", "group", "dimension"],
             process_namespaces=True,
             namespaces={
-                'http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
-                'https://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2': None,
+                "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2": None,
+                "https://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2": None,
             },
         )
 
@@ -65,9 +63,7 @@ class Dataset(object):
         return xmltodict.unparse(self.ncroot, pretty=True)
 
     # Aggregations and scans
-    def add_aggregation(
-        self, dim_name: str, type_: str, recheck_every: str = None, time_units_change: bool = None
-    ):
+    def add_aggregation(self, dim_name: str, type_: str, recheck_every: str = None, time_units_change: bool = None):
         """Add aggregation.
 
         Parameters
@@ -84,22 +80,22 @@ class Dataset(object):
         at = AggregationType(type_)
         item = OrderedDict(
             {
-                '@dimName': dim_name,
-                '@type': at.value,
-                '@recheckEvery': recheck_every,
-                '@timeUnitsChange': time_units_change,
+                "@dimName": dim_name,
+                "@type": at.value,
+                "@recheckEvery": recheck_every,
+                "@timeUnitsChange": time_units_change,
             }
         )
         item = preparse(item)
 
-        aggregations = self.ncroot['netcdf'].get('aggregation', [])
+        aggregations = self.ncroot["netcdf"].get("aggregation", [])
         for agg in aggregations:
-            if agg['@dimName'] == dim_name:
+            if agg["@dimName"] == dim_name:
                 agg.update(item)
                 break
         else:
             aggregations.append(item)
-            self.ncroot['netcdf']['aggregation'] = aggregations
+            self.ncroot["netcdf"]["aggregation"] = aggregations
 
     def add_variable_agg(self, dim_name: str, name: str):
         """Add variable aggregation.
@@ -111,18 +107,18 @@ class Dataset(object):
         name : str
             Variable name.
         """
-        item = OrderedDict({'@name': name})
-        aggregations = self.ncroot['netcdf'].get('aggregation')
+        item = OrderedDict({"@name": name})
+        aggregations = self.ncroot["netcdf"].get("aggregation")
         for agg in aggregations:
-            if agg['@dimName'] == dim_name:
-                variables = agg.get('variableAgg', [])
+            if agg["@dimName"] == dim_name:
+                variables = agg.get("variableAgg", [])
                 for var in variables:
-                    if var['@name'] == name:
+                    if var["@name"] == name:
                         var.update(item)
                         break
                 else:
                     variables.append(item)
-                    agg['variableAgg'] = variables
+                    agg["variableAgg"] = variables
 
     def add_scan(
         self,
@@ -159,30 +155,30 @@ class Dataset(object):
         """
         item = OrderedDict(
             {
-                '@location': location,
-                '@regExp': reg_exp,
-                '@suffix': suffix,
-                '@subdirs': subdirs,
-                '@olderThan': older_than,
-                '@dateFormatMark': date_format_mark,
-                '@enhance': enhance,
+                "@location": location,
+                "@regExp": reg_exp,
+                "@suffix": suffix,
+                "@subdirs": subdirs,
+                "@olderThan": older_than,
+                "@dateFormatMark": date_format_mark,
+                "@enhance": enhance,
             }
         )
 
         item = preparse(item)
 
         # An aggregation must exist for the scan to be added.
-        for agg in self.ncroot['netcdf'].get('aggregation'):
-            if agg['@dimName'] == dim_name:
-                scan = agg.get('scan', [])
+        for agg in self.ncroot["netcdf"].get("aggregation"):
+            if agg["@dimName"] == dim_name:
+                scan = agg.get("scan", [])
                 scan.append(item)
-                agg['scan'] = scan
+                agg["scan"] = scan
                 break
         else:
-            raise ValueError(f'No aggregation found for dimension {dim_name}.')
+            raise ValueError(f"No aggregation found for dimension {dim_name}.")
 
     # Variable
-    def add_variable_attribute(self, variable, key, value, type_='String'):
+    def add_variable_attribute(self, variable, key, value, type_="String"):
         """Add variable attribute.
 
         Parameters
@@ -197,37 +193,37 @@ class Dataset(object):
              String describing attribute type.
 
         """
-        item = OrderedDict({'@name': key, '@type': type_, '@value': value})
-        variables = self.ncroot['netcdf'].get('variable', [])
+        item = OrderedDict({"@name": key, "@type": type_, "@value": value})
+        variables = self.ncroot["netcdf"].get("variable", [])
 
         for var in variables:
-            if var['@name'] == variable:
-                var_attributes = var.get('attribute', [])
+            if var["@name"] == variable:
+                var_attributes = var.get("attribute", [])
                 for attr in var_attributes:
-                    if attr['@name'] == key:
+                    if attr["@name"] == key:
                         attr.update(item)
                         break
                 else:
                     var_attributes.append(item)
-                    var['attribute'] = var_attributes
+                    var["attribute"] = var_attributes
                 break
         else:
-            variables.append(OrderedDict({'@name': variable, 'attribute': item}))
-            self.ncroot['netcdf']['variable'] = variables
+            variables.append(OrderedDict({"@name": variable, "attribute": item}))
+            self.ncroot["netcdf"]["variable"] = variables
 
     def remove_variable_attribute(self, variable, key):
         """Remove variable attribute"""
-        item = OrderedDict({'@name': key, '@type': 'attribute'})
-        variables = self.ncroot['netcdf'].get('variable', [])
+        item = OrderedDict({"@name": key, "@type": "attribute"})
+        variables = self.ncroot["netcdf"].get("variable", [])
 
         for var in variables:
-            if var['@name'] == variable:
-                var['remove'] = item
+            if var["@name"] == variable:
+                var["remove"] = item
                 break
         else:
-            new_var = OrderedDict({'@name': variable, 'remove': item})
+            new_var = OrderedDict({"@name": variable, "remove": item})
             variables.append(new_var)
-            self.ncroot['netcdf']['variable'] = variables
+            self.ncroot["netcdf"]["variable"] = variables
 
     def rename_variable(self, variable, new_name):
         """Rename variable attribute
@@ -240,17 +236,17 @@ class Dataset(object):
             New variable name.
 
         """
-        item = OrderedDict({'@name': new_name, '@orgName': variable})
-        variables = self.ncroot['netcdf'].get('variable', [])
+        item = OrderedDict({"@name": new_name, "@orgName": variable})
+        variables = self.ncroot["netcdf"].get("variable", [])
 
         for var in variables:
-            if var['@name'] == variable:
-                var['@name'] = new_name
-                var['@orgName'] = variable
+            if var["@name"] == variable:
+                var["@name"] = new_name
+                var["@orgName"] = variable
                 break
         else:
             variables.append(item)
-            self.ncroot['netcdf']['variable'] = variables
+            self.ncroot["netcdf"]["variable"] = variables
 
     def remove_variable(self, variable):
         """Remove dataset variable.
@@ -260,12 +256,12 @@ class Dataset(object):
         key : str
             Name of the variable to remove.
         """
-        item = OrderedDict({'@name': variable, '@type': 'variable'})
-        removes = self.ncroot['netcdf'].get('remove', [])
+        item = OrderedDict({"@name": variable, "@type": "variable"})
+        removes = self.ncroot["netcdf"].get("remove", [])
 
         if item not in removes:
             removes.append(item)
-            self.ncroot['netcdf']['remove'] = removes
+            self.ncroot["netcdf"]["remove"] = removes
 
     def rename_variable_attribute(self, variable, old_name, new_name):
         """Rename variable attribute.
@@ -279,24 +275,24 @@ class Dataset(object):
         new_name : str
           New attribute name.
         """
-        item = OrderedDict({'@name': new_name, '@orgName': old_name})
-        variables = self.ncroot['netcdf'].get('variable', [])
+        item = OrderedDict({"@name": new_name, "@orgName": old_name})
+        variables = self.ncroot["netcdf"].get("variable", [])
 
         for var in variables:
-            if var['@name'] == variable:
-                attrs = var.get('attribute', [])
+            if var["@name"] == variable:
+                attrs = var.get("attribute", [])
                 for attr in attrs:
-                    if attr['@name'] == old_name:
-                        attr['@name'] = new_name
-                        attr['@orgName'] = old_name
+                    if attr["@name"] == old_name:
+                        attr["@name"] = new_name
+                        attr["@orgName"] = old_name
                         break
                 else:
                     attrs.append(item)
                     break
         else:
-            new_var = OrderedDict({'@name': 'variable', 'attribute': item})
+            new_var = OrderedDict({"@name": "variable", "attribute": item})
             variables.append(new_var)
-            self.ncroot['netcdf']['variable'] = variables
+            self.ncroot["netcdf"]["variable"] = variables
 
     # Dimensions
 
@@ -310,23 +306,24 @@ class Dataset(object):
         new_name: str
           New dimension name.
         """
-        item = OrderedDict({'@name': new_name, '@orgName': dimension})
-        dimensions = self.ncroot['netcdf'].get('dimension', [])
+        item = OrderedDict({"@name": new_name, "@orgName": dimension})
+        dimensions = self.ncroot["netcdf"].get("dimension", [])
 
         for dim in dimensions:
-            if dim['@name'] == dimension:
-                dim['@name'] = new_name
-                dim['@orgName'] = dimension
+            if dim["@name"] == dimension:
+                dim["@name"] = new_name
+                dim["@orgName"] = dimension
                 break
         else:
             dimensions.append(item)
-            self.ncroot['netcdf']['dimensions'] = dimensions
+            self.ncroot["netcdf"]["dimensions"] = dimensions
 
     # Dataset
 
-    def add_dataset_attribute(self, key, value, type_='String'):
+    def add_dataset_attribute(self, key, value, type_="String"):
         """Add dataset attribute
-         Parameters
+
+        Parameters
         ----------
         key : str
             Attribute name.
@@ -336,16 +333,16 @@ class Dataset(object):
             String describing attribute type.
 
         """
-        item = OrderedDict({'@name': key, '@type': type_, '@value': value})
-        attributes = self.ncroot['netcdf'].get('attribute', [])
+        item = OrderedDict({"@name": key, "@type": type_, "@value": value})
+        attributes = self.ncroot["netcdf"].get("attribute", [])
 
         for attr in attributes:
-            if attr['@name'] == key:
+            if attr["@name"] == key:
                 attr.update(item)
                 break
         else:
             attributes.append(item)
-            self.ncroot['netcdf']['attribute'] = attributes
+            self.ncroot["netcdf"]["attribute"] = attributes
 
     def remove_dataset_attribute(self, key):
         """Remove dataset attribute.
@@ -356,17 +353,15 @@ class Dataset(object):
             Name of the attribute to remove.
 
         """
-        removals = self.ncroot['netcdf'].get('remove', [])
-        item = OrderedDict({'@name': key, '@type': 'attribute'})
+        removals = self.ncroot["netcdf"].get("remove", [])
+        item = OrderedDict({"@name": key, "@type": "attribute"})
 
         if removals:
-            removals_keys = [
-                removal['@name'] for removal in removals if removal['@type'] == 'attribute'
-            ]
+            removals_keys = [removal["@name"] for removal in removals if removal["@type"] == "attribute"]
             if key not in removals_keys:
                 removals.append(item)
         else:
-            self.ncroot['netcdf']['remove'] = [item]
+            self.ncroot["netcdf"]["remove"] = [item]
 
     def rename_dataset_attribute(self, old_name, new_name):
         """Rename dataset attribute.
@@ -378,24 +373,23 @@ class Dataset(object):
         new_name: str
           New attribute name.
         """
-
-        attributes = self.ncroot['netcdf'].get('attribute', None)
-        item = OrderedDict({'@name': new_name, 'orgName': old_name})
+        attributes = self.ncroot["netcdf"].get("attribute", None)
+        item = OrderedDict({"@name": new_name, "orgName": old_name})
 
         if attributes:
             if isinstance(attributes, (dict, OrderedDict)):
                 attributes = [attributes]
 
             for attr in attributes:
-                if attr['@name'] == old_name:
-                    attr['@name'] = new_name
-                    attr['@orgName'] = old_name
+                if attr["@name"] == old_name:
+                    attr["@name"] = new_name
+                    attr["@orgName"] = old_name
                     break
             else:
-                self.ncroot['netcdf']['attribute'] = [*attributes, item]
+                self.ncroot["netcdf"]["attribute"] = [*attributes, item]
 
         else:
-            self.ncroot['netcdf']['attribute'] = item
+            self.ncroot["netcdf"]["attribute"] = item
 
     def to_ncml(self, path=None):
         """Write NcML file to disk.
@@ -412,7 +406,7 @@ class Dataset(object):
                 path = str(self.filepath)
 
         xml_output = xmltodict.unparse(self.ncroot, pretty=True)
-        with open(path, 'w') as fd:
+        with open(path, "w") as fd:
             fd.write(xml_output)
 
     def to_cf_dict(self):
@@ -432,18 +426,18 @@ class Dataset(object):
         http://cf-json.org/specification
         """
         res = OrderedDict()
-        nc = self.ncroot['netcdf']
+        nc = self.ncroot["netcdf"]
 
         for key, val in nc.items():
-            if key[0] == '@':
+            if key[0] == "@":
                 res[key] = val
-            if key == 'dimension':
+            if key == "dimension":
                 res.update(_dims_to_json(val))
-            if key == 'group':
+            if key == "group":
                 res.update(_groups_to_json(val))
-            if key == 'attribute':
+            if key == "attribute":
                 res.update(_attributes_to_json(val))
-            if key == 'variable':
+            if key == "variable":
                 res.update(_variables_to_json(val))
 
         return res
@@ -453,23 +447,23 @@ def _dims_to_json(dims: list) -> dict:
     """The dimensions object has dimension id:size as its key:value members."""
     out = OrderedDict()
     for dim in dims:
-        if int(dim['@length']) > 1:
-            out[dim['@name']] = int(dim['@length'])
+        if int(dim["@length"]) > 1:
+            out[dim["@name"]] = int(dim["@length"])
 
-    return {'dimensions': out}
+    return {"dimensions": out}
 
 
 def _groups_to_json(groups: list) -> dict:
     out = OrderedDict()
     for group in groups:
-        name = group['@name']
+        name = group["@name"]
         out[name] = OrderedDict()
-        if 'attribute' in group:
-            out[name].update(_attributes_to_json(group['attribute']))
-        if 'group' in group:
-            out[name].update(_groups_to_json(group['group']))
+        if "attribute" in group:
+            out[name].update(_attributes_to_json(group["attribute"]))
+        if "group" in group:
+            out[name].update(_groups_to_json(group["group"]))
 
-    return {'groups': out}
+    return {"groups": out}
 
 
 def _attributes_to_json(attrs: list) -> dict:
@@ -477,11 +471,11 @@ def _attributes_to_json(attrs: list) -> dict:
     out = OrderedDict()
     for attr in attrs:
         try:
-            out[attr['@name']] = _cast(attr)
+            out[attr["@name"]] = _cast(attr)
         except ValueError as exc:
             warn(f"Could not cast {attr['@name']}:\n{exc}")
 
-    return {'attributes': out}
+    return {"attributes": out}
 
 
 def _variables_to_json(variables: list) -> dict:
@@ -495,39 +489,39 @@ def _variables_to_json(variables: list) -> dict:
     # Put coordinate variables first
     for var in variables:
         if _is_coordinate(var):
-            out[var['@name']] = None
+            out[var["@name"]] = None
 
     for var in variables:
-        name = var['@name']
+        name = var["@name"]
         out[name] = OrderedDict()
 
-        if '@shape' in var:
-            out[name]['shape'] = var['@shape'].split(' ')
+        if "@shape" in var:
+            out[name]["shape"] = var["@shape"].split(" ")
 
-        if '@type' in var:
-            out[name]['type'] = var['@type']
+        if "@type" in var:
+            out[name]["type"] = var["@type"]
 
-        if 'attribute' in var:
-            out[name].update(_attributes_to_json(var['attribute']))
+        if "attribute" in var:
+            out[name].update(_attributes_to_json(var["attribute"]))
 
-        if 'values' in var:
-            out[name]['data'] = _cast(var)
+        if "values" in var:
+            out[name]["data"] = _cast(var)
 
-    return {'variables': out}
+    return {"variables": out}
 
 
 def _cast(obj: dict) -> Any:
     """Cast attribute value to the appropriate type."""
     from xncml.parser import DataType, nctype
 
-    value = obj.get('@value') or obj.get('values')
-    typ = DataType(obj.get('@type', 'String'))
+    value = obj.get("@value") or obj.get("values")
+    typ = DataType(obj.get("@type", "String"))
     if value is not None:
         if isinstance(value, str):
             if typ in [DataType.STRING, DataType.STRING_1]:
                 return value
 
-            sep = ' '
+            sep = " "
             values = value.split(sep)
             return list(map(nctype(typ), values))
         elif isinstance(value, dict):
@@ -538,36 +532,35 @@ def _cast(obj: dict) -> Any:
 
 def _is_coordinate(var):
     """Return True is variable is a coordinate."""
-
     # Variable is 1D and has same name as dimension
-    if var.get('@shape', '').split(' ') == [var['@name']]:
+    if var.get("@shape", "").split(" ") == [var["@name"]]:
         return True
 
-    lat_units = ['degrees_north', 'degreeN', 'degree_N', 'degree_north', 'degreesN', 'degrees_N']
-    lon_units = ['degrees_east', 'degreeE', 'degree_E', 'degree_east', 'degreesE', 'degrees_E']
+    lat_units = ["degrees_north", "degreeN", "degree_N", "degree_north", "degreesN", "degrees_N"]
+    lon_units = ["degrees_east", "degreeE", "degree_E", "degree_east", "degreesE", "degrees_E"]
     names = [
-        'latitude',
-        'longitude',
-        'time',
-        'air_pressure',
-        'altitude',
-        'depth',
-        'geopotential_height',
-        'height',
-        'height_above_geopotential_datum',
-        'height_above_mean_sea_level',
-        'height_above_reference_ellipsoid',
+        "latitude",
+        "longitude",
+        "time",
+        "air_pressure",
+        "altitude",
+        "depth",
+        "geopotential_height",
+        "height",
+        "height_above_geopotential_datum",
+        "height_above_mean_sea_level",
+        "height_above_reference_ellipsoid",
     ]
 
-    if 'attribute' in var:
-        attrs = _attributes_to_json(var['attribute'])
+    if "attribute" in var:
+        attrs = _attributes_to_json(var["attribute"])
 
         # Check units
-        if attrs.get('units', '') in lon_units + lat_units:
+        if attrs.get("units", "") in lon_units + lat_units:
             return True
 
         # Check long_name and standard_name
-        if attrs.get('long_name', attrs.get('standard_name', '')) in names:
+        if attrs.get("long_name", attrs.get("standard_name", "")) in names:
             return True
 
     return False
@@ -587,9 +580,9 @@ def preparse(obj: dict) -> dict:
 class AggregationType(Enum):
     """Type of aggregation."""
 
-    FORECAST_MODEL_RUN_COLLECTION = 'forecastModelRunCollection'
-    FORECAST_MODEL_RUN_SINGLE_COLLECTION = 'forecastModelRunSingleCollection'
-    JOIN_EXISTING = 'joinExisting'
-    JOIN_NEW = 'joinNew'
-    TILED = 'tiled'
-    UNION = 'union'
+    FORECAST_MODEL_RUN_COLLECTION = "forecastModelRunCollection"
+    FORECAST_MODEL_RUN_SINGLE_COLLECTION = "forecastModelRunSingleCollection"
+    JOIN_EXISTING = "joinExisting"
+    JOIN_NEW = "joinNew"
+    TILED = "tiled"
+    UNION = "union"
