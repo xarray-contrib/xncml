@@ -1,3 +1,9 @@
+0.4.1 (unreleased)
+==================
+
+- Added support for running `pytest` with `pytest-cov`. By @Zeitsperre
+- Reworked the GitHub CI testing workflow to perform version checks as well as tests with `pytest-cov`. By @Zeitsperre
+
 0.4.0 (2024-01-08)
 ==================
 
