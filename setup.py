@@ -12,6 +12,10 @@ if os.path.exists('requirements.txt'):
 else:
     install_requires = ['xmltodict', 'xsdata', 'xarray']
 
+if os.path.exists('requirements-dev.txt'):
+    with open('requirements-dev.txt') as f:
+        dev_install_requires = f.read().strip().split('\n')
+
 if os.path.exists('README.md'):
     with open('README.md') as f:
         long_description = f.read()
@@ -37,6 +41,6 @@ setup(
     python_requires='>=3.9, <4',
     setup_requires=['setuptools_scm', 'setuptools>=30.3.0', 'setuptools_scm_git_archive'],
     extras_require={
-        'dev': ['pytest', 'flake8'],
+        'dev': dev_install_requires,
     },
 )
