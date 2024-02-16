@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+    <variable name="toto" shape="myDim" type="ushort">
+        <values>3</values>
+    </variable>
+    <dimension name="myDim"></dimension>
+</netcdf>

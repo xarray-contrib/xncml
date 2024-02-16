@@ -310,22 +310,22 @@ def test_unsigned_type():
 
 def test_empty_scalar__no_values_tag():
     """
-    Scalar without values loose their type because we can't create a typed numpy
-    scalar which is empty
+    A scalar variable which <values> is missing will have its value set to
+    the default value of its type.
     """
     ds = xncml.open_ncml(data / 'testEmptyScalar.xml')
-    assert ds['empty_scalar_var'].dtype == np.dtype('O')
-    assert ds['empty_scalar_var'].item() is None
+    assert ds['empty_scalar_var'].dtype == np.dtype('float64')
+    assert ds['empty_scalar_var'].item() == 0
 
 
 def test_empty_scalar__with_empty_values_tag():
-    """A scalar variable with an empty <values> tag is invalid."""
+    """A scalar with an empty <values> tag is invalid."""
     with pytest.raises(ValueError, match='No values found for variable .*'):
         xncml.open_ncml(data / 'testEmptyScalar_withValuesTag.xml')
 
 
 def test_multiple_values_for_scalar():
-    """Scalar with an multiple values in <values> tag is invalid."""
+    """A scalar with multiple values in its <values> tag is invalid."""
     with pytest.raises(ValueError, match='The expected size for variable .* was 1, .*'):
         xncml.open_ncml(data / 'testEmptyScalar_withMultipleValues.xml')
 
@@ -333,14 +333,74 @@ def test_multiple_values_for_scalar():
 def test_read_enum():
     """A enum should be turned into CF flag_values and flag_meanings attributes."""
     ds = xncml.open_ncml(data / 'testEnums.xml')
-    assert ds['be_or_not_to_be'].attrs['flag_values'] == [0, 1]
-    assert ds['be_or_not_to_be'].attrs['flag_meanings'] == ['false', 'true']
+    assert ds.be_or_not_to_be.dtype.metadata['enum'] == {'false': 0, 'true': 1}
+    assert ds.be_or_not_to_be.dtype.metadata['enum_name'] == 'boolean'
 
 
 def test_empty_attr():
     """A empty attribute is valid."""
     ds = xncml.open_ncml(data / 'testEmptyAttr.xml')
     assert ds.attrs['comment'] == ''
+
+
+def test_read_group__read_only_root_group():
+    """By default, only read root group."""
+    ds = xncml.open_ncml(data / 'testGroup.xml')
+    assert ds.toto is not None
+    assert ds.get('group_var') is None
+    assert ds.get('other_group_var') is None
+
+
+def test_read_group__read_sub_group():
+    """Read specified sub group and its parents."""
+    ds = xncml.open_ncml(data / 'testGroup.xml', group='a_sub_group')
+    assert ds.toto is not None
+    assert ds.get('group_var') is not None
+    ds.group_var.attrs['group_path'] = '/a_sub_group'
+    assert ds.get('other_group_var') is None
+
+
+def test_read_group__conflicting_dims():
+    """Read a group and ensure its dimension is correct"""
+    ds = xncml.open_ncml(data / 'testGroupConflictingDims.xml', group='gr_b')
+    assert ds.dims['index'] == 94
+    assert 'index' in ds.gr_b_var.dims
+
+
+def test_read__invalid_dim():
+    with pytest.raises(ValueError, match="Unknown dimension 'myDim'.*"):
+        xncml.open_ncml(data / 'testGroupInvalidDim.xml')
+
+
+def test_flatten_groups():
+    """Read every group and flatten everything in a single dataset/group."""
+    ds = xncml.open_ncml(data / 'testGroup.xml', group='*')
+    assert ds.toto is not None
+    assert ds.get('toto__1') is None
+    assert ds.get('group_var') is not None
+    ds.group_var.attrs['group_path'] = '/a_sub_group'
+    assert ds.get('other_group_var') is not None
+    ds.other_group_var.attrs['group_path'] = '/another_sub_group'
+
+
+def test_flatten_groups__conflicting_dims():
+    """Read every group and rename dimensions"""
+    ds = xncml.open_ncml(data / 'testGroupConflictingDims.xml', group='*')
+    assert 'index' in ds.gr_a_var.dims
+    assert ds.dims['index'] is not None
+    assert 'index__1' in ds.gr_b_var.dims
+    assert ds.dims['index__1'] is not None
+
+
+def test_flatten_groups__sub_groups():
+    """Read every group and rename dimensions"""
+    ds = xncml.open_ncml(data / 'testGroupMultiLayers.xml', group='*')
+    assert ds.dims['index'] == 42
+    assert ds.dims['index__1'] == 22
+    assert ds['a_var'].size == 1
+    assert ds['a_var'] == 2
+    assert ds['a_var__1'].size == 42
+    assert ds['a_var__2'].size == 22
 
 
 # --- #
