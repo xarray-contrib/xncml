@@ -43,6 +43,7 @@ jobs:
         pytest
         coveralls
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_FLAG_NAME: run-{{ matrix.python-version }}
         COVERALLS_PARALLEL: true
         COVERALLS_SERVICE_NAME: github
