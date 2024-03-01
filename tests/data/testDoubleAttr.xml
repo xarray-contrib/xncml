@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+    <attribute name="toto" type="double" value="42.42" />
+    <attribute name="comment" value="" />
+</netcdf>

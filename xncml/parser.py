@@ -779,9 +779,10 @@ def cast(obj: Attribute) -> tuple | str:
     if value:
         if obj.type in [DataType.STRING, DataType.STRING_1]:
             return value
-
         sep = obj.separator or ' '
         values = value.split(sep)
+        if len(values) == 1:
+            return nctype(obj.type)(values[0])
         return tuple(map(nctype(obj.type), values))
     return ''
 
