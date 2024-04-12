@@ -404,6 +404,11 @@ def test_flatten_groups__sub_groups():
     assert ds["a_var__2"].size == 22
 
 
+def test_read_non_str_attribute():
+    ds = xncml.open_ncml(data / "testDoubleAttr.xml")
+    assert ds.attrs["toto"] == 42.42
+
+
 # --- #
 def check_dimension(ds):
     assert len(ds["lat"]) == 3
