@@ -13,10 +13,11 @@ These tools allow you to modify NcML by:
 
 and read NcML files into `xarray.Dataset` objects:
 
-```python
-import xncml
-ds = xncml.open_ncml("large_ensemble.ncml")
-```
+.. code-block:: python
+
+   import xncml
+   ds = xncml.open_ncml("large_ensemble.ncml")
+
 
 See `doc`_ for more information.
 
@@ -31,7 +32,7 @@ To install xncml, run this command in your terminal:
 
 .. code-block:: console
 
-    $ python -m pip install xncml
+   python -m pip install xncml
 
 This is the preferred method to install xncml, as it will always install the most recent stable release.
 
@@ -51,19 +52,19 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git@github.com:xarray-contrib/xncml/
+   git clone git@github.com:xarray-contrib/xncml/
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/xarray-contrib/xncml/tarball/main
+   curl -OJL https://github.com/xarray-contrib/xncml/tarball/main
 
 Once you have a copy of the source, you can install it with:
 
 .. code-block:: console
 
-    $ python -m pip install .
+   python -m pip install .
 
 .. _doc: https://readthedocs.org/projects/xncml
 .. _Github repo: https://github.com/xarray-contrib/xncml/

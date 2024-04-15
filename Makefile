@@ -53,8 +53,8 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 lint/flake8: ## check style with flake8
-	ruff xncml tests
-	flake8 --config=.flake8 xncml tests
+	ruff src/xncml tests
+	flake8 --config=.flake8 src/xncml tests
 
 lint: lint/flake8 ## check style
 
@@ -65,13 +65,13 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source xncml -m pytest
+	coverage run --source src/xncml -m pytest
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
 autodoc: clean-docs ## create sphinx-apidoc files:
-	sphinx-apidoc -o docs/apidoc --private --module-first xncml
+	sphinx-apidoc -o docs/apidoc --private --module-first src/xncml
 
 linkcheck: autodoc ## run checks over all external links found throughout the documentation
 	$(MAKE) -C docs linkcheck
@@ -93,7 +93,7 @@ release: dist ## package and upload a release
 	python -m flit publish dist/*
 
 install: clean ## install the package to the active Python's site-packages
-	python -m flit install
+	python -m pip install .[all]
 
 dev: clean ## install the package to the active Python's site-packages
-	python -m flit install --symlink
+	python -m pip install --editable .[all]
