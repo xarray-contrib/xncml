@@ -108,6 +108,30 @@ filename = ".cruft.json"
 search = "\"version\": \"{current_version}\""
 replace = "\"version\": \"{new_version}\""
 
+[[tool.bumpversion.files]]
+filename = "CHANGELOG.rst"
+search = """\
+`Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
+============================================================================
+"""
+replace = """\
+`Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
+============================================================================
+
+Changes:
+--------
+- No change.
+
+Fixes:
+------
+- No change.
+
+.. _changes_{new_version}:
+
+`{new_version} <https://github.com/crim-ca/weaver/tree/{new_version}>`_ ({now:%%Y-%%m-%%d})
+    ========================================================================
+"""
+
 [tool.bumpversion.parts.build]
 independent = false
 
