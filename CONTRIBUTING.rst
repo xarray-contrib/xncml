@@ -1,6 +1,3 @@
-.. highlight:: shell
-
-============
 Contributing
 ============
 
@@ -82,7 +79,7 @@ Ready to contribute? Here's how to set up ``xncml`` for local development.
 
    pre-commit run -a
 
-  If you want to skip the ``pre-commit`` hooks temporarily, you can pass the ``--no-verify`` flag to `$ git commit`.
+  If you want to skip the ``pre-commit`` hooks temporarily, you can pass the ``--no-verify`` flag to `git commit`.
 
 #. Create a branch for local development::
 
@@ -102,7 +99,7 @@ Ready to contribute? Here's how to set up ``xncml`` for local development.
    git commit -m "Your detailed description of your changes."
    git push origin name-of-your-bugfix-or-feature
 
-  If ``pre-commit`` hooks fail, try re-committing your changes (or, if need be, you can skip them with `$ git commit --no-verify`).
+  If ``pre-commit`` hooks fail, try re-committing your changes (or, if need be, you can skip them with `git commit --no-verify`).
 
 #. Submit a `Pull Request <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`_ through the GitHub website.
 
@@ -140,7 +137,7 @@ Tips
 
 To run a subset of tests::
 
-$ pytest tests.test_xncml
+pytest tests.test_xncml
 
 To run specific code style checks::
 
@@ -202,7 +199,7 @@ From the command line on your Linux distribution, simply run the following from 
     # To upload to PyPI
    python -m flit publish dist/*
 
-The new version based off of the version checked out will now be available via `pip` (`$ pip install xncml`).
+The new version based off of the version checked out will now be available via `pip` (`pip install xncml`).
 
 Releasing on conda-forge
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -229,30 +226,3 @@ Subsequent releases
 ^^^^^^^^^^^^^^^^^^^
 
 If the conda-forge feedstock recipe is built from PyPI, then when a new release is published on PyPI, `regro-cf-autotick-bot` will open Pull Requests automatically on the conda-forge feedstock. It is up to the conda-forge feedstock maintainers to verify that the package is building properly before merging the Pull Request to the main branch.
-
-Building sources for wide support with `manylinux` image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. warning::
-    This section is for building source files that link to or provide links to C/C++ dependencies.
-    It is not necessary to perform the following when building pure Python packages.
-
-In order to do ensure best compatibility across architectures, we suggest building wheels using the `PyPA`'s `manylinux`
-docker images (at time of writing, we endorse using `manylinux_2_24_x86_64`).
-
-With `docker` installed and running, begin by pulling the image::
-
-   sudo docker pull quay.io/pypa/manylinux_2_24_x86_64
-
-From the xncml source folder we can enter into the docker container, providing access to the `xncml` source files by linking them to the running image::
-
-   sudo docker run --rm -ti -v $(pwd):/xncml -w /xncml quay.io/pypa/manylinux_2_24_x86_64 bash
-
-Finally, to build the wheel, we run it against the provided Python3.9 binary::
-
-   /opt/python/cp39-cp39m/bin/python -m build --sdist --wheel
-
-This will then place two files in `xncml/dist/` ("xncml-1.2.3-py3-none-any.whl" and "xncml-1.2.3.tar.gz").
-We can now leave our docker container (`$ exit`) and continue with uploading the files to PyPI::
-
-   twine upload dist/*

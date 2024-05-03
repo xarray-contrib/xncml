@@ -438,16 +438,7 @@ def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
 
 
 def read_enum(obj: EnumTypedef) -> dict[str, list]:
-    """
-    Parse <enumTypeDef> element.
-
-    Example
-    -------
-    <enumTypedef name="trilean" type="enum1">
-        <enum key="0">false</enum>
-        <enum key="1">true</enum>
-        <enum key="2">undefined</enum>
-    </enumTypedef>
+    """Parse <enumTypeDef> element.
 
     Parameters
     ----------

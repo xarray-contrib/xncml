@@ -128,8 +128,8 @@ Fixes:
 
 .. _changes_{new_version}:
 
-`{new_version} <https://github.com/crim-ca/weaver/tree/{new_version}>`_ ({now:%%Y-%%m-%%d})
-    ========================================================================
+`{new_version} <https://github.com/xarray-contrib/xncml/tree/{new_version}`_
+================================================================
 """
 
 [tool.bumpversion.parts.build]
@@ -238,6 +238,9 @@ max-complexity = 15
 
 [tool.ruff.lint.per-file-ignores]
 "src/xncml/**/__init__.py" = ["F401", "F403"]
+"src/xncml/generated/*.py" = ["D"]
+"tests/**/*.py" = ["D"]
+"src/xncml/parser.py" = ["C901"] # To be added
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 180

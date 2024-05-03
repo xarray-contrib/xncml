@@ -9,6 +9,7 @@ ignore =
 	AZ100,
 	AZ200,
 	AZ300,
+    AZ400
 	C,
 	D,
 	E,

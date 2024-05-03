@@ -1,3 +1,9 @@
+"""
+Core features of xncml.
+
+This module exposes the ``Dataset`` class which is used to manipulate ncml files.
+"""
+
 from collections import OrderedDict
 from enum import Enum
 from pathlib import Path
@@ -8,7 +14,7 @@ import xmltodict
 
 
 class Dataset(object):
-    """This is a class for reading and manipulating NcML file.
+    """A class for reading and manipulating NcML file.
 
     Note that NcML documents are used for two distinct purposes:
       - an XML description of NetCDF structure and metadata;
@@ -18,7 +24,7 @@ class Dataset(object):
     """
 
     def __init__(self, filepath: str = None, location: str = None):
-        """
+        """Create a Dataset.
 
         Parameters
         ----------
@@ -59,7 +65,8 @@ class Dataset(object):
             },
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Return a string representation of the parsed xml"""
         return xmltodict.unparse(self.ncroot, pretty=True)
 
     # Aggregations and scans
@@ -70,12 +77,12 @@ class Dataset(object):
         ----------
         dim_name : str
             Dimension name.
-        type_ : str
+        ``type_`` : str
             Aggregation type.
         recheck_every : str
-            Time interval for rechecking the aggregation. Only used if `type_` is `AggregationType.scan`.
+            Time interval for rechecking the aggregation. Only used if ``type_`` is ``AggregationType.scan``.
         time_units_change : bool
-            Whether the time units change. Only used if `type_` is `AggregationType.scan`.
+            Whether the time units change. Only used if ``type_`` is ``AggregationType.scan``.
         """
         at = AggregationType(type_)
         item = OrderedDict(
@@ -189,7 +196,7 @@ class Dataset(object):
             Attribute name
         value : object
             Attribute value. Must be a serializable Python Object
-        type_ : str, default: 'String'
+        ``type_`` : str, default: 'String'
              String describing attribute type.
 
         """
@@ -329,7 +336,7 @@ class Dataset(object):
             Attribute name.
         value : object
             Attribute value. Must be a serializable Python Object.
-        type_ : str, default: 'String'
+        ``type_`` : str, default: 'String'
             String describing attribute type.
 
         """
