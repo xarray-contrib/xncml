@@ -9,7 +9,9 @@ authors = [
 ]
 maintainers = [
   {name = "Anderson Banihirwe", email = "abanihi@ucar.edu"},
-  {name = "David Huard"}
+  {name = "Abel Aoun", email = "aoun.abel@gmail.com"},
+  {name = "David Huard", email = "david.huard@gmail.com"},
+  {name = "Trevor James Smith", email = "trevor_smith@live.com"}
 ]
 description = "Tools for manipulating and opening NCML (NetCDF Markup) files with/for xarray"
 readme = {file = "README.rst", content-type = "text/x-rst"}
@@ -33,13 +35,13 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-  "xmltodict",
-  "xsdata",
-  "xarray",
   "cftime",
-  "netCDF4",
   "dask",
-  "psutil"
+  "netCDF4",
+  "psutil",
+  "xarray",
+  "xmltodict",
+  "xsdata"
 ]
 
 [project.optional-dependencies]
