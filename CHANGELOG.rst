@@ -2,7 +2,7 @@ Changelog
 =========
 
 `Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
-============================================================================
+----------------------------------------------------------------------------
 
 - Added support for running `pytest` with `pytest-cov`. By @Zeitsperre
 - Reworked the GitHub CI testing workflow to perform version checks as well as tests with `pytest-cov` . By @Zeitsperre
