@@ -55,13 +55,13 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 lint/flake8: ## check style with flake8
-	ruff xncml tests
+	ruff check src tests
 	flake8 --config=.flake8 xncml tests
 
 lint/black: ## check style with black
-	black --check xncml tests
-	blackdoc --check xncml docs
-	isort --check xncml tests
+	black --check src/xncml tests
+	blackdoc --check src/xncml docs
+	isort --check src/xncml tests
 
 lint: lint/flake8 lint/black ## check style
 
@@ -72,7 +72,7 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source xncml -m pytest
+	coverage run --source src/xncml -m pytest
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
