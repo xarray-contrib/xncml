@@ -1,4 +1,4 @@
-.PHONY: clean clean-build clean-pyc clean-test coverage dist docs help install lint lint/flake8 lint/black
+.PHONY: clean clean-build clean-pyc clean-test coverage dist docs help install lint lint/flake8 lint/format-checkformat-check
 .DEFAULT_GOAL := help
 
 define BROWSER_PYSCRIPT
@@ -58,12 +58,10 @@ lint/flake8: ## check style with flake8
 	ruff check src tests
 	flake8 --config=.flake8 xncml tests
 
-lint/black: ## check style with black
-	black --check src/xncml tests
-	blackdoc --check src/xncml docs
-	isort --check src/xncml tests
+lint/format-check: ## check style with ruff format
+	ruff format --check src/xncml tests
 
-lint: lint/flake8 lint/black ## check style
+lint: lint/flake8 lint/format-check ## check style
 
 test: ## run tests quickly with the default Python
 	python -m pytest

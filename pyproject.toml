@@ -83,14 +83,6 @@ all = ["xncml[dev]", "xncml[docs]"]
 "Issue tracker" = "https://github.com/xarray-contrib/xncml/issues"
 "Changelog" = "https://github.com/xarray-contrib/xncml/blob/main/CHANGELOG.rst"
 
-[tool.black]
-target-version = [
-  "py39",
-  "py310",
-  "py311",
-  "py312"
-]
-
 [tool.bumpversion]
 current_version = "0.5.0"
 commit = true
@@ -172,10 +164,6 @@ exclude = [
   "docs/locales"
 ]
 
-[tool.isort]
-profile = "black"
-py_version = 38
-
 [tool.mypy]
 files = "."
 python_version = 3.9
@@ -215,6 +203,8 @@ exclude = [
 ]
 
 [tool.ruff.format]
+# Enable reformatting of code snippets in docstrings.
+docstring-code-format = true
 line-ending = "auto"
 
 [tool.ruff.lint]
