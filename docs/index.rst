@@ -10,6 +10,7 @@ Xncml Documentation
    readme
    tutorial
    contributing
+   releasing
    authors
    changelog
 

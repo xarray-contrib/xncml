@@ -1,4 +1,4 @@
-.PHONY: clean clean-build clean-pyc clean-test coverage dist docs help install lint lint/flake8
+.PHONY: clean clean-build clean-pyc clean-test coverage dist docs help install lint lint/flake8 lint/black
 .DEFAULT_GOAL := help
 
 define BROWSER_PYSCRIPT
@@ -22,6 +22,7 @@ endef
 export PRINT_HELP_PYSCRIPT
 
 BROWSER := python -c "$$BROWSER_PYSCRIPT"
+LOCALES := docs/locales
 
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
@@ -38,6 +39,7 @@ clean-build: ## remove build artifacts
 clean-docs: ## remove docs artifacts
 	rm -f docs/apidoc/xncml*.rst
 	rm -f docs/apidoc/modules.rst
+	rm -fr docs/locales/fr/LC_MESSAGES/*.mo
 	$(MAKE) -C docs clean
 
 clean-pyc: ## remove Python file artifacts
@@ -53,10 +55,15 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 lint/flake8: ## check style with flake8
-	ruff src/xncml tests
-	flake8 --config=.flake8 src/xncml tests
+	ruff xncml tests
+	flake8 --config=.flake8 xncml tests
 
-lint: lint/flake8 ## check style
+lint/black: ## check style with black
+	black --check xncml tests
+	blackdoc --check xncml docs
+	isort --check xncml tests
+
+lint: lint/flake8 lint/black ## check style
 
 test: ## run tests quickly with the default Python
 	python -m pytest
@@ -65,21 +72,28 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source src/xncml -m pytest
+	coverage run --source xncml -m pytest
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
+initialize-translations: clean-docs ## initialize translations, ignoring autodoc-generated files
+	${MAKE} -C docs gettext
+	sphinx-intl update -p docs/_build/gettext -d docs/locales -l fr
 
 autodoc: clean-docs ## create sphinx-apidoc files:
-	sphinx-apidoc -o docs/apidoc --private --module-first src/xncml
+	sphinx-apidoc -o docs/apidoc --private --module-first xncml
 
 linkcheck: autodoc ## run checks over all external links found throughout the documentation
 	$(MAKE) -C docs linkcheck
 
 docs: autodoc ## generate Sphinx HTML documentation, including API docs
-	$(MAKE) -C docs html
+	$(MAKE) -C docs html BUILDDIR="_build/html/en"
+ifneq ("$(wildcard $(LOCALES))","")
+	${MAKE} -C docs gettext
+	$(MAKE) -C docs html BUILDDIR="_build/html/fr" SPHINXOPTS="-D language='fr'"
+endif
 ifndef READTHEDOCS
-	$(BROWSER) docs/_build/html/index.html
+	$(BROWSER) docs/_build/html/en/html/index.html
 endif
 
 servedocs: docs ## compile the docs watching for changes
@@ -93,7 +107,8 @@ release: dist ## package and upload a release
 	python -m flit publish dist/*
 
 install: clean ## install the package to the active Python's site-packages
-	python -m pip install .[all]
+	python -m pip install .
 
 dev: clean ## install the package to the active Python's site-packages
 	python -m pip install --editable .[all]
+	pre-commit install

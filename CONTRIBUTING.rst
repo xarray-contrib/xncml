@@ -1,3 +1,4 @@
+============
 Contributing
 ============
 
@@ -11,7 +12,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/xarray-contrib/xncml/issues.
+Report bugs at https://github.com/audreyr/xncml/issues.
 
 If you are reporting a bug, please include:
 
@@ -37,7 +38,7 @@ xncml could always use more documentation, whether as part of the official xncml
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/xarray-contrib/xncml/issues.
+The best way to send feedback is to file an issue at https://github.com/audreyr/xncml/issues.
 
 If you are proposing a feature:
 
@@ -53,51 +54,73 @@ Get Started!
 
     If you are new to using GitHub and `git`, please read `this guide <https://guides.github.com/activities/hello-world/>`_ first.
 
+.. warning::
+
+    Anaconda Python users: Due to the complexity of some packages, the default dependency solver can take a long time to resolve the environment. Consider running the following commands in order to speed up the process::
+
+   .. code-block:: console
+
+        conda install -n base conda-libmamba-solver
+        conda config --set solver libmamba
+
+    For more information, please see the following link: https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community
+
+    Alternatively, you can use the `mamba <https://mamba.readthedocs.io/en/latest/index.html>`_ package manager, which is a drop-in replacement for ``conda``. If you are already using `mamba`, replace the following commands with ``mamba`` instead of ``conda``.
+
 Ready to contribute? Here's how to set up ``xncml`` for local development.
 
 #. Fork the ``xncml`` repo on GitHub.
 #. Clone your fork locally::
 
+   .. code-block:: console
+
     git clone git@github.com:your_name_here/xncml.git
 
-#. Install your local copy into a development environment. Using ``virtualenv`` (``virtualenvwrapper``), you can create a new development environment with::
+#. Install your local copy into a development environment. You can create a new Anaconda development environment with::
 
-    python -m pip install flit virtualenvwrapper
-    mkvirtualenv xncml
-    cd xncml/
-    flit install --symlink
+   .. code-block:: console
+
+    conda env create -f environment-dev.yml
+    conda activate xncml
+    make dev
 
   This installs ``xncml`` in an "editable" state, meaning that changes to the code are immediately seen by the environment.
 
-#. To ensure a consistent coding style, install the ``pre-commit`` hooks to your local clone::
+#. To ensure a consistent coding style, ``make dev`` also installs the ``pre-commit`` hooks to your local clone::
 
-   pre-commit install
-
-  On commit, ``pre-commit`` will check that ``flake8``, and ``ruff`` checks are passing, perform automatic fixes if possible, and warn of violations that require intervention. If your commit fails the checks initially, simply fix the errors, re-add the files, and re-commit.
+  On commit, ``pre-commit`` will check that ``black``, ``blackdoc``, ``isort``, ``flake8``, and ``ruff`` checks are passing, perform automatic fixes if possible, and warn of violations that require intervention. If your commit fails the checks initially, simply fix the errors, re-add the files, and re-commit.
 
   You can also run the hooks manually with::
 
-   pre-commit run -a
+   .. code-block:: console
+
+    pre-commit run -a
 
   If you want to skip the ``pre-commit`` hooks temporarily, you can pass the ``--no-verify`` flag to `git commit`.
 
 #. Create a branch for local development::
 
-   git checkout -b name-of-your-bugfix-or-feature
+   .. code-block:: console
+
+    git checkout -b name-of-your-bugfix-or-feature
 
   Now you can make your changes locally.
 
 #. When you're done making changes, we **strongly** suggest running the tests in your environment or with the help of ``tox``::
 
-   python -m pytest
+   .. code-block:: console
+    make lint
+    python -m pytest
     # Or, to run multiple build tests
-   tox
+    python -m tox
 
 #. Commit your changes and push your branch to GitHub::
 
-   git add .
-   git commit -m "Your detailed description of your changes."
-   git push origin name-of-your-bugfix-or-feature
+   .. code-block:: console
+
+    git add .
+    git commit -m "Your detailed description of your changes."
+    git push origin name-of-your-bugfix-or-feature
 
   If ``pre-commit`` hooks fail, try re-committing your changes (or, if need be, you can skip them with `git commit --no-verify`).
 
@@ -105,13 +128,15 @@ Ready to contribute? Here's how to set up ``xncml`` for local development.
 
 #. When pushing your changes to your branch on GitHub, the documentation will automatically be tested to reflect the changes in your Pull Request. This build process can take several minutes at times. If you are actively making changes that affect the documentation and wish to save time, you can compile and test your changes beforehand locally with::
 
+   .. code-block:: console
+
     # To generate the html and open it in your browser
-   make docs
+    make docs
     # To only generate the html
-   make autodoc
-   make -C docs html
+    make autodoc
+    make -C docs html
     # To simply test that the docs pass build checks
-   tox -e docs
+    python -m tox -e docs
 
 #. Once your Pull Request has been accepted and merged to the ``main`` branch, several automated workflows will be triggered:
 
@@ -130,21 +155,33 @@ Before you submit a pull request, check that it meets these guidelines:
 
 #. If the pull request adds functionality, the docs should also be updated. Put your new functionality into a function with a docstring, and add the feature to the list in ``README.rst``.
 
-#. The pull request should work for Python 3.8, 3.9, 3.10, 3.11, and 3.12. Check that the tests pass for all supported Python versions.
+#. The pull request should work for Python 3.8, 3.9, 3.10, 3.11, 3.12 and PyPy. Check that the tests pass for all supported Python versions.
 
 Tips
 ----
 
 To run a subset of tests::
 
+   .. code-block:: console
+
 pytest tests.test_xncml
 
 To run specific code style checks::
 
-   black --check xncml tests
-   isort --check xncml tests
-   blackdoc --check xncml docs
-   ruff xncml tests
-   flake8 xncml tests
+   .. code-block:: console
 
-To get ``black``, ``isort``, ``blackdoc``, ``ruff``, and ``flake8`` (with plugins ``flake8-alphabetize`` and ``flake8-rst-docstrings``) simply install them with `pip` into your environment.
+    python -m black --check xncml tests
+    python -m isort --check xncml tests
+    python -m blackdoc --check xncml docs
+    python -m ruff xncml tests
+    python -m flake8 xncml tests
+
+To get ``black``, ``isort``, ``blackdoc``, ``ruff``, and ``flake8`` (with plugins ``flake8-alphabetize`` and ``flake8-rst-docstrings``) simply install them with `pip` (or `conda`) into your environment.
+
+Code of Conduct
+---------------
+
+Please note that this project is released with a `Contributor Code of Conduct`_.
+By participating in this project you agree to abide by its terms.
+
+.. _`Contributor Code of Conduct`: CODE_OF_CONDUCT.rst
