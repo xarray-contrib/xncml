@@ -124,4 +124,3 @@ We can now leave our docker container (`exit`) and continue with uploading the f
    .. code-block:: console
 
     python -m twine upload dist/*
-
