@@ -1,5 +1,0 @@
-[run]
-omit =
-    tests/*.py
-    setup.py
-    xncml/__init__.py

@@ -7,13 +7,14 @@ dependencies:
   - xmltodict
   - xsdata
   - xarray
-  - sphinx==5.3.0
-  - nbsphinx==0.8.10
+  - sphinx
+  - nbsphinx
   - sphinx-copybutton
+  - sphinx-codeautolink
   - numpydoc
   - sphinx-autosummary-accessors
   - ipython
-  - pip:
-      - myst_nb
-      - myst-parser==0.18.1
-      - sphinx_rtd_theme==1.1.1
+  - ipykernel
+  - jupyter_client
+  - sphinx-rtd-theme
+  - pandoc
