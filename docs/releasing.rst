@@ -9,32 +9,33 @@ A reminder for the **maintainers** on how to deploy. This section is only releva
 
 .. warning::
 
-    It is important to be aware that any changes to files found within the ``{{ cookiecutter.project_slug }}`` folder (with the exception of ``{{ cookiecutter.project_slug }}/__init__.py``) will trigger the ``bump-version.yml`` workflow. Be careful not to commit changes to files in this folder when preparing a new release.
+    It is important to be aware that any changes to files found within the ``src/xncml`` folder (with the exception of ``src/xncml/__init__.py``) will trigger the ``bump-version.yml`` workflow. Be careful not to commit changes to files in this folder when preparing a new release.
 
 #. Create a new branch from `main` (e.g. `release-0.2.0`).
-#. Update the `CHANGES.rst` file to change the `Unreleased` section to the current date.
-#. Bump the version in your branch to the next version (e.g. `v0.1.0 -> v0.2.0`)::
+#. Update the `CHANGELOG.rst` file to change the `Unreleased` section to the current date.
+#. Bump the version in your branch to the next version (e.g. `v0.1.0 -> v0.2.0`):
 
-   .. code-block:: console
+    .. code-block:: console
 
-    bump-my-version bump minor # In most cases, we will be releasing a minor version
-    git push
+        bump-my-version bump minor # In most cases, we will be releasing a minor version
+        bump-my-version bump release # This will update the version strings to drop the `dev` suffix
+        git push
 
 #. Create a pull request from your branch to `main`.
-#. Once the pull request is merged, create a new release on GitHub. On the main branch, run::
+#. Once the pull request is merged, create a new release on GitHub. On the `main` branch, run:
 
-   .. code-block:: console
+    .. code-block:: console
 
-    git tag v0.2.0
-    git push --tags
+        git tag v0.2.0
+        git push --tags
 
-   This will trigger a GitHub workflow to build the package and upload it to TestPyPI. At the same time, the GitHub workflow will create a draft release on GitHub. Assuming that the workflow passes, the final release can then be published on GitHub by finalizing the draft release.
+    This will trigger a GitHub workflow to build the package and upload it to TestPyPI. At the same time, the GitHub workflow will create a draft release on GitHub. Assuming that the workflow passes, the final release can then be published on GitHub by finalizing the draft release.
 
 #. Once the release is published, the `publish-pypi.yml` workflow will go into an `awaiting approval` mode on Github Actions. Only authorized users may approve this workflow (notifications will be sent) to trigger the upload to PyPI.
 
 .. warning::
 
-    Uploads to PyPI can **never** be overwritten. If you make a mistake, you will need to bump the version and re-release the package. If the package uploaded to PyPI is broken, you should modify the GitHub release to mark the package as broken, as well as yank the package (mark the version  "broken") on PyPI.
+    Uploads to PyPI can **never** be overwritten. If you make a mistake, you will need to bump the version and re-release the package. If the package uploaded to PyPI is broken, you should modify the GitHub release to mark the package as broken, as well as yank the package (mark the version "broken") on PyPI.
 
 Packaging
 ---------
@@ -44,21 +45,21 @@ When a new version has been minted (features have been successfully integrated t
 The simple approach
 ~~~~~~~~~~~~~~~~~~~
 
-The simplest approach to packaging for general support (pip wheels) requires that ``flit`` be installed::
+The simplest approach to packaging for general support (pip wheels) requires that `flit` be installed:
 
-   .. code-block:: console
+    .. code-block:: console
 
-    python -m pip install flit
+        python -m pip install flit
 
-From the command line on your Linux distribution, simply run the following from the clone's main dev branch::
+From the command line on your Linux distribution, simply run the following from the clone's main dev branch:
 
-   .. code-block:: console
+    .. code-block:: console
 
-    # To build the packages (sources and wheel)
-    make dist
+        # To build the packages (sources and wheel)
+        make dist
 
-    # To upload to PyPI
-    make release
+        # To upload to PyPI
+        make release
 
 The new version based off of the version checked out will now be available via `pip` (`pip install {{ cookiecutter.project_slug }}`).
 
@@ -72,14 +73,14 @@ Before preparing an initial release on conda-forge, we *strongly* suggest consul
  * https://conda-forge.org/docs/maintainer/adding_pkgs.html
  * https://github.com/conda-forge/staged-recipes
 
-In order to create a new conda build recipe, to be used when proposing packages to the conda-forge repository, we strongly suggest using the ``grayskull`` tool::
+In order to create a new conda build recipe, to be used when proposing packages to the conda-forge repository, we strongly suggest using the `grayskull` tool:
 
-   .. code-block:: console
+    .. code-block:: console
 
-    python -m pip install grayskull
-    grayskull pypi {{ cookiecutter.project_slug }}
+        python -m pip install grayskull
+        grayskull pypi xncml
 
-For more information on ``grayskull``, please see the following link: https://github.com/conda/grayskull
+For more information on `grayskull`, please see the following link: https://github.com/conda/grayskull
 
 Before updating the main conda-forge recipe, we echo the conda-forge documentation and *strongly* suggest performing the following checks:
  * Ensure that dependencies and dependency versions correspond with those of the tagged version, with open or pinned versions for the `host` requirements.
@@ -97,30 +98,31 @@ Building sources for wide support with `manylinux` image
     This section is for building source files that link to or provide links to C/C++ dependencies.
     It is not necessary to perform the following when building pure Python packages.
 
-In order to do ensure best compatibility across architectures, we suggest building wheels using the `PyPA`'s `manylinux`
+In order to do ensure best compatibility across architectures, we suggest building wheels using the `PyPA`'s `manylinux` docker images (at time of writing, we endorse using `manylinux_2_24_x86_64`).
 docker images (at time of writing, we endorse using `manylinux_2_24_x86_64`).
 
-With `docker` installed and running, begin by pulling the image::
+With `docker` installed and running, begin by pulling the image:
 
-   .. code-block:: console
+    .. code-block:: console
 
-    sudo docker pull quay.io/pypa/manylinux_2_24_x86_64
+        sudo docker pull quay.io/pypa/manylinux_2_24_x86_64
 
-From the {{ cookiecutter.project_slug }} source folder we can enter into the docker container, providing access to the `{{ cookiecutter.project_slug }}` source files by linking them to the running image::
+From the xncml source folder we can enter into the docker container, providing access to the `src/xncml` source files by linking them to the running image:
 
-   .. code-block:: console
+    .. code-block:: console
 
-    sudo docker run --rm -ti -v $(pwd):/{{ cookiecutter.project_slug }} -w /{{ cookiecutter.project_slug }} quay.io/pypa/manylinux_2_24_x86_64 bash
+        sudo docker run --rm -ti -v $(pwd):/src/xncml -w /src/xncml quay.io/pypa/manylinux_2_24_x86_64 bash
 
-Finally, to build the wheel, we run it against the provided Python3.9 binary::
 
-   .. code-block:: console
+Finally, to build the wheel, we run it against the provided Python3.9 binary:
 
-    /opt/python/cp39-cp39m/bin/python -m build --sdist --wheel
+    .. code-block:: console
 
-This will then place two files in `{{ cookiecutter.project_slug }}/dist/` ("{{ cookiecutter.project_slug }}-1.2.3-py3-none-any.whl" and "{{ cookiecutter.project_slug }}-1.2.3.tar.gz").
-We can now leave our docker container (`exit`) and continue with uploading the files to PyPI::
+        /opt/python/cp39-cp39m/bin/python -m build --sdist --wheel
 
-   .. code-block:: console
+This will then place two files in `src/xncml/dist/` ("xncml-1.2.3-py3-none-any.whl" and "xncml-1.2.3.tar.gz").
+We can now leave our docker container (`exit`) and continue with uploading the files to PyPI:
 
-    python -m twine upload dist/*
+    .. code-block:: console
+
+        python -m twine upload dist/*

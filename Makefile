@@ -56,7 +56,7 @@ clean-test: ## remove test and coverage artifacts
 
 lint/flake8: ## check style with flake8
 	ruff check src tests
-	flake8 --config=.flake8 xncml tests
+	flake8 --config=.flake8 src/xncml tests
 
 lint/format-check: ## check style with ruff format
 	ruff format --check src/xncml tests
@@ -70,16 +70,16 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source src/xncml -m pytest
-	coverage report -m
-	coverage html
+	python -m coverage run --source src/xncml -m pytest
+	python -m coverage report -m
+	python -m coverage html
 	$(BROWSER) htmlcov/index.html
 initialize-translations: clean-docs ## initialize translations, ignoring autodoc-generated files
 	${MAKE} -C docs gettext
 	sphinx-intl update -p docs/_build/gettext -d docs/locales -l fr
 
 autodoc: clean-docs ## create sphinx-apidoc files:
-	sphinx-apidoc -o docs/apidoc --private --module-first xncml
+	sphinx-apidoc -o docs/apidoc --private --module-first src/xncml
 
 linkcheck: autodoc ## run checks over all external links found throughout the documentation
 	$(MAKE) -C docs linkcheck

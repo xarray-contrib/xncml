@@ -24,7 +24,7 @@ repos:
       -   id: python-use-type-annotations
       -   id: rst-inline-touching-normal
   -   repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.3.7
+      rev: v0.4.4
       hooks:
       -   id: ruff
           args: [ --fix ]
@@ -41,7 +41,7 @@ repos:
       -   id: yamllint
           args: [ '--config-file=.yamllint.yaml' ]
   -   repo: https://github.com/python-jsonschema/check-jsonschema
-      rev: 0.28.2
+      rev: 0.28.3
       hooks:
       -   id: check-github-workflows
       -   id: check-readthedocs

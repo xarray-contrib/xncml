@@ -5,8 +5,8 @@ Changelog
 `Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
 ----------------------------------------------------------------------------
 
-- Added support for running `pytest` with `pytest-cov`. By @Zeitsperre
-- Reworked the GitHub CI testing workflow to perform version checks as well as tests with `pytest-cov` . By @Zeitsperre
+- Added support for running `pytest` with `pytest-cov` (by :user:`Zeitsperre`).
+- Reworked the GitHub CI testing workflow to perform version checks as well as tests with `pytest-cov` (by :user:`Zeitsperre`).
 
 Breaking changes
 ^^^^^^^^^^^^^^^^
@@ -21,10 +21,10 @@ Breaking changes
 0.4.0 (2024-01-08)
 ------------------
 
-- Add support for <EnumTypeDef>. By @bzah
-- Update XSD schema and dataclasses to latest version from netcdf-java to add support for unsigned types. By @bzah
-- Add support for scalar variables. By @Bzah
-- [fix] empty attributes are now parsed into an empty string instead of crashing the parser.  By @Bzah
+- Add support for <EnumTypeDef> (by :user:`bzah`).
+- Update XSD schema and dataclasses to latest version from netcdf-java to add support for unsigned types (by :user:`bzah`).
+- Add support for scalar variables (by :user:`bzah`).
+- [fix] empty attributes are now parsed into an empty string instead of crashing the parser (by :user:`bzah`).
 
 .. _changes-0.3.1:
 
@@ -40,10 +40,10 @@ Breaking changes
 0.3 (2023-08-28)
 ----------------
 
-- Add `add_aggregation` and `add_variable_agg` to `Dataset` class. By @huard
-- Add `add_scan` to `Dataset` class. By @huard
-- Closing the dataset returned by `open_ncml` will close the underlying opened files. By @huard
-- Add `Dataset.from_text` classmethod  to create a `Dataset` from an XML string. By @huard
+- Add `add_aggregation` and `add_variable_agg` to `Dataset` class (by :user:`huard`).
+- Add `add_scan` to `Dataset` class (by :user:`huard`).
+- Closing the dataset returned by `open_ncml` will close the underlying opened files (by :user:`huard`).
+- Add `Dataset.from_text` classmethod  to create a `Dataset` from an XML string (by :user:`huard`).
 
 
 .. _changes-0.2:
@@ -51,10 +51,10 @@ Breaking changes
 0.2 (2023-02-23)
 ----------------
 
-- Implement `Dataset.rename_dataset_attribute`. By @huard
-- Allow empty `Dataset` creation. By @huard
-- Add support in `Dataset` for NcML documents using the `ncml` namespace. By @huard
-- Implement `Dataset.to_cf_dict` method to export CF-JSON dictionary. By @huard.
+- Implement `Dataset.rename_dataset_attribute` (by :user:`huard`).
+- Allow empty `Dataset` creation (by :user:`huard`).
+- Add support in `Dataset` for NcML documents using the `ncml` namespace (by :user:`huard`).
+- Implement `Dataset.to_cf_dict` method to export CF-JSON dictionary (by :user:`huard`).
 
 
 .. _changes-0.1:
@@ -62,6 +62,6 @@ Breaking changes
 0.1 Initial release (2022-11-24)
 --------------------------------
 
- - Manipulate NcML file: add & remove attributes, variables and dimensions. By @andersy005
+ - Manipulate NcML file: add & remove attributes, variables and dimensions. (by :user:`andersy005`).
  - Implement `open_ncml`, which returns an `xarray.Dataset` built from an NcML. Note that
-   Only a subset of the NcML syntax is supported. By @huard
+   Only a subset of the NcML syntax is supported. (by :user:`huard`).
