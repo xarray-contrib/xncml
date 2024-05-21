@@ -175,13 +175,13 @@ For more information on running tests, see the `pytest documentation <https://do
 
 To run specific code style checks:
 
-   .. code-block:: console
+.. code-block:: console
 
-    python -m black --check xncml tests
-    python -m isort --check xncml tests
-    python -m blackdoc --check xncml docs
-    python -m ruff check xncml tests
-    python -m flake8 xncml tests
+    python -m black --check src/xncml tests
+    python -m isort --check src/xncml tests
+    python -m blackdoc --check src/xncml docs
+    python -m ruff check src/xncml tests
+    python -m flake8 src/xncml tests
 
 To get ``black``, ``isort``, ``blackdoc``, ``ruff``, and ``flake8`` (with plugins ``flake8-alphabetize`` and ``flake8-rst-docstrings``) simply install them with ``pip`` (or ``conda``) into your environment.
 
