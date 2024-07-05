@@ -44,8 +44,7 @@ If you are proposing a feature:
 
 * Explain in detail how it would work.
 * Keep the scope as narrow as possible, to make it easier to implement.
-* Remember that this is a volunteer-driven project, and that contributions
-  are welcome. :)
+* Remember that this is a volunteer-driven project, and that contributions are welcome. :)
 
 Get Started!
 ------------
@@ -69,12 +68,20 @@ Get Started!
 
 Ready to contribute? Here's how to set up ``xncml`` for local development.
 
-#. Fork the ``xncml`` repo on GitHub.
+#. First, clone the ``xncml`` repo locally.
 #. Clone your fork locally:
 
-    .. code-block:: console
+    * If you are not a ``xncml`` collaborator, first fork the ``xncml`` repo on GitHub, then clone your fork locally.
 
-        git clone git@github.com:your_name_here/xncml.git
+        .. code-block:: console
+
+            git clone git@github.com:your_name_here/xncml.git
+
+    * If you are a ``xncml`` collaborator, clone the ``xncml`` repo directly.
+
+        .. code-block:: console
+
+            git clone git@github.com:bzah/xncml.git
 
 #. Install your local copy into a development environment. You can create a new Anaconda development environment with:
 
@@ -85,17 +92,24 @@ Ready to contribute? Here's how to set up ``xncml`` for local development.
         cd xncml/
         make dev
 
-  This installs ``xncml`` in an "editable" state, meaning that changes to the code are immediately seen by the environment. To ensure a consistent coding style, `make dev` also installs the ``pre-commit`` hooks to your local clone.
+    If you are on Windows, replace the ``make dev`` command with the following:
 
-  On commit, ``pre-commit`` will check that ``black``, ``blackdoc``, ``isort``, ``flake8``, and ``ruff`` checks are passing, perform automatic fixes if possible, and warn of violations that require intervention. If your commit fails the checks initially, simply fix the errors, re-add the files, and re-commit.
+    .. code-block:: console
 
-  You can also run the hooks manually with:
+        python -m pip install -e .[dev]
+        pre-commit install
+
+    This installs ``xncml`` in an "editable" state, meaning that changes to the code are immediately seen by the environment. To ensure a consistent coding style, `make dev` also installs the ``pre-commit`` hooks to your local clone.
+
+    On commit, ``pre-commit`` will check that ``flake8``, and ``ruff`` checks are passing, perform automatic fixes if possible, and warn of violations that require intervention. If your commit fails the checks initially, simply fix the errors, re-add the files, and re-commit.
+
+    You can also run the hooks manually with:
 
     .. code-block:: console
 
         pre-commit run -a
 
-  If you want to skip the ``pre-commit`` hooks temporarily, you can pass the ``--no-verify`` flag to `git commit`.
+    If you want to skip the ``pre-commit`` hooks temporarily, you can pass the `--no-verify` flag to `git commit`.
 
 #. Create a branch for local development:
 
@@ -103,7 +117,7 @@ Ready to contribute? Here's how to set up ``xncml`` for local development.
 
         git checkout -b name-of-your-bugfix-or-feature
 
-  Now you can make your changes locally.
+    Now you can make your changes locally.
 
 #. When you're done making changes, we **strongly** suggest running the tests in your environment or with the help of ``tox``:
 
@@ -121,7 +135,7 @@ Ready to contribute? Here's how to set up ``xncml`` for local development.
         git commit -m "Your detailed description of your changes."
         git push origin name-of-your-bugfix-or-feature
 
-    If ``pre-commit`` hooks fail, try re-committing your changes (or, if need be, you can skip them with `git commit --no-verify`).
+    If ``pre-commit`` hooks fail, try fixing the issues, re-staging the files to be committed, and re-committing your changes (or, if need be, you can skip them with `git commit --no-verify`).
 
 #. Submit a `Pull Request <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request>`_ through the GitHub website.
 
@@ -137,24 +151,44 @@ Ready to contribute? Here's how to set up ``xncml`` for local development.
         # To simply test that the docs pass build checks
         python -m tox -e docs
 
+#. If changes to your branch are made on GitHub, you can update your local branch with:
+
+    .. code-block:: console
+
+        git checkout name-of-your-bugfix-or-feature
+        git fetch
+        git pull origin name-of-your-bugfix-or-feature
+
+    If you have merge conflicts, you might need to replace `git pull` with `git merge` and resolve the conflicts manually.
+    Resolving conflicts from the command line can be tricky. If you are not comfortable with this, you can ignore the last command and instead use a GUI like PyCharm or Visual Studio Code to merge the remote changes and resolve the conflicts.
+
+#. Before merging, your Pull Request will need to be based on the `main` branch of the ``xncml`` repository. If your branch is not up-to-date with the `main` branch, you can perform similar steps as above to update your branch:
+
+    .. code-block:: console
+
+        git checkout name-of-your-bugfix-or-feature
+        git fetch
+        git pull origin main
+    See the previous step for more information on resolving conflicts.
+
 #. Once your Pull Request has been accepted and merged to the `main` branch, several automated workflows will be triggered:
 
     - The ``bump-version.yml`` workflow will automatically bump the patch version when pull requests are pushed to the `main` branch on GitHub. **It is not recommended to manually bump the version in your branch when merging (non-release) pull requests (this will cause the version to be bumped twice).**
     - `ReadTheDocs` will automatically build the documentation and publish it to the `latest` branch of `xncml` documentation website.
     - If your branch is not a fork (ie: you are a maintainer), your branch will be automatically deleted.
 
-    You will have contributed your first changes to ``xncml``!
+    You will have contributed to ``xncml``!
 
 Pull Request Guidelines
 -----------------------
 
 Before you submit a pull request, check that it meets these guidelines:
 
-#. The pull request should include tests and should aim to provide `code coverage <https://en.wikipedia.org/wiki/Code_coverage>`_ for all new lines of code. You can use the `--cov-report html --cov xncml` flags during the call to ``pytest`` to generate an HTML report and analyse the current test coverage.
+#. All functions should be documented with `docstrings` following the `numpydoc <https://numpydoc.readthedocs.io/en/latest/format.html>`_ format.
 
-#. If the pull request adds functionality, the docs should also be updated. Put your new functionality into a function with a docstring, and add the feature to the list in ``README.rst``.
+#. If the pull request adds functionality, either update the documentation or create a new notebook that demonstrates the feature. Library-defining features should also be listed in ``README.rst``.
 
-#. The pull request should work for Python 3.9, 3.10, 3.11, and 3.12. Check that the tests pass for all supported Python versions.
+#. The pull request should work for all currently supported Python versions. Check the `pyproject.toml` or `tox.ini` files for the list of supported versions.
 
 Tips
 ----
@@ -177,13 +211,10 @@ To run specific code style checks:
 
 .. code-block:: console
 
-    python -m black --check src/xncml tests
-    python -m isort --check src/xncml tests
-    python -m blackdoc --check src/xncml docs
     python -m ruff check src/xncml tests
     python -m flake8 src/xncml tests
 
-To get ``black``, ``isort``, ``blackdoc``, ``ruff``, and ``flake8`` (with plugins ``flake8-alphabetize`` and ``flake8-rst-docstrings``) simply install them with ``pip`` (or ``conda``) into your environment.
+To get ``ruff``, and ``flake8`` (with the ``flake8-rst-docstrings`` plugin) simply install them with ``pip`` into your environment.
 
 Code of Conduct
 ---------------
