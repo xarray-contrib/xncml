@@ -17,11 +17,21 @@ dependencies:
   - pip
   - pytest
   - pytest-cov
-  - python=3.7
+  - python=3.9
   - recommonmark
   - sphinx_rtd_theme
-  - sphinx>=1.6
-  - xarray
+  - sphinx
+  - bump-my-version
+  - watchdog
+  - flake8-rst-docstrings
+  - flake8-alphabetize
+  - flit
+  - tox
+  - coverage
+  - coveralls
+  - ruff
+  - pre-commit
+
   - pip:
     - sphinx_copybutton
     - xmltodict
