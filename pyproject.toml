@@ -148,9 +148,9 @@ values = [
 ]
 
 [tool.coverage.run]
-relative_files = true
-include = ["src/xncml/*"]
 omit = ["tests/*.py"]
+relative_files = true
+source = ["xncml"]
 
 [tool.flit.sdist]
 include = [
