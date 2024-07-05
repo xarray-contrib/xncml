@@ -13,7 +13,7 @@ from warnings import warn
 import xmltodict
 
 
-class Dataset(object):
+class Dataset:
     """A class for reading and manipulating NcML file.
 
     Note that NcML documents are used for two distinct purposes:

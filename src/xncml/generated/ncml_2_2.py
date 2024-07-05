@@ -380,7 +380,7 @@ class Variable:
             "type": "Element",
         },
     )
-    variable: List["Variable"] = field(
+    variable: List[Variable] = field(
         default_factory=list,
         metadata={
             "type": "Element",
@@ -535,7 +535,7 @@ class Aggregation:
             ),
         },
     )
-    variable_agg: List["Aggregation.VariableAgg"] = field(
+    variable_agg: List[Aggregation.VariableAgg] = field(
         default_factory=list,
         metadata={
             "name": "variableAgg",
@@ -556,19 +556,19 @@ class Aggregation:
             "type": "Element",
         },
     )
-    netcdf: List["Netcdf"] = field(
+    netcdf: List[Netcdf] = field(
         default_factory=list,
         metadata={
             "type": "Element",
         },
     )
-    scan: List["Aggregation.Scan"] = field(
+    scan: List[Aggregation.Scan] = field(
         default_factory=list,
         metadata={
             "type": "Element",
         },
     )
-    scan_fmrc: List["Aggregation.ScanFmrc"] = field(
+    scan_fmrc: List[Aggregation.ScanFmrc] = field(
         default_factory=list,
         metadata={
             "name": "scanFmrc",

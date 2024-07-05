@@ -241,7 +241,19 @@ ignore = [
   "COM", # commas
   "D205", # blank-line-after-summary
   "D400", # ends-in-period
-  "D401" # non-imperative-mood
+  "D401", # non-imperative-mood
+  # The following ignore codes are disabled because the codebase is not yet compliant
+  "BLE001", # Do not catch blind exception: `Exception`
+  "PERF203", # `try`-`except` within a loop incurs performance overhead
+  "PTH100", # `os.path.abspath()` should be replaced by `Path.resolve()`
+  "PTH107", # `os.remove()` should be replaced by `Path.unlink()`
+  "PTH110", # ``os.path.exists()` should be replaced by `Path.exists()`
+  "PTH120", # `os.path.dirname()` should be replaced by `Path.parent`
+  "PTH123", # `open()` should be replaced by `Path.open()`
+  "RUF013", # PEP 484 prohibits implicit `Optional`
+  "S110", # `try`-`except`-`pass` detected, consider logging the exception
+  "UP006", # Use `list` instead of `List` for type annotation
+  "UP007" # Use `X | Y` for type annotations
 ]
 select = [
   "BLE", # blind-except
