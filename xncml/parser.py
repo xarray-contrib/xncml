@@ -543,7 +543,7 @@ def read_variable(
     elif obj.shape == '':
         out = build_scalar_variable(var_name=var_name, values_tag=obj.values, var_type=obj.type)
     else:
-        error_msg = f'Could not build variable `{var_name }`.'
+        error_msg = f'Could not build variable `{var_name}`.'
         raise ValueError(error_msg)
 
     # Set variable attributes
@@ -751,7 +751,6 @@ def rename_dimension(target: xr.Dataset, ref: xr.Dataset, obj: Dimension) -> xr.
     if obj.org_name:
         if obj.org_name in target.dims:
             target = target.rename_dims({obj.org_name: obj.name})
-            ref_dim = None
         elif obj.org_name in ref.dims:
             target = target.expand_dims({obj.name: ref.dims[obj.org_name]})
         else:
