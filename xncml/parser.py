@@ -314,6 +314,8 @@ def read_group(
     enums = {} if enums is None else enums
     for item in obj.choice:
         if isinstance(item, Dimension):
+            target = rename_dimension(target, ref, item)
+
             dim_name = item.name
             if dims.get(dim_name):
                 dims[dim_name].append(read_dimension(item))
@@ -742,6 +744,20 @@ def read_dimension(obj: Dimension) -> Dimension:
         obj.length = int(obj.length)
 
     return obj
+
+
+def rename_dimension(target: xr.Dataset, ref: xr.Dataset, obj: Dimension) -> xr.Dataset:
+    """Rename dimension in target dataset."""
+    if obj.org_name:
+        if obj.org_name in target.dims:
+            target = target.rename_dims({obj.org_name: obj.name})
+            ref_dim = None
+        elif obj.org_name in ref.dims:
+            target = target.expand_dims({obj.name: ref.dims[obj.org_name]})
+        else:
+            raise ValueError
+
+    return target
 
 
 def nctype(typ: DataType) -> type:
