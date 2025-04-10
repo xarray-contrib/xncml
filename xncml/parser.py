@@ -34,11 +34,14 @@ Support for these attributes is missing:
 
 from __future__ import annotations
 
+import pytest
 import datetime as dt
+import contextlib
 from functools import partial
 from pathlib import Path
 from typing import Union
 from warnings import warn
+from threading import Lock, RLock
 
 import dask
 import numpy as np
@@ -65,6 +68,9 @@ __author__ = 'David Huard'
 __date__ = 'July 2022'
 __contact__ = 'huard.david@ouranos.ca'
 
+engine="netcdf4"
+# engine="h5netcdf"
+
 
 def parse(path: Path) -> Netcdf:
     """
@@ -84,7 +90,7 @@ def parse(path: Path) -> Netcdf:
     return parser.from_path(path, Netcdf)
 
 
-def open_ncml(ncml: str | Path, parallel: bool = False) -> xr.Dataset:
+def open_ncml(ncml: str | Path, parallel: bool = False, engine: str = None) -> xr.Dataset:
     """
     Convert NcML document to a dataset.
 
@@ -94,21 +100,26 @@ def open_ncml(ncml: str | Path, parallel: bool = False) -> xr.Dataset:
       Path to NcML file.
     parallel : bool
       If True, use dask to read data in parallel.
+    engine : str | None
+      The engine to use to read the netCDF data. If None, the default engine is used.
 
     Returns
     -------
     xr.Dataset
       Dataset holding variables and attributes defined in NcML document.
     """
+
     # Parse NcML document
     ncml = Path(ncml)
     obj = parse(ncml)
 
-    return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml, parallel=parallel)
+    # Recursive lock context / null context.
+    lock = RLock() if parallel else contextlib.nullcontext()
+    return read_netcdf(xr.Dataset(), xr.Dataset(), obj, ncml, parallel=parallel, lock=lock, engine=engine)
 
 
 def read_netcdf(
-    target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path, parallel: bool
+    target: xr.Dataset, ref: xr.Dataset, obj: Netcdf, ncml: Path, parallel: bool, engine: str, lock: Lock = None
 ) -> xr.Dataset:
     """
     Return content of <netcdf> element.
@@ -125,6 +136,11 @@ def read_netcdf(
       Path to NcML document, sometimes required to follow relative links.
     parallel : bool
       If True, use dask to read data in parallel.
+    engine : str | None
+      The engine to use to read the netCDF data. If None, the default engine is used.
+    lock : Lock object or null context
+      Lock to be used when reading files in parallel. If `parallel` is False, a null context is used.
+
 
     Returns
     -------
@@ -133,7 +149,7 @@ def read_netcdf(
     """
     # Open location if any
     if obj.location:
-        ref = read_ds(obj, ncml, parallel=parallel)
+        ref = read_ds(obj, ncml, parallel=parallel, lock=lock, engine=engine)
 
     # <explicit/> element means that only content specifically mentioned in NcML document is included in dataset.
     if obj.explicit is not None:
@@ -143,16 +159,17 @@ def read_netcdf(
         target = ref
 
     for item in filter_by_class(obj.choice, Aggregation):
-        target = read_aggregation(target, item, ncml, parallel=parallel)
+        target = read_aggregation(target, item, ncml, parallel=parallel, lock=lock, engine=engine)
 
     # Handle <variable>, <attribute> and <remove> elements
-    target = read_group(target, ref, obj)
+    with lock:
+        target = read_group(target, ref, obj)
 
     return target
 
 
 def read_aggregation(
-    target: xr.Dataset, obj: Aggregation, ncml: Path, parallel: bool
+    target: xr.Dataset, obj: Aggregation, ncml: Path, parallel: bool, engine: str, lock: Lock
 ) -> xr.Dataset:
     """
     Return merged or concatenated content of <aggregation> element.
@@ -167,6 +184,10 @@ def read_aggregation(
       Path to NcML document, sometimes required to follow relative links.
     parallel : bool
       If True, use dask to read data in parallel.
+    lock : Lock object or null context
+      Lock to be used when reading files in parallel. If `parallel` is False, a null context is used.
+    engine : str | None
+      The engine to use to read the netCDF data. If None, the default engine is used.
 
     Returns
     -------
@@ -189,25 +210,27 @@ def read_aggregation(
 
     for item in obj.netcdf:
         # Open dataset defined in <netcdf>'s `location` attribute
-        tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml, parallel=parallel)
-        closers.append(getattr_(tar, '_close'))
+        with lock:
+            tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml, parallel=parallel, lock=lock,
+                              engine=engine)
+            closers.append(getattr_(tar, '_close'))
 
-        # Select variables
-        if names:
-            tar = tar[names]
+            # Select variables
+            if names:
+                tar = tar[names]
 
-        # Handle coordinate values
-        if item.coord_value is not None:
-            dtypes = [i[obj.dim_name].dtype.type for i in [tar, target] if obj.dim_name in i]
-            coords = read_coord_value(item, obj, dtypes=dtypes)
-            tar = tar.assign_coords({obj.dim_name: coords})
-        datasets.append(tar)
+            # Handle coordinate values
+            if item.coord_value is not None:
+                dtypes = [i[obj.dim_name].dtype.type for i in [tar, target] if obj.dim_name in i]
+                coords = read_coord_value(item, obj, dtypes=dtypes)
+                tar = tar.assign_coords({obj.dim_name: coords})
+            datasets.append(tar)
 
     # Handle <scan> element
     for item in obj.scan:
-        dss = read_scan(item, ncml, parallel=parallel)
+        dss, cls = read_scan(item, ncml, parallel=parallel, lock=lock, engine=engine)
         datasets.extend([ds.chunk() for ds in dss])
-        closers.extend([getattr_(ds, '_close') for ds in dss])
+        closers.extend(cls)
 
     if parallel:
         datasets, closers = dask.compute(datasets, closers)
@@ -215,7 +238,8 @@ def read_aggregation(
     # Need to decode time variable
     if obj.time_units_change:
         for i, ds in enumerate(datasets):
-            t = xr.as_variable(ds[obj.dim_name], obj.dim_name)  # Maybe not the same name...
+            with lock:
+                t = xr.as_variable(ds[obj.dim_name], obj.dim_name)  # Maybe not the same name...
             encoded = CFDatetimeCoder(use_cftime=True).decode(t, name=t.name)
             datasets[i] = ds.assign_coords({obj.dim_name: encoded})
 
@@ -230,7 +254,8 @@ def read_aggregation(
         raise NotImplementedError
 
     # Merge aggregated dataset into target dataset
-    agg = read_group(agg, None, obj)
+    with lock:
+        agg = read_group(agg, None, obj)
     out = target.merge(agg, combine_attrs='no_conflicts')
 
     # Set close method to close all opened datasets
@@ -238,7 +263,7 @@ def read_aggregation(
     return out
 
 
-def read_ds(obj: Netcdf, ncml: Path, parallel: bool) -> Union[xr.Dataset, Delayed]:
+def read_ds(obj: Netcdf, ncml: Path, parallel: bool, engine: str, lock: Lock) -> Union[xr.Dataset, Delayed]:
     """
     Return dataset defined in <netcdf> element.
 
@@ -250,6 +275,8 @@ def read_ds(obj: Netcdf, ncml: Path, parallel: bool) -> Union[xr.Dataset, Delaye
       Path to NcML document, sometimes required to follow relative links.
     parallel : bool
       If True, use dask to read data in parallel.
+    engine : str | None
+      The engine to use to read the netCDF data. If None, the default engine is used.
 
     Returns
     -------
@@ -268,11 +295,11 @@ def read_ds(obj: Netcdf, ncml: Path, parallel: bool) -> Union[xr.Dataset, Delaye
 
     open_dataset_ = dask.delayed(xr.open_dataset) if parallel else xr.open_dataset
 
-    return open_dataset_(location, decode_times=False)
+    return open_dataset_(location, cache=False, decode_times=False, engine=engine, lock=lock)
 
 
 def read_group(
-    target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf, dims: dict = None
+    target: xr.Dataset, ref: xr.Dataset, obj: Group | Netcdf, dims: dict = None,
 ) -> xr.Dataset:
     """
     Parse <group> items, typically <dimension>, <variable>, <attribute> and <remove> elements.
@@ -293,6 +320,7 @@ def read_group(
     """
     dims = {} if dims is None else dims
     enums = {}
+
     for item in obj.choice:
         if isinstance(item, Dimension):
             dims[item.name] = read_dimension(item)
@@ -305,7 +333,7 @@ def read_group(
         elif isinstance(item, EnumTypedef):
             enums[item.name] = read_enum(item)
         elif isinstance(item, Group):
-            target = read_group(target, ref, item, dims)
+            target = read_group(target, ref, item, dims=dims)
         elif isinstance(item, Aggregation):
             pass  # <aggregation> elements are parsed in `read_netcdf`
         else:
@@ -314,7 +342,7 @@ def read_group(
     return target
 
 
-def read_scan(obj: Aggregation.Scan, ncml: Path, parallel: bool) -> list[xr.Dataset]:
+def read_scan(obj: Aggregation.Scan, ncml: Path, parallel: bool, engine: str, lock: Lock) -> list[xr.Dataset]:
     """
     Return list of datasets defined in <scan> element.
 
@@ -326,6 +354,8 @@ def read_scan(obj: Aggregation.Scan, ncml: Path, parallel: bool) -> list[xr.Data
       Path to NcML document, sometimes required to follow relative links.
     parallel : bool
       If True, use dask to read data in parallel.
+    engine : str | None
+      The engine to use to read the netCDF data. If None, the default engine is used.
 
     Returns
     -------
@@ -362,7 +392,15 @@ def read_scan(obj: Aggregation.Scan, ncml: Path, parallel: bool) -> list[xr.Data
 
     open_dataset_ = dask.delayed(xr.open_dataset) if parallel else xr.open_dataset
 
-    return [open_dataset_(f, decode_times=False) for f in files]
+    getattr_ = dask.delayed(getattr) if parallel else getattr
+
+    out = []; closers=[]
+    for f in files:
+        ds = open_dataset_(f, decode_times=False, cache=False, engine=engine) #, lock=lock)
+        closers.append(getattr_(ds, '_close'))
+        out.append(ds)
+
+    return out, closers
 
 
 def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
@@ -433,8 +471,8 @@ def read_enum(obj: EnumTypedef) -> dict[str, list]:
         A dictionary with CF flag_values and flag_meanings that describe the Enum.
     """
     return {
-        'flag_values': list(map(lambda e: e.key, obj.content)),
-        'flag_meanings': list(map(lambda e: e.content[0], obj.content)),
+        'flag_values': list(map(lambda e: e.value.key, obj.content)),
+        'flag_meanings': list(map(lambda e: e.value.content[0], obj.content)),
     }
 
 
