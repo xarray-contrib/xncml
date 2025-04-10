@@ -192,6 +192,15 @@ def test_agg_syn_rename():
     assert 'Temperature' in ds
 
 
+def test_rename_dim():
+    ds = xncml.open_ncml(data / 'modifyDim.xml')
+    assert 'newTime' in ds.dims
+    assert 'time' not in ds.dims
+    assert len(ds['newTime']) == 4
+    assert ds['time'].dims == ('newTime',)
+    assert ds['T'].dims == ('newTime', 'lat', 'lon')
+
+
 def test_rename_var():
     ds = xncml.open_ncml(data / 'renameVar.xml')
     assert ds.attrs['title'] == 'Example Data'
