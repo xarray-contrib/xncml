@@ -754,7 +754,9 @@ def rename_dimension(target: xr.Dataset, ref: xr.Dataset, obj: Dimension) -> xr.
         elif obj.org_name in ref.dims:
             target = target.expand_dims({obj.name: ref.dims[obj.org_name]})
         else:
-            raise ValueError(f"Dimension '{obj.org_name}' not found in either the target or reference dataset.")
+            raise ValueError(
+                f"Dimension '{obj.org_name}' not found in either the target or reference dataset."
+            )
     return target
 
 
