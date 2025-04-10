@@ -198,7 +198,7 @@ def test_rename_dim():
     assert 'time' not in ds.dims
     assert len(ds['newTime']) == 4
     assert ds['time'].dims == ('newTime',)
-    assert ds["T"].dims == ("newTime", "lat", "lon")
+    assert ds['T'].dims == ('newTime', 'lat', 'lon')
 
 
 def test_rename_var():
