@@ -122,6 +122,7 @@ Ready to contribute? Here's how to set up ``xncml`` for local development.
 #. When you're done making changes, we **strongly** suggest running the tests in your environment or with the help of ``tox``:
 
     .. code-block:: console
+
         make lint
         python -m pytest
         # Or, to run multiple build tests

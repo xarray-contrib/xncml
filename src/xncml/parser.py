@@ -453,8 +453,8 @@ def read_enum(obj: EnumTypedef) -> dict[str, list]:
     dict:
         A dictionary describing the Enum.
 
-    Example
-    -------
+    Examples
+    --------
     .. code-block: xml
         <enumTypedef name="trilean" type="enum1">
             <enum key="0">false</enum>

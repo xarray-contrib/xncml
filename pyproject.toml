@@ -307,7 +307,7 @@ max-complexity = 15
 [tool.ruff.lint.per-file-ignores]
 "docs/**" = ["E402"]
 "src/xncml/**/__init__.py" = ["F401", "F403"]
-"src/xncml/generated/*.py" = ["D"]
+"src/xncml/generated/*.py" = ["D", "UP"]
 "src/xncml/parser.py" = ["C901"] # To be added
 "tests/**" = ["D100", "D101", "D102", "D103", "S101"]
 

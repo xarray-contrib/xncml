@@ -1,5 +1,3 @@
-.. module:: xncml
-
 Xncml Documentation
 ===================
 
@@ -13,6 +11,12 @@ Xncml Documentation
    releasing
    authors
    changelog
+
+.. toctree::
+   :maxdepth: 1
+   :caption: API Reference:
+
+   apidoc/modules
 
 `xncml` adds NcML support to xarray. It includes utilities to modify NcML documents, and open NcML files as `xarray.Dataset`.
 For more information on NcML, take a look at `tutorials and examples <https://docs.unidata.ucar.edu/netcdf-java/current/userguide/basic_ncml_tutorial.html>`_

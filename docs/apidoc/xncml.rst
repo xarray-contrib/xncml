@@ -3,9 +3,9 @@ xncml package
 
 .. automodule:: xncml
    :members:
-   :undoc-members:
-   :show-inheritance:
    :private-members:
+   :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------
@@ -23,15 +23,15 @@ xncml.core module
 
 .. automodule:: xncml.core
    :members:
-   :undoc-members:
-   :show-inheritance:
    :private-members:
+   :show-inheritance:
+   :undoc-members:
 
 xncml.parser module
 -------------------
 
 .. automodule:: xncml.parser
    :members:
-   :undoc-members:
-   :show-inheritance:
    :private-members:
+   :show-inheritance:
+   :undoc-members:
