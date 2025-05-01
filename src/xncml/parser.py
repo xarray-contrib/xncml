@@ -312,6 +312,8 @@ def read_group(
     enums = {} if enums is None else enums
     for item in obj.choice:
         if isinstance(item, Dimension):
+            target = rename_dimension(target, ref, item)
+
             dim_name = item.name
             if dims.get(dim_name):
                 dims[dim_name].append(read_dimension(item))
@@ -438,7 +440,8 @@ def read_coord_value(nc: Netcdf, agg: Aggregation, dtypes: list = ()):
 
 
 def read_enum(obj: EnumTypedef) -> dict[str, list]:
-    """Parse <enumTypeDef> element.
+    """
+    Parse <enumTypeDef> element.
 
     Parameters
     ----------
@@ -449,6 +452,14 @@ def read_enum(obj: EnumTypedef) -> dict[str, list]:
     -------
     dict:
         A dictionary describing the Enum.
+
+    Example
+    -------
+    <enumTypedef name="trilean" type="enum1">
+        <enum key="0">false</enum>
+        <enum key="1">true</enum>
+        <enum key="2">undefined</enum>
+    </enumTypedef>
     """
     return {e.content[0]: e.key for e in obj.content}
 
@@ -513,7 +524,7 @@ def read_variable(
         shape = []
         for dim in obj.shape.split(" "):
             if dimensions.get(dim) is None:
-                err = f"Unknown dimension '{dim}'." " Make sure it is declared before being used in the NCML."
+                err = f"Unknown dimension '{dim}'. Make sure it is declared before being used in the NCML."
                 raise ValueError(err)
             shape.append(dimensions[dim][-1].length)
             if (dim_count := len(dimensions[dim])) > 1:
@@ -523,7 +534,7 @@ def read_variable(
     elif obj.shape == "":
         out = build_scalar_variable(var_name=var_name, values_tag=obj.values, var_type=obj.type)
     else:
-        error_msg = f"Could not build variable `{var_name }`."
+        error_msg = f"Could not build variable `{var_name}`."
         raise ValueError(error_msg)
 
     # Set variable attributes
@@ -589,7 +600,7 @@ def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
       A list filled with values from <values> element.
     """
     if values_tag.from_attribute is not None:
-        error_msg = "xncml cannot yet fetch values from a global or a " " variable attribute using <from_attribute>, here on variable" f" {var_name}."
+        error_msg = "xncml cannot yet fetch values from a global or a variable attribute using <from_attribute>, here on variable" f" {var_name}."
         raise NotImplementedError(error_msg)
     if values_tag.start is not None and values_tag.increment is not None:
         number_of_values = int(values_tag.npts or expected_size)
@@ -598,7 +609,7 @@ def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
         error_msg = f"Unsupported format of the <values> tag from variable {var_name}."
         raise NotImplementedError(error_msg)
     if len(values_tag.content) == 0:
-        error_msg = f"No values found for variable {var_name}, but a {expected_size}" " values were expected."
+        error_msg = f"No values found for variable {var_name}, but a {expected_size} values were expected."
         raise ValueError(error_msg)
     if not isinstance(values_tag.content[0], str):
         error_msg = f"Unsupported format of the <values> tag from variable {var_name}."
@@ -606,7 +617,7 @@ def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
     separator = values_tag.separator or " "
     data = values_tag.content[0].split(separator)
     if len(data) > expected_size:
-        error_msg = f"The expected size for variable {var_name} was {expected_size}," f" but {len(data)} values were found in its <values> tag."
+        error_msg = f"The expected size for variable {var_name} was {expected_size}, but {len(data)} values were found in its <values> tag."
         raise ValueError(error_msg)
     return data
 
@@ -645,7 +656,7 @@ def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> x
     if len(values_content) == 1:
         return xr.Variable(data=np.array(values_content[0], dtype=nctype(var_type))[()], dims=())
     if len(values_content) > 1:
-        error_msg = f"Multiple values found for variable {var_name} but its" ' shape is "" thus a single scalar is expected within its <values> tag.'
+        error_msg = f"Multiple values found for variable {var_name} but its shape is \"\" thus a single scalar is expected within its <values> tag."
     raise ValueError(error_msg)
 
 
@@ -706,6 +717,20 @@ def read_dimension(obj: Dimension) -> Dimension:
         obj.length = int(obj.length)
 
     return obj
+
+
+def rename_dimension(target: xr.Dataset, ref: xr.Dataset, obj: Dimension) -> xr.Dataset:
+    """Rename dimension in target dataset."""
+    if obj.org_name:
+        if obj.org_name in target.dims:
+            target = target.rename_dims({obj.org_name: obj.name})
+        elif obj.org_name in ref.dims:
+            target = target.expand_dims({obj.name: ref.dims[obj.org_name]})
+        else:
+            raise ValueError(
+                f"Dimension '{obj.org_name}' not found in either the target or reference dataset."
+            )
+    return target
 
 
 def nctype(typ: DataType) -> type:
