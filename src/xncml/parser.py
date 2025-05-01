@@ -455,11 +455,12 @@ def read_enum(obj: EnumTypedef) -> dict[str, list]:
 
     Example
     -------
-    <enumTypedef name="trilean" type="enum1">
-        <enum key="0">false</enum>
-        <enum key="1">true</enum>
-        <enum key="2">undefined</enum>
-    </enumTypedef>
+    .. code-block: xml
+        <enumTypedef name="trilean" type="enum1">
+            <enum key="0">false</enum>
+            <enum key="1">true</enum>
+            <enum key="2">undefined</enum>
+        </enumTypedef>
     """
     return {e.content[0]: e.key for e in obj.content}
 

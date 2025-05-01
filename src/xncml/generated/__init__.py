@@ -19,12 +19,11 @@ from .ncml_2_2 import (
 )
 
 __all__ = [
-    "AggregationType",
-    "DataType",
-    "ObjectType",
     "Aggregation",
+    "AggregationType",
     "Attribute",
     "CacheVariable",
+    "DataType",
     "Dimension",
     "EnumTypedef",
     "Group",
@@ -32,6 +31,7 @@ __all__ = [
     "LogicalSection",
     "LogicalSlice",
     "Netcdf",
+    "ObjectType",
     "PromoteGlobalAttribute",
     "Remove",
     "Values",
