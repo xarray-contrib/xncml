@@ -17,8 +17,9 @@ data = Path(__file__).parent / "data"
 
 
 class CheckClose:
-    """Check that files are closed after the test. Note that `close` has to be explicitly called within the
-    context manager for this to work.
+    """Check that files are closed after the test.
+
+    Note that `close` has to be explicitly called within the context manager for this to work.
     """
 
     def __init__(self):
@@ -26,9 +27,10 @@ class CheckClose:
         self.before = None
 
     def __enter__(self):
+        """Enter check context."""
         self.before = len(self.proc.open_files())
 
-    def __exit__(self, *args):
+    def __exit__(self, *args):  # noqa: F841
         """Raise error if files are left open at the end of the test."""
         after = len(self.proc.open_files())
         if after != self.before:

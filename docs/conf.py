@@ -11,7 +11,7 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
-
+import datetime
 # If extensions (or modules to document with autodoc) are in another
 # directory, add these directories to sys.path here. If the directory is
 # relative to the documentation root, use os.path.abspath to make it
@@ -19,6 +19,7 @@
 #
 import os
 import sys
+from typing import Any
 
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -70,17 +71,15 @@ extlinks = {
 templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
-# You can specify multiple suffix as a list of string:
-#
-# source_suffix = ['.rst', '.md']
-source_suffix = ['.rst']
+# You can specify multiple suffix as a dictionary of suffix: filetype
+source_suffix = {'.rst': 'restructuredtext'}
 
 # The master toctree document.
 master_doc = 'index'
 
 # General information about the project.
 project = 'xncml'
-copyright = '2019-{}, University Corporation for Atmospheric Research'
+copyright = f'2019-{datetime.date.today().year}, University Corporation for Atmospheric Research'
 author = 'Anderson Banihirwe'
 
 # The version info for the project you're documenting, acts as replacement
@@ -127,7 +126,9 @@ html_theme_options = {'style_external_links': True}
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+if not os.path.exists("_static"):
+    os.makedirs("_static")
+html_static_path = ['_static']
 
 
 # -- Options for HTMLHelp output ---------------------------------------
@@ -138,7 +139,7 @@ htmlhelp_basename = 'xncmldoc'
 
 # -- Options for LaTeX output ------------------------------------------
 
-latex_elements = {
+latex_elements: dict[str, Any] = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',

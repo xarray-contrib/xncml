@@ -51,7 +51,7 @@ Get Started!
 
 .. note::
 
-    If you are new to using GitHub and `git`, please read `this guide <https://guides.github.com/activities/hello-world/>`_ first.
+    If you are new to using `GitHub <https://github.com/>`_ and ``git``, please read `this guide <https://guides.github.com/activities/hello-world/>`_ first.
 
 .. warning::
 
@@ -169,15 +169,16 @@ Ready to contribute? Here's how to set up ``xncml`` for local development.
         git checkout name-of-your-bugfix-or-feature
         git fetch
         git pull origin main
+
     See the previous step for more information on resolving conflicts.
 
 #. Once your Pull Request has been accepted and merged to the `main` branch, several automated workflows will be triggered:
 
     - The ``bump-version.yml`` workflow will automatically bump the patch version when pull requests are pushed to the `main` branch on GitHub. **It is not recommended to manually bump the version in your branch when merging (non-release) pull requests (this will cause the version to be bumped twice).**
     - `ReadTheDocs` will automatically build the documentation and publish it to the `latest` branch of `xncml` documentation website.
-    - If your branch is not a fork (ie: you are a maintainer), your branch will be automatically deleted.
+    - If your branch is not a fork (i.e. you are a maintainer), your branch will be automatically deleted.
 
-    You will have contributed to ``xncml``!
+You will have contributed to ``xncml``!
 
 Pull Request Guidelines
 -----------------------
@@ -213,8 +214,9 @@ To run specific code style checks:
 
     python -m ruff check src/xncml tests
     python -m flake8 src/xncml tests
+    python -m numpydoc lint src/xncml/**.py
 
-To get ``ruff``, and ``flake8`` (with the ``flake8-rst-docstrings`` plugin) simply install them with ``pip`` into your environment.
+To get ``ruff``, ``flake8`` (with the ``flake8-rst-docstrings`` plugin), and `numpydoc` simply install them with ``pip`` into your environment.
 
 Code of Conduct
 ---------------

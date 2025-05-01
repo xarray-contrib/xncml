@@ -55,8 +55,9 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 lint/flake8: ## check style with flake8
-	ruff check src tests
-	flake8 --config=.flake8 src/xncml tests
+	python -m ruff check src/xncml tests
+	python -m flake8 --config=.flake8 src/xncml tests
+	python -m numpydoc lint src/xncml/**.py
 
 lint/format-check: ## check style with ruff format
 	ruff format --check src/xncml tests
@@ -67,7 +68,7 @@ test: ## run tests quickly with the default Python
 	python -m pytest
 
 test-all: ## run tests on every Python version with tox
-	tox
+	python -m tox
 
 coverage: ## check code coverage quickly with the default Python
 	python -m coverage run --source src/xncml -m pytest

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Type
 
 __NAMESPACE__ = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
@@ -51,7 +50,7 @@ class CacheVariable:
         name = "cacheVariable"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    name: Optional[str] = field(
+    name: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
@@ -66,14 +65,14 @@ class Dimension:
         name = "dimension"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    name: Optional[str] = field(
+    name: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
         },
     )
-    length: Optional[str] = field(
+    length: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
@@ -100,7 +99,7 @@ class Dimension:
             "type": "Attribute",
         },
     )
-    org_name: Optional[str] = field(
+    org_name: str | None = field(
         default=None,
         metadata={
             "name": "orgName",
@@ -115,7 +114,7 @@ class LogicalReduce:
         name = "logicalReduce"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    dim_names: Optional[str] = field(
+    dim_names: str | None = field(
         default=None,
         metadata={
             "name": "dimNames",
@@ -131,7 +130,7 @@ class LogicalSection:
         name = "logicalSection"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    section: Optional[str] = field(
+    section: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
@@ -146,7 +145,7 @@ class LogicalSlice:
         name = "logicalSlice"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    dim_name: Optional[str] = field(
+    dim_name: str | None = field(
         default=None,
         metadata={
             "name": "dimName",
@@ -154,7 +153,7 @@ class LogicalSlice:
             "required": True,
         },
     )
-    index: Optional[int] = field(
+    index: int | None = field(
         default=None,
         metadata={
             "type": "Attribute",
@@ -169,14 +168,14 @@ class PromoteGlobalAttribute:
         name = "promoteGlobalAttribute"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    name: Optional[str] = field(
+    name: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
         },
     )
-    org_name: Optional[str] = field(
+    org_name: str | None = field(
         default=None,
         metadata={
             "name": "orgName",
@@ -191,38 +190,38 @@ class Values:
         name = "values"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    start: Optional[float] = field(
+    start: float | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    increment: Optional[float] = field(
+    increment: float | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    npts: Optional[int] = field(
+    npts: int | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    separator: Optional[str] = field(
+    separator: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    from_attribute: Optional[str] = field(
+    from_attribute: str | None = field(
         default=None,
         metadata={
             "name": "fromAttribute",
             "type": "Attribute",
         },
     )
-    content: List[object] = field(
+    content: list[object] = field(
         default_factory=list,
         metadata={
             "type": "Wildcard",
@@ -238,7 +237,7 @@ class Attribute:
         name = "attribute"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    name: Optional[str] = field(
+    name: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
@@ -251,33 +250,33 @@ class Attribute:
             "type": "Attribute",
         },
     )
-    value: Optional[str] = field(
+    value: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    separator: Optional[str] = field(
+    separator: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    org_name: Optional[str] = field(
+    org_name: str | None = field(
         default=None,
         metadata={
             "name": "orgName",
             "type": "Attribute",
         },
     )
-    is_unsigned: Optional[bool] = field(
+    is_unsigned: bool | None = field(
         default=None,
         metadata={
             "name": "isUnsigned",
             "type": "Attribute",
         },
     )
-    content: List[object] = field(
+    content: list[object] = field(
         default_factory=list,
         metadata={
             "type": "Wildcard",
@@ -293,7 +292,7 @@ class EnumTypedef:
         name = "enumTypedef"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    name: Optional[str] = field(
+    name: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
@@ -306,7 +305,7 @@ class EnumTypedef:
             "type": "Attribute",
         },
     )
-    content: List[object] = field(
+    content: list[object] = field(
         default_factory=list,
         metadata={
             "type": "Wildcard",
@@ -315,7 +314,7 @@ class EnumTypedef:
             "choices": (
                 {
                     "name": "enum",
-                    "type": Type["EnumTypedef.EnumType"],
+                    "type": type["EnumTypedef.EnumType"],
                 },
             ),
         },
@@ -323,14 +322,14 @@ class EnumTypedef:
 
     @dataclass
     class EnumType:
-        key: Optional[int] = field(
+        key: int | None = field(
             default=None,
             metadata={
                 "type": "Attribute",
                 "required": True,
             },
         )
-        content: List[object] = field(
+        content: list[object] = field(
             default_factory=list,
             metadata={
                 "type": "Wildcard",
@@ -346,14 +345,14 @@ class Remove:
         name = "remove"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    type: Optional[ObjectType] = field(
+    type: ObjectType | None = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
         },
     )
-    name: Optional[str] = field(
+    name: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
@@ -368,77 +367,77 @@ class Variable:
         name = "variable"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    attribute: List[Attribute] = field(
+    attribute: list[Attribute] = field(
         default_factory=list,
         metadata={
             "type": "Element",
         },
     )
-    values: Optional[Values] = field(
+    values: Values | None = field(
         default=None,
         metadata={
             "type": "Element",
         },
     )
-    variable: List[Variable] = field(
+    variable: list[Variable] = field(
         default_factory=list,
         metadata={
             "type": "Element",
         },
     )
-    logical_section: Optional[LogicalSection] = field(
+    logical_section: LogicalSection | None = field(
         default=None,
         metadata={
             "name": "logicalSection",
             "type": "Element",
         },
     )
-    logical_slice: Optional[LogicalSlice] = field(
+    logical_slice: LogicalSlice | None = field(
         default=None,
         metadata={
             "name": "logicalSlice",
             "type": "Element",
         },
     )
-    logical_reduce: Optional[LogicalReduce] = field(
+    logical_reduce: LogicalReduce | None = field(
         default=None,
         metadata={
             "name": "logicalReduce",
             "type": "Element",
         },
     )
-    remove: List[Remove] = field(
+    remove: list[Remove] = field(
         default_factory=list,
         metadata={
             "type": "Element",
         },
     )
-    name: Optional[str] = field(
+    name: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
         },
     )
-    type: Optional[DataType] = field(
+    type: DataType | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    typedef: Optional[str] = field(
+    typedef: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    shape: Optional[str] = field(
+    shape: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    org_name: Optional[str] = field(
+    org_name: str | None = field(
         default=None,
         metadata={
             "name": "orgName",
@@ -453,7 +452,7 @@ class Group:
         name = "group"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    choice: List[object] = field(
+    choice: list[object] = field(
         default_factory=list,
         metadata={
             "type": "Elements",
@@ -476,7 +475,7 @@ class Group:
                 },
                 {
                     "name": "group",
-                    "type": Type["Group"],
+                    "type": type["Group"],
                 },
                 {
                     "name": "remove",
@@ -485,14 +484,14 @@ class Group:
             ),
         },
     )
-    name: Optional[str] = field(
+    name: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
         },
     )
-    org_name: Optional[str] = field(
+    org_name: str | None = field(
         default=None,
         metadata={
             "name": "orgName",
@@ -507,7 +506,7 @@ class Aggregation:
         name = "aggregation"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    choice: List[object] = field(
+    choice: list[object] = field(
         default_factory=list,
         metadata={
             "type": "Elements",
@@ -535,75 +534,75 @@ class Aggregation:
             ),
         },
     )
-    variable_agg: List[Aggregation.VariableAgg] = field(
+    variable_agg: list[Aggregation.VariableAgg] = field(
         default_factory=list,
         metadata={
             "name": "variableAgg",
             "type": "Element",
         },
     )
-    promote_global_attribute: List[PromoteGlobalAttribute] = field(
+    promote_global_attribute: list[PromoteGlobalAttribute] = field(
         default_factory=list,
         metadata={
             "name": "promoteGlobalAttribute",
             "type": "Element",
         },
     )
-    cache_variable: List[CacheVariable] = field(
+    cache_variable: list[CacheVariable] = field(
         default_factory=list,
         metadata={
             "name": "cacheVariable",
             "type": "Element",
         },
     )
-    netcdf: List[Netcdf] = field(
+    netcdf: list[Netcdf] = field(
         default_factory=list,
         metadata={
             "type": "Element",
         },
     )
-    scan: List[Aggregation.Scan] = field(
+    scan: list[Aggregation.Scan] = field(
         default_factory=list,
         metadata={
             "type": "Element",
         },
     )
-    scan_fmrc: List[Aggregation.ScanFmrc] = field(
+    scan_fmrc: list[Aggregation.ScanFmrc] = field(
         default_factory=list,
         metadata={
             "name": "scanFmrc",
             "type": "Element",
         },
     )
-    type: Optional[AggregationType] = field(
+    type: AggregationType | None = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
         },
     )
-    dim_name: Optional[str] = field(
+    dim_name: str | None = field(
         default=None,
         metadata={
             "name": "dimName",
             "type": "Attribute",
         },
     )
-    recheck_every: Optional[str] = field(
+    recheck_every: str | None = field(
         default=None,
         metadata={
             "name": "recheckEvery",
             "type": "Attribute",
         },
     )
-    time_units_change: Optional[bool] = field(
+    time_units_change: bool | None = field(
         default=None,
         metadata={
             "name": "timeUnitsChange",
             "type": "Attribute",
         },
     )
-    fmrc_definition: Optional[str] = field(
+    fmrc_definition: str | None = field(
         default=None,
         metadata={
             "name": "fmrcDefinition",
@@ -613,7 +612,7 @@ class Aggregation:
 
     @dataclass
     class VariableAgg:
-        name: Optional[str] = field(
+        name: str | None = field(
             default=None,
             metadata={
                 "type": "Attribute",
@@ -623,21 +622,21 @@ class Aggregation:
 
     @dataclass
     class Scan:
-        location: Optional[str] = field(
+        location: str | None = field(
             default=None,
             metadata={
                 "type": "Attribute",
                 "required": True,
             },
         )
-        reg_exp: Optional[str] = field(
+        reg_exp: str | None = field(
             default=None,
             metadata={
                 "name": "regExp",
                 "type": "Attribute",
             },
         )
-        suffix: Optional[str] = field(
+        suffix: str | None = field(
             default=None,
             metadata={
                 "type": "Attribute",
@@ -649,21 +648,21 @@ class Aggregation:
                 "type": "Attribute",
             },
         )
-        older_than: Optional[str] = field(
+        older_than: str | None = field(
             default=None,
             metadata={
                 "name": "olderThan",
                 "type": "Attribute",
             },
         )
-        date_format_mark: Optional[str] = field(
+        date_format_mark: str | None = field(
             default=None,
             metadata={
                 "name": "dateFormatMark",
                 "type": "Attribute",
             },
         )
-        enhance: Optional[bool] = field(
+        enhance: bool | None = field(
             default=None,
             metadata={
                 "type": "Attribute",
@@ -672,21 +671,21 @@ class Aggregation:
 
     @dataclass
     class ScanFmrc:
-        location: Optional[str] = field(
+        location: str | None = field(
             default=None,
             metadata={
                 "type": "Attribute",
                 "required": True,
             },
         )
-        reg_exp: Optional[str] = field(
+        reg_exp: str | None = field(
             default=None,
             metadata={
                 "name": "regExp",
                 "type": "Attribute",
             },
         )
-        suffix: Optional[str] = field(
+        suffix: str | None = field(
             default=None,
             metadata={
                 "type": "Attribute",
@@ -698,28 +697,28 @@ class Aggregation:
                 "type": "Attribute",
             },
         )
-        older_than: Optional[str] = field(
+        older_than: str | None = field(
             default=None,
             metadata={
                 "name": "olderThan",
                 "type": "Attribute",
             },
         )
-        run_date_matcher: Optional[str] = field(
+        run_date_matcher: str | None = field(
             default=None,
             metadata={
                 "name": "runDateMatcher",
                 "type": "Attribute",
             },
         )
-        forecast_date_matcher: Optional[str] = field(
+        forecast_date_matcher: str | None = field(
             default=None,
             metadata={
                 "name": "forecastDateMatcher",
                 "type": "Attribute",
             },
         )
-        forecast_offset_matcher: Optional[str] = field(
+        forecast_offset_matcher: str | None = field(
             default=None,
             metadata={
                 "name": "forecastOffsetMatcher",
@@ -734,27 +733,27 @@ class Netcdf:
         name = "netcdf"
         namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
 
-    read_metadata: Optional[object] = field(
+    read_metadata: object | None = field(
         default=None,
         metadata={
             "name": "readMetadata",
             "type": "Element",
         },
     )
-    explicit: Optional[object] = field(
+    explicit: object | None = field(
         default=None,
         metadata={
             "type": "Element",
         },
     )
-    iosp_param: Optional[object] = field(
+    iosp_param: object | None = field(
         default=None,
         metadata={
             "name": "iospParam",
             "type": "Element",
         },
     )
-    choice: List[object] = field(
+    choice: list[object] = field(
         default_factory=list,
         metadata={
             "type": "Elements",
@@ -790,71 +789,71 @@ class Netcdf:
             ),
         },
     )
-    location: Optional[str] = field(
+    location: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    id: Optional[str] = field(
+    id: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    title: Optional[str] = field(
+    title: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    enhance: Optional[str] = field(
+    enhance: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    add_records: Optional[bool] = field(
+    add_records: bool | None = field(
         default=None,
         metadata={
             "name": "addRecords",
             "type": "Attribute",
         },
     )
-    iosp: Optional[str] = field(
+    iosp: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    iosp_param_attribute: Optional[str] = field(
+    iosp_param_attribute: str | None = field(
         default=None,
         metadata={
             "name": "iospParam",
             "type": "Attribute",
         },
     )
-    buffer_size: Optional[int] = field(
+    buffer_size: int | None = field(
         default=None,
         metadata={
             "name": "bufferSize",
             "type": "Attribute",
         },
     )
-    ncoords: Optional[str] = field(
+    ncoords: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    coord_value: Optional[str] = field(
+    coord_value: str | None = field(
         default=None,
         metadata={
             "name": "coordValue",
             "type": "Attribute",
         },
     )
-    section: Optional[str] = field(
+    section: str | None = field(
         default=None,
         metadata={
             "type": "Attribute",

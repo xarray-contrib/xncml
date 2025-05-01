@@ -1,0 +1,28 @@
+name: dev
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python>=3.9,<3.14
+  # Requirements
+  - cftime
+  - dask
+  - netcdf4
+  - psutil
+  - xarray
+  - xmltodict
+  - xsdata
+  # Development
+  - bump-my-version >=0.30.1
+  - coverage >=7.5.0
+  - flake8 >=7.1.1
+  - flake8-rst-docstrings >=0.3.0
+  - flit >=3.10.1,<4.0
+  - numpydoc >=1.8.0
+  - pip >=25.0
+  - pre-commit >=3.5.0
+  - pytest >=8.3.2
+  - pytest-cov >=5.0.0
+  - ruff >=0.9.0
+  - tox >=4.24.1
+  - watchdog >=4.0.0

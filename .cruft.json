@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/Ouranosinc/cookiecutter-pypackage.git",
-  "commit": "58525bb6c287ad11c874d7b8531c3597232e2d93",
+  "commit": "760bcbb2540bd973d57ea1aa1f1b24759f6d0955",
   "checkout": null,
   "context": {
     "cookiecutter": {
@@ -23,7 +23,8 @@
       "open_source_license": "Apache Software License 2.0",
       "generated_with_cruft": "y",
       "__gh_slug": "https://github.com/xarray-contrib/xncml",
-      "_template": "https://github.com/Ouranosinc/cookiecutter-pypackage.git"
+      "_template": "https://github.com/Ouranosinc/cookiecutter-pypackage.git",
+      "_commit": "760bcbb2540bd973d57ea1aa1f1b24759f6d0955"
     }
   },
   "directory": null

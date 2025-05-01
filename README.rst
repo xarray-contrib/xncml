@@ -1,7 +1,15 @@
 xncml
 =====
 
-|pypi| |ruff| |docs|
++----------------------------+-----------------------------------------------------+
+| Documentation and Support  | |docs|                                              |
++----------------------------+-----------------------------------------------------+
+| Open Source                | |license| |ossf-score|                              |
++----------------------------+-----------------------------------------------------+
+| Coding Standards           | |ruff| |pre-commit|                                 |
++----------------------------+-----------------------------------------------------+
+| Development Status         | |status| |build| |coveralls|                        |
++----------------------------+-----------------------------------------------------+
 
 Tools for opening and manipulating NcML (NetCDF Markup Language) files with/for xarray.
 
@@ -18,9 +26,7 @@ and read NcML files into `xarray.Dataset` objects:
    import xncml
    ds = xncml.open_ncml("large_ensemble.ncml")
 
-
 See `doc`_ for more information.
-
 
 Installation
 ============
@@ -41,7 +47,6 @@ you through the process.
 
 .. _pip: https://pip.pypa.io
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
-
 
 From sources
 ------------
@@ -70,9 +75,34 @@ Once you have a copy of the source, you can install it with:
 .. _Github repo: https://github.com/xarray-contrib/xncml/
 .. _tarball: https://github.com/xarray-contrib/xncml/tarball/main
 
+.. |build| image:: https://github.com/xarray-contrib/xncml/actions/workflows/main.yml/badge.svg
+        :target: https://github.com/xarray-contrib/xncml/actions/workflows/main.yml
+        :alt: Build Status
+
+.. |coveralls| image:: https://coveralls.io/repos/github/xarray-contrib/xncml/badge.svg
+        :target: https://coveralls.io/github/xarray-contrib/xncml
+        :alt: Coveralls
+
 .. |docs| image:: https://readthedocs.org/projects/xncml/badge/?version=latest
-        :target: hhttps://xncml.readthedocs.io
+        :target: https://xncml.readthedocs.io
         :alt: Documentation Status
+
+.. |license| image:: https://img.shields.io/github/license/xarray-contrib/xncml.svg
+        :target: https://github.com/xarray-contrib/xncml/blob/main/LICENSE
+        :alt: License
+
+..
+    .. |ossf-bp| image:: https://bestpractices.coreinfrastructure.org/projects/9945/badge
+            :target: https://bestpractices.coreinfrastructure.org/projects/9945
+            :alt: Open Source Security Foundation Best Practices
+
+.. |ossf-score| image:: https://api.securityscorecards.dev/projects/github.com/xarray-contrib/xncml/badge
+        :target: https://securityscorecards.dev/viewer/?uri=github.com/xarray-contrib/xncml
+        :alt: OpenSSF Scorecard
+
+.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/xarray-contrib/xncml/main.svg
+        :target: https://results.pre-commit.ci/latest/github/xarray-contrib/xncml/main
+        :alt: pre-commit.ci status
 
 .. |pypi| image:: https://img.shields.io/pypi/v/xncml.svg
         :target: https://pypi.python.org/pypi/xncml
@@ -81,3 +111,7 @@ Once you have a copy of the source, you can install it with:
 .. |ruff| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
         :target: https://github.com/astral-sh/ruff
         :alt: Ruff
+
+.. |status| image:: https://www.repostatus.org/badges/latest/active.svg
+        :target: https://www.repostatus.org/#active
+        :alt: Project Status: Active – The project has reached a stable, usable state and is being actively developed.
