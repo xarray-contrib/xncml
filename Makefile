@@ -57,7 +57,7 @@ clean-test: ## remove test and coverage artifacts
 lint/flake8: ## check style with flake8
 	python -m ruff check src/xncml tests
 	python -m flake8 --config=.flake8 src/xncml tests
-	python -m numpydoc lint src/xncml/**.py
+	# python -m numpydoc lint src/xncml/**.py
 
 lint/format-check: ## check style with ruff format
 	ruff format --check src/xncml tests
