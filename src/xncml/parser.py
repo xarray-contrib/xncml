@@ -601,7 +601,7 @@ def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
       A list filled with values from <values> element.
     """
     if values_tag.from_attribute is not None:
-        error_msg = "xncml cannot yet fetch values from a global or a variable attribute using <from_attribute>, here on variable" f" {var_name}."
+        error_msg = f"xncml cannot yet fetch values from a global or a variable attribute using <from_attribute>, here on variable {var_name}."
         raise NotImplementedError(error_msg)
     if values_tag.start is not None and values_tag.increment is not None:
         number_of_values = int(values_tag.npts or expected_size)
@@ -657,7 +657,7 @@ def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> x
     if len(values_content) == 1:
         return xr.Variable(data=np.array(values_content[0], dtype=nctype(var_type))[()], dims=())
     if len(values_content) > 1:
-        error_msg = f"Multiple values found for variable {var_name} but its shape is \"\" thus a single scalar is expected within its <values> tag."
+        error_msg = f'Multiple values found for variable {var_name} but its shape is "" thus a single scalar is expected within its <values> tag.'
     raise ValueError(error_msg)
 
 
@@ -728,9 +728,7 @@ def rename_dimension(target: xr.Dataset, ref: xr.Dataset, obj: Dimension) -> xr.
         elif obj.org_name in ref.dims:
             target = target.expand_dims({obj.name: ref.dims[obj.org_name]})
         else:
-            raise ValueError(
-                f"Dimension '{obj.org_name}' not found in either the target or reference dataset."
-            )
+            raise ValueError(f"Dimension '{obj.org_name}' not found in either the target or reference dataset.")
     return target
 
 

@@ -408,7 +408,7 @@ class Dataset:
         """
         if not path:
             if self.filepath.exists():
-                path = f'{str(self.filepath).strip(".ncml")}_modified.ncml'
+                path = f"{str(self.filepath).strip('.ncml')}_modified.ncml"
             else:
                 path = str(self.filepath)
 
