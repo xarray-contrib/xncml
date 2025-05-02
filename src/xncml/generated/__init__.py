@@ -1,4 +1,4 @@
-from .ncml_2_2 import (
+from ._ncml_2_2 import (
     Aggregation,
     AggregationType,
     Attribute,

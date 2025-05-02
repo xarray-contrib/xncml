@@ -300,7 +300,7 @@ def read_group(
       List of groups that must be read and included in `target`.
     parent_group_path : str
       Path of parent group, by default the root group '/'.
-    dims: dict[str, Dimension]
+    dims : dict[str, Dimension]
       Dictionary of the dimensions of this dataset.
 
     Returns
@@ -445,12 +445,12 @@ def read_enum(obj: EnumTypedef) -> dict[str, list]:
 
     Parameters
     ----------
-    obj: EnumTypeDef
+    obj : EnumTypeDef
       <enumTypeDef> object.
 
     Returns
     -------
-    dict:
+    dict
         A dictionary describing the Enum.
 
     Examples
@@ -486,9 +486,9 @@ def read_variable(
        <variable> object description.
     dimensions : dict
       Dimension attributes keyed by name.
-    enums: dict[str, dict]
+    enums : dict[str, dict]
       The enums types that have been read in the parent groups.
-    group_path: str
+    group_path : str
       Path to the parent group.
 
     Returns
@@ -590,7 +590,7 @@ def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
     ----------
     var_name : str
       The variable name.
-    size: int
+    size : int
       The variable expected size.
     values_tag : Values instance
       <values> object description
@@ -632,7 +632,7 @@ def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> x
       The variable name.
     values_tag : Values instance
       <values> object description
-    var_type: str
+    var_type : str
       The variable expected type.
 
     Returns

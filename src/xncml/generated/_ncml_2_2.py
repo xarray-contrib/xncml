@@ -49,7 +49,7 @@ class ObjectType(Enum):
 class CacheVariable:
     class Meta:
         name = "cacheVariable"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     name: str | None = field(
         default=None,
@@ -64,7 +64,7 @@ class CacheVariable:
 class Dimension:
     class Meta:
         name = "dimension"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     name: str | None = field(
         default=None,
@@ -113,7 +113,7 @@ class Dimension:
 class LogicalReduce:
     class Meta:
         name = "logicalReduce"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     dim_names: str | None = field(
         default=None,
@@ -129,7 +129,7 @@ class LogicalReduce:
 class LogicalSection:
     class Meta:
         name = "logicalSection"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     section: str | None = field(
         default=None,
@@ -144,7 +144,7 @@ class LogicalSection:
 class LogicalSlice:
     class Meta:
         name = "logicalSlice"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     dim_name: str | None = field(
         default=None,
@@ -167,7 +167,7 @@ class LogicalSlice:
 class PromoteGlobalAttribute:
     class Meta:
         name = "promoteGlobalAttribute"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     name: str | None = field(
         default=None,
@@ -189,7 +189,7 @@ class PromoteGlobalAttribute:
 class Values:
     class Meta:
         name = "values"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     start: float | None = field(
         default=None,
@@ -236,7 +236,7 @@ class Values:
 class Attribute:
     class Meta:
         name = "attribute"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     name: str | None = field(
         default=None,
@@ -291,7 +291,7 @@ class Attribute:
 class EnumTypedef:
     class Meta:
         name = "enumTypedef"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     name: str | None = field(
         default=None,
@@ -344,7 +344,7 @@ class EnumTypedef:
 class Remove:
     class Meta:
         name = "remove"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     type: ObjectType | None = field(
         default=None,
@@ -366,7 +366,7 @@ class Remove:
 class Variable:
     class Meta:
         name = "variable"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     attribute: list[Attribute] = field(
         default_factory=list,
@@ -451,7 +451,7 @@ class Variable:
 class Group:
     class Meta:
         name = "group"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     choice: list[object] = field(
         default_factory=list,
@@ -505,7 +505,7 @@ class Group:
 class Aggregation:
     class Meta:
         name = "aggregation"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     choice: list[object] = field(
         default_factory=list,
@@ -732,7 +732,7 @@ class Aggregation:
 class Netcdf:
     class Meta:
         name = "netcdf"
-        namespace = "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        namespace = __NAMESPACE__
 
     read_metadata: object | None = field(
         default=None,
