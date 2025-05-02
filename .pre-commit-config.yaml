@@ -7,7 +7,7 @@ repos:
     hooks:
       - id: pyupgrade
         args: [ '--py39-plus' ]
-        exclude: 'src/xncml/generated/ncml_2_2.py'
+        exclude: 'src/xncml/generated/_ncml_2_2.py'
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
