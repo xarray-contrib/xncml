@@ -4,7 +4,7 @@ xncml
 +----------------------------+-----------------------------------------------------+
 | Documentation and Support  | |docs|                                              |
 +----------------------------+-----------------------------------------------------+
-| Open Source                | |license| |ossf-score|                              |
+| Open Source                | |license|                                           |
 +----------------------------+-----------------------------------------------------+
 | Coding Standards           | |ruff| |pre-commit|                                 |
 +----------------------------+-----------------------------------------------------+
@@ -92,13 +92,13 @@ Once you have a copy of the source, you can install it with:
         :alt: License
 
 ..
-    .. |ossf-bp| image:: https://bestpractices.coreinfrastructure.org/projects/9945/badge
-            :target: https://bestpractices.coreinfrastructure.org/projects/9945
+    .. |ossf-bp| image:: https://bestpractices.coreinfrastructure.org/projects/????/badge
+            :target: https://bestpractices.coreinfrastructure.org/projects/????
             :alt: Open Source Security Foundation Best Practices
 
-.. |ossf-score| image:: https://api.securityscorecards.dev/projects/github.com/xarray-contrib/xncml/badge
-        :target: https://securityscorecards.dev/viewer/?uri=github.com/xarray-contrib/xncml
-        :alt: OpenSSF Scorecard
+    .. |ossf-score| image:: https://api.securityscorecards.dev/projects/github.com/xarray-contrib/xncml/badge
+            :target: https://securityscorecards.dev/viewer/?uri=github.com/xarray-contrib/xncml
+            :alt: OpenSSF Scorecard
 
 .. |pre-commit| image:: https://results.pre-commit.ci/badge/github/xarray-contrib/xncml/main.svg
         :target: https://results.pre-commit.ci/latest/github/xarray-contrib/xncml/main
