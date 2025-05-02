@@ -384,7 +384,7 @@ class Dataset:
         item = OrderedDict({"@name": new_name, "orgName": old_name})
 
         if attributes:
-            if isinstance(attributes, (dict, OrderedDict)):
+            if isinstance(attributes, dict | OrderedDict):
                 attributes = [attributes]
 
             for attr in attributes:
