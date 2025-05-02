@@ -80,7 +80,7 @@ initialize-translations: clean-docs ## initialize translations, ignoring autodoc
 	sphinx-intl update -p docs/_build/gettext -d docs/locales -l fr
 
 autodoc: clean-docs ## create sphinx-apidoc files:
-	sphinx-apidoc -o docs/apidoc --private --module-first src/xncml
+	sphinx-apidoc -o docs/apidoc --module-first src/xncml
 
 linkcheck: autodoc ## run checks over all external links found throughout the documentation
 	$(MAKE) -C docs linkcheck

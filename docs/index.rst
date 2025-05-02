@@ -1,4 +1,4 @@
-Xncml Documentation
+xncml Documentation
 ===================
 
 .. toctree::
