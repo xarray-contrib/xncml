@@ -97,27 +97,28 @@ serialize = [
 filename = "CHANGELOG.rst"
 include_bumps = ["release"]
 search = """\
-`Unreleased <https://github.com/bzah/xncml>`_ (latest)
-------------------------------------------------------
+`Unreleased <https://github.com/xarray-contrib/xncml>`_ (latest)
+----------------------------------------------------------------
 """
 replace = """\
-`Unreleased <https://github.com/bzah/xncml>`_ (latest)
-------------------------------------------------------
+..
+    `Unreleased <https://github.com/xarray-contrib/xncml>`_ (latest)
+    ----------------------------------------------------------------
 
-Contributors:
+    Contributors:
 
-Changes
-^^^^^^^
-* No change.
+    Changes
+    ^^^^^^^
+    * No change.
 
-Fixes
-^^^^^
-* No change.
+    Fixes
+    ^^^^^
+    * No change.
 
 .. _changes_{new_version}:
 
-`v{new_version} <https://github.com/bzah/xncml/tree/{new_version}>`_
-----------------------------------------------------
+`v{new_version} <https://github.com/xarray-contrib/xncml/tree/{new_version}>`_ ({now:%Y-%m-%d})
+---------------------------------------------------------------------------
 """
 
 [[tool.bumpversion.files]]

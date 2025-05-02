@@ -175,7 +175,6 @@ Ready to contribute? Here's how to set up ``xncml`` for local development.
 
 #. Once your Pull Request has been accepted and merged to the `main` branch, several automated workflows will be triggered:
 
-    - The ``bump-version.yml`` workflow will automatically bump the patch version when pull requests are pushed to the `main` branch on GitHub. **It is not recommended to manually bump the version in your branch when merging (non-release) pull requests (this will cause the version to be bumped twice).**
     - `ReadTheDocs` will automatically build the documentation and publish it to the `latest` branch of `xncml` documentation website.
     - If your branch is not a fork (i.e. you are a maintainer), your branch will be automatically deleted.
 
@@ -217,7 +216,7 @@ To run specific code style checks:
     python -m flake8 src/xncml tests
     python -m numpydoc lint src/xncml/**.py
 
-To get ``ruff``, ``flake8`` (with the ``flake8-rst-docstrings`` plugin), and `numpydoc` simply install them with ``pip`` into your environment.
+To get ``ruff``, ``flake8`` (with the ``flake8-rst-docstrings`` plugin), and ``numpydoc`` simply install them with ``pip`` into your environment.
 
 Code of Conduct
 ---------------
