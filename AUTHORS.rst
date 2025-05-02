@@ -14,5 +14,5 @@ Maintainers
 
 Contributors
 -------------
-* Pascal Bourgault <bourgault.pascal@ouranos.ca> `@Zeitsperre <https://github.com/Zeitsperre>`_
+* Pascal Bourgault <bourgault.pascal@ouranos.ca> `@aulemhahal <https://github.com/aulemahal>`_
 * Francis Charette-Migneault <francis.charette.migneault@gmail.com> `@fmigneault <https://github.com/fmigneault>`_
