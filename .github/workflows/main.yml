@@ -8,9 +8,6 @@ on:
       - .cruft.json
       - CHANGELOG.rst
       - README.rst
-      - pyproject.toml
-      - tests/test_xncml.py
-      - src/xncml/__init__.py
   pull_request:
 
 concurrency:
