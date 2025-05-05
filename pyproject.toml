@@ -97,13 +97,13 @@ serialize = [
 filename = "CHANGELOG.rst"
 include_bumps = ["release"]
 search = """\
-`Unreleased <https://github.com/xarray-contrib/xncml>`_ (latest)
-----------------------------------------------------------------
+`Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
+----------------------------------------------------------------------------
 """
 replace = """\
 ..
-    `Unreleased <https://github.com/xarray-contrib/xncml>`_ (latest)
-    ----------------------------------------------------------------
+    `Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
+    ----------------------------------------------------------------------------
 
     Contributors:
 
@@ -123,11 +123,6 @@ replace = """\
 
 [[tool.bumpversion.files]]
 filename = "src/xncml/__init__.py"
-search = "__version__ = \"{current_version}\""
-replace = "__version__ = \"{new_version}\""
-
-[[tool.bumpversion.files]]
-filename = "tests/test_xncml.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
 
