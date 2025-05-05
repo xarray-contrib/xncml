@@ -12,9 +12,24 @@ Breaking changes
 ^^^^^^^^^^^^^^^^
 
 - Nested group handling:
-  Before this version, all groups were read, but conflicting variable names in-between groups would shadow data.  Now, similarly to xarray ``open_dataset``, ``open_ncml`` accepts an optional ``group`` argument to specify which group should be read. When ``group`` is not specified, it defaults to the root group. Additionally ``group`` can be set to ``'*'`` so that every group is read and the hierarchy is flattened.   In the event of conflicting variable/dimension names across groups, the conflicting name will be modified by appending ``'__n'`` where n is incremented.
+  - Before this version, all groups were read, but conflicting variable names in-between groups would shadow data.  Now, similarly to xarray ``open_dataset``, ``open_ncml`` accepts an optional ``group`` argument to specify which group should be read. When ``group`` is not specified, it defaults to the root group. Additionally ``group`` can be set to ``'*'`` so that every group is read and the hierarchy is flattened.   In the event of conflicting variable/dimension names across groups, the conflicting name will be modified by appending ``'__n'`` where n is incremented.
 - Enums are no longer transformed into CF flag_values and flag_meanings attributes, instead they are stored in the ``encoding["dtype"].metadata`` of their respective variable. This is aligned with what is done on xarray v2024.01.0
 - [fix] scalar attributes that are not strings are no longer wrapped in tuples of length 1.
+- Python 3.9 support has been dropped and Python 3.13 support has been added.
+- ``xncml.generated.ncml_2_2`` has been refactored to no longer be exposed to the package API. Users should now use objects imported directly from ``xncml.generated``.
+
+Internal changes
+^^^^^^^^^^^^^^^^
+
+- The `xncml` package has been significantly restructured to improve maintainability:
+  - The package now complies with both PEP 517 and PEP 621 (``pyproject.toml`` and newer metadata definitions).
+  - The build system has been migrated from `setuptools` to `flit`.
+  - `CHANGES.rst` has been replaced with `CHANGELOG.rst` to follow the `keepachangelog` format.
+  - Code linting and formatting now exclusively uses `ruff` (in lieu of `black`, `isort`, and others).
+  - The package has adopted a `src/` layout.
+  - Documentation now uses `sphinx-apidoc` to generate API documentation on build and the module layout is now navigable on the documentation page.
+  - The `xncml` package now uses `pytest` for testing, and the test suite has been migrated to `pytest` from `unittest`.
+  - The project now uses Trusted Publisher to sign and verify releases.
 
 .. _changes-0.4.0:
 
