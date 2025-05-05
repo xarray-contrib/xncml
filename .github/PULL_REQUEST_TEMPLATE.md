@@ -1,9 +1,18 @@
-Thanks for submitting a PR, your contribution is really appreciated!
+<!-- Please ensure the PR fulfills the following requirements! -->
+<!-- If this is your first PR, make sure to add your details to the AUTHORS.rst! -->
+### Pull Request Checklist:
+- [ ] This PR addresses an already opened issue (for bug fixes / features)
+  - This PR fixes #xyz
+- [ ] (If applicable) Documentation has been added / updated (for bug fixes / features).
+- [ ] (If applicable) Tests have been added.
+- [ ] CHANGELOG.rst has been updated (with summary of main changes).
+  - [ ] Link to issue (:issue:`number`) and pull request (:pull:`number`) has been added.
 
-Here's a quick checklist that should be present in PRs (you can delete this text from the final description, this is just a guideline):
+### What kind of change does this PR introduce?
+
+* ...
+
+### Does this PR introduce a breaking change?
 
 
-- [ ] Include documentation when adding new features.
-- [ ] Include new tests or update existing tests when applicable.
-
-[summarize your pull request here]
+### Other information:

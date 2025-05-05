@@ -1,56 +1,113 @@
-.PHONY: help clean clean-pyc clean-build list test test-all coverage docs release sdist
+.PHONY: clean clean-build clean-pyc clean-test coverage dist docs help install lint lint/flake8 lint/format-checkformat-check
+.DEFAULT_GOAL := help
+
+define BROWSER_PYSCRIPT
+import os, webbrowser, sys
+
+from urllib.request import pathname2url
+
+webbrowser.open("file://" + pathname2url(os.path.abspath(sys.argv[1])))
+endef
+export BROWSER_PYSCRIPT
+
+define PRINT_HELP_PYSCRIPT
+import re, sys
+
+for line in sys.stdin:
+	match = re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)
+	if match:
+		target, help = match.groups()
+		print("%-20s %s" % (target, help))
+endef
+export PRINT_HELP_PYSCRIPT
+
+BROWSER := python -c "$$BROWSER_PYSCRIPT"
+LOCALES := docs/locales
 
 help:
-	@echo "clean-build - remove build artifacts"
-	@echo "clean-pyc - remove Python file artifacts"
-	@echo "lint - check style with flake8"
-	@echo "test - run tests quickly with the default Python"
-	@echo "test-all - run tests on every Python version with tox"
-	@echo "coverage - check code coverage quickly with the default Python"
-	@echo "docs - generate Sphinx HTML documentation, including API docs"
-	@echo "release - package and upload a release"
-	@echo "sdist - package"
+	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-clean: clean-build clean-pyc
+clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 
-clean-build:
+clean-build: ## remove build artifacts
 	rm -fr build/
 	rm -fr dist/
-	rm -fr *.egg-info
+	rm -fr .eggs/
+	find . -name '*.egg-info' -exec rm -fr {} +
+	find . -name '*.egg' -exec rm -f {} +
 
-clean-pyc:
+clean-docs: ## remove docs artifacts
+	rm -f docs/apidoc/xncml*.rst
+	rm -f docs/apidoc/modules.rst
+	rm -fr docs/locales/fr/LC_MESSAGES/*.mo
+	$(MAKE) -C docs clean
+
+clean-pyc: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
+	find . -name '__pycache__' -exec rm -fr {} +
 
-lint:
-	flake8 xncml test
+clean-test: ## remove test and coverage artifacts
+	rm -fr .tox/
+	rm -f .coverage
+	rm -fr htmlcov/
+	rm -fr .pytest_cache
 
-test:
-	py.test
+lint/flake8: ## check style with flake8
+	python -m ruff check src/xncml tests
+	python -m flake8 --config=.flake8 src/xncml tests
+	# python -m numpydoc lint src/xncml/**.py
 
-test-all:
-	tox
+lint/format-check: ## check style with ruff format
+	ruff format --check src/xncml tests
 
-coverage:
-	coverage run --source xncml setup.py test
-	coverage report -m
-	coverage html
-	open htmlcov/index.html
+lint: lint/flake8 lint/format-check ## check style
 
-docs:
-	rm -f docs/xncml.rst
-	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ xncml
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
-	open docs/_build/html/index.html
+test: ## run tests quickly with the default Python
+	python -m pytest
 
-release: clean
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+test-all: ## run tests on every Python version with tox
+	python -m tox
 
-sdist: clean
-	python setup.py sdist
-	python setup.py bdist_wheel upload
+coverage: ## check code coverage quickly with the default Python
+	python -m coverage run --source src/xncml -m pytest
+	python -m coverage report -m
+	python -m coverage html
+	$(BROWSER) htmlcov/index.html
+initialize-translations: clean-docs ## initialize translations, ignoring autodoc-generated files
+	${MAKE} -C docs gettext
+	sphinx-intl update -p docs/_build/gettext -d docs/locales -l fr
+
+autodoc: clean-docs ## create sphinx-apidoc files:
+	sphinx-apidoc -o docs/apidoc --module-first src/xncml
+
+linkcheck: autodoc ## run checks over all external links found throughout the documentation
+	$(MAKE) -C docs linkcheck
+
+docs: autodoc ## generate Sphinx HTML documentation, including API docs
+	$(MAKE) -C docs html BUILDDIR="_build/html/en"
+ifneq ("$(wildcard $(LOCALES))","")
+	${MAKE} -C docs gettext
+	$(MAKE) -C docs html BUILDDIR="_build/html/fr" SPHINXOPTS="-D language='fr'"
+endif
+ifndef READTHEDOCS
+	$(BROWSER) docs/_build/html/en/html/index.html
+endif
+
+servedocs: docs ## compile the docs watching for changes
+	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
+
+dist: clean ## builds source and wheel package
+	python -m flit build
 	ls -l dist
+
+release: dist ## package and upload a release
+	python -m flit publish dist/*
+
+install: clean ## install the package to the active Python's site-packages
+	python -m pip install .
+
+dev: clean ## install the package to the active Python's site-packages
+	python -m pip install --editable .[all]
+	pre-commit install

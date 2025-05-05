@@ -1,0 +1,23 @@
+name: xncml-doc
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python >=3.11,<3.12
+  # Requirements
+  - cftime
+  - dask
+  - netCDF4
+  - psutil
+  - xarray
+  - xmltodict
+  - xsdata
+  # Documentation
+  - ipykernel
+  - ipython
+  - jupyter_client
+  - nbsphinx >=0.9.5
+  - sphinx >=7.0.0
+  - sphinx-codeautolink >=0.16.2
+  - sphinx-copybutton
+  - sphinx-rtd-theme >=1.0

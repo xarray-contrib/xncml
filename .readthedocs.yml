@@ -7,17 +7,21 @@ version: 2
 
 # Set the version of Python and other tools you might need
 build:
-  os: ubuntu-20.04
+  os: "ubuntu-24.04"
   tools:
-    python: 'mambaforge-4.10'
+    python: 'mambaforge-23.11'
+  jobs:
+    pre_build:
+      - sphinx-apidoc -o docs/apidoc/ --module-first src/xncml
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
-   configuration: docs/source/conf.py
+  configuration: docs/conf.py
+  fail_on_warning: true
 
 # Optionally set the version of Python and requirements required to build your docs
 conda:
-    environment: ci/doc.yml
+  environment: CI/environment-docs.yml
 
 python:
   install:
