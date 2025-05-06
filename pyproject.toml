@@ -5,13 +5,13 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "xncml"
 authors = [
-  {name = "Anderson Banihirwe", email = "abanihi@ucar.edu"}
+  {name = "Anderson Banihirwe", email = "abanihi@ucar.edu"},
+  {name = "David Huard", email = "david.huard@gmail.com"}
 ]
 maintainers = [
-  {name = "Anderson Banihirwe", email = "abanihi@ucar.edu"},
   {name = "Abel Aoun", email = "aoun.abel@gmail.com"},
   {name = "David Huard", email = "david.huard@gmail.com"},
-  {name = "Trevor James Smith", email = "trevor_smith@live.com"}
+  {name = "Trevor James Smith", email = "smith.trevorj@ouranos.ca"}
 ]
 description = "Tools for manipulating and opening NCML (NetCDF Markup) files with/for xarray"
 readme = {file = "README.rst", content-type = "text/x-rst"}
@@ -76,6 +76,7 @@ docs = [
 all = ["xncml[dev]", "xncml[docs]"]
 
 [project.urls]
+"Homepage" = "https://xncml.readthedocs.io/"
 "Changelog" = "https://xncml.readthedocs.io/en/stable/changelog.html"
 "Issue tracker" = "https://github.com/xarray-contrib/xncml/issues"
 "Source" = "https://github.com/xarray-contrib/xncml"
