@@ -2,19 +2,26 @@
 Changelog
 =========
 
-..
-    `Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
-    ----------------------------------------------------------------------------
+`Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
+----------------------------------------------------------------------------
 
-    Contributors:
+Contributors: Trevor James Smith (:user:`Zeitsperre`).
 
-    Changes
-    ^^^^^^^
-    * No change.
+Changes
+^^^^^^^
 
-    Fixes
-    ^^^^^
-    * No change.
+- No change.
+
+Fixes
+^^^^^
+
+- Author and license information have been updated in the top-most ``__init__.py``, ``.zenodo.json``, and ``pyproject.toml`` files.
+
+Internal changes
+^^^^^^^^^^^^^^^^
+
+- Removed the obsolete ``MANIFEST.in`` file.
+- New `pre-commit` checks have been added to the ``.pre-commit-config.yaml`` file.
 
 .. _changes_0.5.0:
 
@@ -68,7 +75,6 @@ Internal changes
 - Add support for Python 3.12
 - Drop support for Python 3.8
 
-
 .. _changes-0.3:
 
 0.3 (2023-08-28)
@@ -79,7 +85,6 @@ Internal changes
 - Closing the dataset returned by `open_ncml` will close the underlying opened files (by :user:`huard`).
 - Add `Dataset.from_text` classmethod  to create a `Dataset` from an XML string (by :user:`huard`).
 
-
 .. _changes-0.2:
 
 0.2 (2023-02-23)
@@ -89,7 +94,6 @@ Internal changes
 - Allow empty `Dataset` creation (by :user:`huard`).
 - Add support in `Dataset` for NcML documents using the `ncml` namespace (by :user:`huard`).
 - Implement `Dataset.to_cf_dict` method to export CF-JSON dictionary (by :user:`huard`).
-
 
 .. _changes-0.1:
 
