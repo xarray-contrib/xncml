@@ -2,8 +2,8 @@
 Credits
 =======
 
-Development Lead
-----------------
+Development Leads
+-----------------
 * Anderson Banihirwe <abanihi@ucar.edu> `@andersy005 <https://github.com/andersy005>`_
 * David Huard <david.huard@gmail.com> `@huard <https://github.com/huard>`_
 

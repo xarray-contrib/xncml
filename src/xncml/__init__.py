@@ -3,7 +3,7 @@
 ###################################################################################
 # Apache Software License 2.0
 #
-# Copyright (c) 2019-2024, Anderson Banihirwe, David Huard
+# Copyright (c) 2019-2025, Anderson Banihirwe, David Huard, Abel Aoud, Trevor James Smith, Francis Charette-Migneault, Pascal Bourgault
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
