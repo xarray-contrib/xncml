@@ -2,19 +2,18 @@
 Changelog
 =========
 
-..
-    `Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
-    ----------------------------------------------------------------------------
+`Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
+----------------------------------------------------------------------------
+Contributors: Trevor James Smith (:user:`Zeitsperre`).
 
-    Contributors:
+Fixes
+^^^^^
+- Author and license information have been updated in the top-most ``__init__.py``, ``.zenodo.json``, and ``pyproject.toml`` files.
 
-    Changes
-    ^^^^^^^
-    * No change.
-
-    Fixes
-    ^^^^^
-    * No change.
+Internal changes
+^^^^^^^^^^^^^^^^
+- Removed the obsolete ``MANIFEST.in`` file.
+- New `pre-commit` checks have been added to the ``.pre-commit-config.yaml`` file.
 
 .. _changes_0.5.0:
 
@@ -23,12 +22,10 @@ Changelog
 
 Bug fixes
 ^^^^^^^^^
-
 - Scalar attributes that are not strings are no longer wrapped in tuples of length==1 (by :user:`bzah`).
 
 Breaking changes
 ^^^^^^^^^^^^^^^^
-
 - Nested group handling (by :user:`bzah`):
     - Before this version, all groups were read, but conflicting variable names in-between groups would shadow data. Now, similarly to ``xarray.open_dataset``, ``open_ncml`` accepts an optional ``group`` argument to specify which group should be read. When ``group`` is not specified, it defaults to the root group. Additionally ``group`` can be set to ``'*'`` so that every group is read and the hierarchy is flattened. In the event of conflicting variable/dimension names across groups, the conflicting name will be modified by appending ``'__n'`` where n is incremented.
 - Enums are no longer transformed into CF flag_values and flag_meanings attributes, instead they are stored in the ``encoding["dtype"].metadata`` of their respective variable. This is aligned with what was done on `xarray` v2024.01.0 (by :user:`bzah`).
@@ -37,7 +34,6 @@ Breaking changes
 
 Internal changes
 ^^^^^^^^^^^^^^^^
-
 - Added support for running `pytest` with `pytest-cov` (by :user:`Zeitsperre`).
 - Reworked the GitHub CI testing workflow to perform version checks as well as tests with `pytest-cov` (by :user:`Zeitsperre`).
 - The `xncml` package has been significantly restructured to improve maintainability (by :user:`bzah` and :user:`Zeitsperre`):
@@ -68,7 +64,6 @@ Internal changes
 - Add support for Python 3.12
 - Drop support for Python 3.8
 
-
 .. _changes-0.3:
 
 0.3 (2023-08-28)
@@ -78,7 +73,6 @@ Internal changes
 - Add `add_scan` to `Dataset` class (by :user:`huard`).
 - Closing the dataset returned by `open_ncml` will close the underlying opened files (by :user:`huard`).
 - Add `Dataset.from_text` classmethod  to create a `Dataset` from an XML string (by :user:`huard`).
-
 
 .. _changes-0.2:
 
@@ -90,12 +84,11 @@ Internal changes
 - Add support in `Dataset` for NcML documents using the `ncml` namespace (by :user:`huard`).
 - Implement `Dataset.to_cf_dict` method to export CF-JSON dictionary (by :user:`huard`).
 
-
 .. _changes-0.1:
 
 0.1 Initial release (2022-11-24)
 --------------------------------
 
- - Manipulate NcML file: add & remove attributes, variables and dimensions. (by :user:`andersy005`).
- - Implement `open_ncml`, which returns an `xarray.Dataset` built from an NcML. Note that
-   Only a subset of the NcML syntax is supported. (by :user:`huard`).
+- Manipulate NcML file: add & remove attributes, variables and dimensions. (by :user:`andersy005`).
+- Implement `open_ncml`, which returns an `xarray.Dataset` built from an NcML. Note that
+  Only a subset of the NcML syntax is supported. (by :user:`huard`).

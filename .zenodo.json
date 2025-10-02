@@ -2,10 +2,37 @@
   "title": "xncml",
   "creators": [
     {
-      "name": "Anderson Banihirwe"
+      "name": "Banihirwe, Anderson",
+      "orcid": "0000-0001-6583-571X"
+    },
+    {
+      "name": "Huard, David",
+      "affiliation": "Ouranos, Montréal, Québec, Canada",
+      "orcid": "0000-0003-0311-5498"
+    },
+    {
+      "name": "Aoun, Abel",
+      "orcid": "0000-0003-2289-2890"
+    },
+    {
+      "name": "Smith, Trevor James",
+      "affiliation": "Ouranos, Montréal, Québec, Canada",
+      "orcid": "0000-0001-5393-8359"
+    },
+    {
+      "name": "Charette-Migneault, Francis",
+      "affiliation": "CRIM, Montréal, Québec, Canada",
+      "orcid": "0000-0003-4862-3349"
+    },
+    {
+      "name": "Bourgault, Pascal",
+      "affiliation": "Ouranos, Montréal, Québec, Canada",
+      "orcid": "0000-0003-1192-0403"
     }
   ],
   "keywords": [
+    "netcdf",
+    "xarray",
     "xncml"
   ],
   "license": "Apache-2.0",
