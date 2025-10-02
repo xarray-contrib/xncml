@@ -2,8 +2,24 @@
 Changelog
 =========
 
-`Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
-----------------------------------------------------------------------------
+..
+    `Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
+    ----------------------------------------------------------------------------
+
+    Contributors:
+
+    Changes
+    ^^^^^^^
+    * No change.
+
+    Fixes
+    ^^^^^
+    * No change.
+
+.. _changes_0.5.1:
+
+`v0.5.1 <https://github.com/xarray-contrib/xncml/tree/0.5.1>`_ (2025-10-02)
+---------------------------------------------------------------------------
 Contributors: Trevor James Smith (:user:`Zeitsperre`).
 
 Fixes

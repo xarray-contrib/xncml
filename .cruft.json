@@ -11,7 +11,7 @@
       "project_slug": "xncml",
       "project_short_description": "Tools for manipulating NcML (NetCDF Markup Language) files with/for xarray",
       "pypi_username": "bzah",
-      "version": "0.5.1-dev.0",
+      "version": "0.5.1",
       "use_pytest": "y",
       "use_black": "n",
       "use_conda": "n",
