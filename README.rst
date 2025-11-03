@@ -2,7 +2,9 @@ xncml
 =====
 
 +----------------------------+-----------------------------------------------------+
-| Documentation and Support  | |docs|                                              |
+| Versions                   | |pypi|                                              |
++----------------------------+-----------------------------------------------------+
+| Documentation and Support  | |docs| |versions|                                   |
 +----------------------------+-----------------------------------------------------+
 | Open Source                | |license|                                           |
 +----------------------------+-----------------------------------------------------+
@@ -115,3 +117,7 @@ Once you have a copy of the source, you can install it with:
 .. |status| image:: https://www.repostatus.org/badges/latest/active.svg
         :target: https://www.repostatus.org/#active
         :alt: Project Status: Active – The project has reached a stable, usable state and is being actively developed.
+
+.. |versions| image:: https://img.shields.io/pypi/pyversions/xncml.svg
+        :target: https://pypi.python.org/pypi/xncml
+        :alt: Supported Python Versions
