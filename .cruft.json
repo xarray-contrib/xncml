@@ -1,21 +1,20 @@
 {
   "template": "https://github.com/Ouranosinc/cookiecutter-pypackage.git",
-  "commit": "760bcbb2540bd973d57ea1aa1f1b24759f6d0955",
+  "commit": "66708e5e15f00caaaaf1748bf0a7e041bc5c6243",
   "checkout": null,
   "context": {
     "cookiecutter": {
       "full_name": "Abel Aoun",
       "email": "aoun.abel@gmail.com",
       "github_username": "xarray-contrib",
+      "orcid_id": "0000-0003-2289-2890",
       "project_name": "xncml",
       "project_slug": "xncml",
       "project_short_description": "Tools for manipulating NcML (NetCDF Markup Language) files with/for xarray",
       "pypi_username": "bzah",
       "version": "0.5.1",
       "use_pytest": "y",
-      "use_black": "n",
       "use_conda": "n",
-      "add_pyup_badge": "n",
       "make_docs": "y",
       "add_translations": "n",
       "command_line_interface": "No command-line interface",
@@ -24,7 +23,7 @@
       "generated_with_cruft": "y",
       "__gh_slug": "https://github.com/xarray-contrib/xncml",
       "_template": "https://github.com/Ouranosinc/cookiecutter-pypackage.git",
-      "_commit": "760bcbb2540bd973d57ea1aa1f1b24759f6d0955"
+      "_commit": "66708e5e15f00caaaaf1748bf0a7e041bc5c6243"
     }
   },
   "directory": null

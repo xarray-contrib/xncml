@@ -1,5 +1,5 @@
 [build-system]
-requires = ["flit_core >=3.10.1,<4"]
+requires = ["flit_core >=3.11.0,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
@@ -17,12 +17,12 @@ description = "Tools for manipulating and opening NCML (NetCDF Markup) files wit
 readme = {file = "README.rst", content-type = "text/x-rst"}
 requires-python = ">=3.10.0"
 keywords = ["xncml", "xarray", "netcdf", "ncml"]
-license = {file = "LICENSE"}
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: Apache Software License",
   "Natural Language :: English",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
@@ -31,7 +31,8 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
-  "Topic :: Scientific/Engineering :: Atmospheric Science"
+  "Topic :: Scientific/Engineering :: Atmospheric Science",
+  "Typing :: Typed"
 ]
 dynamic = ["version"]
 dependencies = [
@@ -47,19 +48,21 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   # Dev tools and testing
-  "bump-my-version >=0.30.1",
+  "bump-my-version >=1.2.3",
   "coverage >=7.5.0",
-  "flake8 >=7.1.1",
-  "flake8-rst-docstrings >=0.3.0",
-  "flit >=3.10.1,<4.0",
-  "mypy >=1.14.1",
-  "numpydoc >=1.8.0",
-  "pip >=25.0",
+  "deptry >=0.23.1",
+  "flake8 >=7.3.0",
+  "flake8-rst-docstrings >=0.3.1",
+  "flit >=3.12.0,<4.0",
+  "mypy >=1.18.2",
+  "numpydoc >=1.9.0",
+  "pip >=25.2",
   "pre-commit >=3.5.0",
   "pytest >=8.3.2",
   "pytest-cov >=5.0.0",
-  "ruff >=0.9.0",
-  "tox >=4.24.1",
+  "ruff >=0.13.3",
+  "tox >=4.30.3",
+  "vulture >=2.14",
   "watchdog >=4.0.0"
 ]
 docs = [
@@ -68,7 +71,7 @@ docs = [
   "ipython",
   "jupyter_client",
   "nbsphinx >=0.9.5",
-  "sphinx >=7.0.0",
+  "sphinx >=7.1.0,<8.2",
   "sphinx-codeautolink >=0.16.2",
   "sphinx-copybutton",
   "sphinx-rtd-theme >=1.0"
@@ -123,6 +126,13 @@ replace = """\
 """
 
 [[tool.bumpversion.files]]
+filename = "CITATION.cff"
+include_bumps = ["release"]
+search = "^version: \"[0-9]+\\.[0-9]+\\.[0-9]\""
+regex = true
+replace = "version: \"{new_version}\""
+
+[[tool.bumpversion.files]]
 filename = "src/xncml/__init__.py"
 search = "__version__ = \"{current_version}\""
 replace = "__version__ = \"{new_version}\""
@@ -153,6 +163,10 @@ source = ["src/xncml/", "*/site-packages/xncml/"]
 omit = ["tests/*.py"]
 relative_files = true
 source = ["xncml"]
+
+[tool.deptry]
+extend_exclude = ["docs"]
+pep621_dev_dependency_groups = ["all", "dev", "docs"]
 
 [tool.flit.sdist]
 include = [
@@ -195,7 +209,7 @@ exclude = [
 
 [tool.mypy]
 files = "."
-python_version = 3.10
+python_version = "3.10"
 show_error_codes = true
 strict = true
 warn_no_return = true
@@ -234,11 +248,14 @@ override_SS05 = [
 
 [tool.pytest.ini_options]
 addopts = [
-  "--verbose",
-  "--color=yes"
+  "-ra",
+  "--color=yes",
+  "--verbose"
 ]
 filterwarnings = ["ignore::UserWarning"]
-testpaths = "tests"
+testpaths = [
+  "tests"
+]
 
 [tool.ruff]
 src = ["xncml"]
@@ -253,10 +270,15 @@ exclude = [
 [tool.ruff.format]
 # Enable reformatting of code snippets in docstrings.
 docstring-code-format = true
+docstring-code-line-length = "dynamic"
+indent-style = "space"
+quote-style = "double"
+skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [tool.ruff.lint]
 extend-select = [
+  "D213", # multi-line-summary-second-line
   "RUF022" # unsorted-dunder-all
 ]
 ignore = [
@@ -278,12 +300,15 @@ ignore = [
   "UP007" # Use `X | Y` for type annotations
 ]
 select = [
+  "B", # bugbear
   "BLE", # blind-except
   "C90", # mccabe-complexity
   "D", # docstrings
   "E", # pycodestyle errors
+  "F", # pyflakes
   "FLY002", # static-join-to-fstring
   "G", # logging-format
+  "I", # imports
   "N", # naming conventions
   "PERF", # iterator performance
   "PTH", # pathlib
@@ -296,6 +321,13 @@ select = [
 
 [tool.ruff.lint.flake8-bandit]
 check-typed-exception = true
+
+[tool.ruff.lint.isort]
+known-first-party = ["xncml"]
+case-sensitive = true
+detect-same-package = false
+lines-after-imports = 2
+no-lines-before = ["future", "standard-library"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 15

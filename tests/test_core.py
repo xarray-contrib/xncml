@@ -7,6 +7,7 @@ import pytest
 
 import xncml
 
+
 here = os.path.abspath(os.path.dirname(__file__))
 input_file = Path(here) / "data" / "exercise1.ncml"
 

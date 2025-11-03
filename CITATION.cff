@@ -1,0 +1,23 @@
+# This CITATION.cff file was generated with cffinit and templated with cookiecutter.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: "1.2.0"
+title: "xncml"
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: "software"
+authors:
+  - given-names: 'Abel'
+    family-names: 'Aoun'
+    email: 'aoun.abel@gmail.com'
+    orcid: "https://orcid.org/0000-0003-2289-2890"
+contact:
+  - given-names: 'Abel'
+    family-names: 'Aoun'
+    email: 'aoun.abel@gmail.com'
+    orcid: "https://orcid.org/0000-0003-2289-2890"
+repository-code: "https://github.com/xarray-contrib/xncml"
+abstract: "Tools for manipulating NcML (NetCDF Markup Language) files with/for xarray"
+license: "Apache-2.0"
+version: "0.5.1"
