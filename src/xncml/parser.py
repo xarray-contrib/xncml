@@ -31,7 +31,6 @@ Support for these attributes is missing:
 """
 
 from __future__ import annotations
-
 import datetime as dt
 from functools import partial
 from pathlib import Path
@@ -56,6 +55,7 @@ from .generated import (
     Values,
     Variable,
 )
+
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -180,7 +180,8 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     names = [v.name for v in filter_by_class(obj.choice, Aggregation.VariableAgg)]
 
     for attr in obj.promote_global_attribute:
-        raise NotImplementedError
+        msg = f"{attr} in <promoteGlobalAttribute> not implemented yet."
+        raise NotImplementedError(msg)
 
     # Create list of datasets to aggregate.
     datasets = []
@@ -189,7 +190,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     for item in obj.netcdf:
         # Open dataset defined in <netcdf>'s `location` attribute
         tar = read_netcdf(xr.Dataset(), ref=xr.Dataset(), obj=item, ncml=ncml, group=ROOT_GROUP)
-        closers.append(getattr(tar, "_close"))
+        closers.append(tar._close)
 
         # Select variables
         if names:
@@ -206,7 +207,7 @@ def read_aggregation(target: xr.Dataset, obj: Aggregation, ncml: Path) -> xr.Dat
     for item in obj.scan:
         dss = read_scan(item, ncml)
         datasets.extend([ds.chunk() for ds in dss])
-        closers.extend([getattr(ds, "_close") for ds in dss])
+        closers.extend([ds._close for ds in dss])
 
     # Need to decode time variable
     if obj.time_units_change:
@@ -584,7 +585,8 @@ def read_variable(
 
 
 def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
-    """Read values for <variable> element.
+    """
+    Read values for <variable> element.
 
     Parameters
     ----------
@@ -624,7 +626,8 @@ def read_values(var_name: str, expected_size: int, values_tag: Values) -> list:
 
 
 def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> xr.Variable:
-    """Build an xr.Variable for scalar variables.
+    """
+    Build an xr.Variable for scalar variables.
 
     Parameters
     ----------
@@ -650,7 +653,8 @@ def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> x
         warn(
             f"The scalar variable {var_name} has no values set within"
             f" <values></values>. A default value of {default_value} is set"
-            " to preserve the type."
+            " to preserve the type.",
+            stacklevel=2,
         )
         return xr.Variable(data=default_value, dims=())
     values_content = read_values(var_name, expected_size=1, values_tag=values_tag)
@@ -662,7 +666,8 @@ def build_scalar_variable(var_name: str, values_tag: Values, var_type: str) -> x
 
 
 def read_remove(target: xr.Dataset | xr.Variable, obj: Remove) -> xr.Dataset:
-    """Remove item from dataset.
+    """
+    Remove item from dataset.
 
     Parameters
     ----------
@@ -687,7 +692,8 @@ def read_remove(target: xr.Dataset | xr.Variable, obj: Remove) -> xr.Dataset:
 
 
 def read_attribute(target: xr.Dataset | xr.Variable, obj: Attribute, ref: xr.Dataset = None):
-    """Update target dataset in place with new or modified attribute.
+    """
+    Update target dataset in place with new or modified attribute.
 
     Parameters
     ----------

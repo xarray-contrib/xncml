@@ -18,6 +18,7 @@ from ._ncml_2_2 import (
     Variable,
 )
 
+
 __all__ = [
     "Aggregation",
     "AggregationType",

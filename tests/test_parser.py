@@ -7,6 +7,7 @@ import pytest
 
 import xncml
 
+
 # Notes
 
 # This is not testing absolute paths.
@@ -17,7 +18,8 @@ data = Path(__file__).parent / "data"
 
 
 class CheckClose:
-    """Check that files are closed after the test.
+    """
+    Check that files are closed after the test.
 
     Note that `close` has to be explicitly called within the context manager for this to work.
     """

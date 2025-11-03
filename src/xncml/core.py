@@ -14,7 +14,8 @@ import xmltodict
 
 
 class Dataset:
-    """A class for reading and manipulating NcML file.
+    """
+    A class for reading and manipulating NcML file.
 
     Note that NcML documents are used for two distinct purposes:
       - an XML description of NetCDF structure and metadata;
@@ -24,7 +25,8 @@ class Dataset:
     """
 
     def __init__(self, filepath: str = None, location: str = None):
-        """Create a Dataset.
+        """
+        Create a Dataset.
 
         Parameters
         ----------
@@ -71,7 +73,8 @@ class Dataset:
 
     # Aggregations and scans
     def add_aggregation(self, dim_name: str, type_: str, recheck_every: str = None, time_units_change: bool = None):
-        """Add aggregation.
+        """
+        Add aggregation.
 
         Parameters
         ----------
@@ -105,7 +108,8 @@ class Dataset:
             self.ncroot["netcdf"]["aggregation"] = aggregations
 
     def add_variable_agg(self, dim_name: str, name: str):
-        """Add variable aggregation.
+        """
+        Add variable aggregation.
 
         Parameters
         ----------
@@ -186,7 +190,8 @@ class Dataset:
 
     # Variable
     def add_variable_attribute(self, variable, key, value, type_="String"):
-        """Add variable attribute.
+        """
+        Add variable attribute.
 
         Parameters
         ----------
@@ -233,7 +238,8 @@ class Dataset:
             self.ncroot["netcdf"]["variable"] = variables
 
     def rename_variable(self, variable, new_name):
-        """Rename variable attribute
+        """
+        Rename variable attribute
 
         Parameters
         ----------
@@ -256,7 +262,8 @@ class Dataset:
             self.ncroot["netcdf"]["variable"] = variables
 
     def remove_variable(self, variable):
-        """Remove dataset variable.
+        """
+        Remove dataset variable.
 
         Parameters
         ----------
@@ -271,7 +278,8 @@ class Dataset:
             self.ncroot["netcdf"]["remove"] = removes
 
     def rename_variable_attribute(self, variable, old_name, new_name):
-        """Rename variable attribute.
+        """
+        Rename variable attribute.
 
         Parameters
         ----------
@@ -304,7 +312,8 @@ class Dataset:
     # Dimensions
 
     def rename_dimension(self, dimension, new_name):
-        """Rename dimension.
+        """
+        Rename dimension.
 
         Parameters
         ----------
@@ -328,7 +337,8 @@ class Dataset:
     # Dataset
 
     def add_dataset_attribute(self, key, value, type_="String"):
-        """Add dataset attribute
+        """
+        Add dataset attribute
 
         Parameters
         ----------
@@ -352,7 +362,8 @@ class Dataset:
             self.ncroot["netcdf"]["attribute"] = attributes
 
     def remove_dataset_attribute(self, key):
-        """Remove dataset attribute.
+        """
+        Remove dataset attribute.
 
         Parameters
         ----------
@@ -371,7 +382,8 @@ class Dataset:
             self.ncroot["netcdf"]["remove"] = [item]
 
     def rename_dataset_attribute(self, old_name, new_name):
-        """Rename dataset attribute.
+        """
+        Rename dataset attribute.
 
         Parameters
         ----------
@@ -399,7 +411,8 @@ class Dataset:
             self.ncroot["netcdf"]["attribute"] = item
 
     def to_ncml(self, path=None):
-        """Write NcML file to disk.
+        """
+        Write NcML file to disk.
 
         Parameters
         ----------
@@ -417,7 +430,8 @@ class Dataset:
             fd.write(xml_output)
 
     def to_cf_dict(self):
-        """Convert internal representation to a CF-JSON dictionary.
+        """
+        Convert internal representation to a CF-JSON dictionary.
 
         The CF-JSON specification includes `data` for variables, but if the data is not within the NcML,
         it cannot be included in the JSON representation.
@@ -480,13 +494,14 @@ def _attributes_to_json(attrs: list) -> dict:
         try:
             out[attr["@name"]] = _cast(attr)
         except ValueError as exc:
-            warn(f"Could not cast {attr['@name']}:\n{exc}")
+            warn(f"Could not cast {attr['@name']}:\n{exc}", stacklevel=2)
 
     return {"attributes": out}
 
 
 def _variables_to_json(variables: list) -> dict:
-    """The variables definition object has variable id:object as its key:value members.
+    """
+    The variables definition object has variable id:object as its key:value members.
 
     Each variable object MUST include shape, attributes and data objects.
     The shape field is an array of dimension IDs which correspond to the array ordering of the variable data.
