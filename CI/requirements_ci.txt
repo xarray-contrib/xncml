@@ -20,9 +20,9 @@ bracex==2.4 \
     --hash=sha256:a27eaf1df42cf561fed58b7a8f3fdf129d1ea16a81e1fadd1d17989bc6384beb \
     --hash=sha256:efdc71eff95eaff5e0f8cfebe7d01adf2c8637c8c92edaf63ef348c241a82418
     # via wcmatch
-bump-my-version==1.2.3 \
-    --hash=sha256:620eac65828c86e60c6a9becf9eadc376181e81b47c0097a7b63e113b5cb256f \
-    --hash=sha256:7352af6f9454469a020493c2747cd7c88b0c7017dd216e3abb270a13745afa1b
+bump-my-version==1.2.6 \
+    --hash=sha256:1f2f0daa5d699904e9739be8efb51c4c945461bad83cd4da4c89d324d9a18343 \
+    --hash=sha256:a2f567c10574a374b81a9bd6d2bd3cb2ca74befe5c24c3021123773635431659
     # via -r CI/requirements_ci.in
 cachetools==6.1.0 \
     --hash=sha256:1c7bb3cf9193deaf3508b7c5f2a79986c13ea38965c5adcff1f84519cf39163e \
