@@ -11,6 +11,12 @@ updates:
       actions:
         patterns:
           - "*"
+        update-types:
+          - patch
+          - minor
+          - major
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: pip
     directory: /
@@ -20,6 +26,14 @@ updates:
       ci:
         patterns:
           - "CI/*"
+        update-types:
+          - patch
+          - minor
+          - major
       python:
         patterns:
           - "pyproject.toml"
+        update-types:
+          - patch
+    cooldown:
+      default-days: 7
