@@ -2,19 +2,22 @@
 Changelog
 =========
 
-..
-    `Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
-    ----------------------------------------------------------------------------
+`Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
+----------------------------------------------------------------------------
 
-    Contributors:
+Contributors:
 
-    Changes
-    ^^^^^^^
-    * No change.
+Changes
+^^^^^^^
+- No change.
 
-    Fixes
-    ^^^^^
-    * No change.
+Fixes
+^^^^^
+- No change.
+
+Internal changes
+^^^^^^^^^^^^^^^^
+- Added a workflow for automatically approving and merging safe updates from Dependabot (by :user:`Zeitsperre`).
 
 .. _changes_0.5.1:
 
