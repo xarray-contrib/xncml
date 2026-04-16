@@ -140,8 +140,8 @@ replace = """\
 
 .. _changes_{new_version}:
 
-`v{new_version} <https://github.com/xarray-contrib/xncml/tree/{new_version}>`_ ({now:%Y-%m-%d})
----------------------------------------------------------------------------
+`v{new_version} <https://github.com/xarray-contrib/xncml/tree/v{new_version}>`_ ({now:%Y-%m-%d})
+----------------------------------------------------------------------------
 """
 
 [[tool.bumpversion.files]]
