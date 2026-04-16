@@ -8,7 +8,7 @@ xncml
 +----------------------------+-----------------------------------------------------+
 | Open Source                | |license|                                           |
 +----------------------------+-----------------------------------------------------+
-| Coding Standards           | |ruff| |pre-commit|                                 |
+| Coding Standards           | |ruff| |prek| |pre-commit-ci|                       |
 +----------------------------+-----------------------------------------------------+
 | Development Status         | |status| |build| |coveralls|                        |
 +----------------------------+-----------------------------------------------------+
@@ -73,6 +73,9 @@ Once you have a copy of the source, you can install it with:
 
    python -m pip install .
 
+
+
+
 .. _doc: https://readthedocs.org/projects/xncml
 .. _Github repo: https://github.com/xarray-contrib/xncml/
 .. _tarball: https://github.com/xarray-contrib/xncml/tarball/main
@@ -102,9 +105,13 @@ Once you have a copy of the source, you can install it with:
             :target: https://securityscorecards.dev/viewer/?uri=github.com/xarray-contrib/xncml
             :alt: OpenSSF Scorecard
 
-.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/xarray-contrib/xncml/main.svg
+.. |pre-commit-ci| image:: https://results.pre-commit.ci/badge/github/xarray-contrib/xncml/main.svg
         :target: https://results.pre-commit.ci/latest/github/xarray-contrib/xncml/main
         :alt: pre-commit.ci status
+
+.. |prek| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/j178/prek/master/docs/assets/badge-v0.json
+        :target: https://github.com/j178/prek
+        :alt: prek
 
 .. |pypi| image:: https://img.shields.io/pypi/v/xncml.svg
         :target: https://pypi.python.org/pypi/xncml
