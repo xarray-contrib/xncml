@@ -2,7 +2,7 @@ xncml
 =====
 
 +----------------------------+-----------------------------------------------------+
-| Versions                   | |pypi|                                              |
+| Versions                   | |pypi| |conda|                                      |
 +----------------------------+-----------------------------------------------------+
 | Documentation and Support  | |docs| |versions|                                   |
 +----------------------------+-----------------------------------------------------+
@@ -73,16 +73,23 @@ Once you have a copy of the source, you can install it with:
 
    python -m pip install .
 
+Acknowledgments
+---------------
+This package was created with Cookiecutter_ and the `Ouranosinc/cookiecutter-pypackage`_ project template.
 
-
-
-.. _doc: https://readthedocs.org/projects/xncml
+.. _Cookiecutter: https://github.com/cookiecutter/cookiecutter
 .. _Github repo: https://github.com/xarray-contrib/xncml/
+.. _Ouranosinc/cookiecutter-pypackage: https://github.com/Ouranosinc/cookiecutter-pypackage
+.. _doc: https://readthedocs.org/projects/xncml
 .. _tarball: https://github.com/xarray-contrib/xncml/tarball/main
 
 .. |build| image:: https://github.com/xarray-contrib/xncml/actions/workflows/main.yml/badge.svg
         :target: https://github.com/xarray-contrib/xncml/actions/workflows/main.yml
         :alt: Build Status
+
+.. |conda| image:: https://img.shields.io/conda/vn/conda-forge/xncml.svg
+        :target: https://anaconda.org/conda-forge/xncml
+        :alt: Conda Build
 
 .. |coveralls| image:: https://coveralls.io/repos/github/xarray-contrib/xncml/badge.svg
         :target: https://coveralls.io/github/xarray-contrib/xncml
