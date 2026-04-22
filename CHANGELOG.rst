@@ -5,11 +5,11 @@ Changelog
 `Unreleased <https://github.com/xarray-contrib/xncml/tree/master>`_ (latest)
 ----------------------------------------------------------------------------
 
-Contributors:
+Contributors: Trevor James Smith (:user:`Zeitsperre`).
 
 Changes
 ^^^^^^^
-- No change.
+- Added official support for Python3.14.
 
 Fixes
 ^^^^^
@@ -17,12 +17,16 @@ Fixes
 
 Internal changes
 ^^^^^^^^^^^^^^^^
-- Added a workflow for automatically approving and merging safe updates from Dependabot (by :user:`Zeitsperre`).
+- Added a workflow for automatically approving and merging safe updates from Dependabot.
+- `tox` now uses the new TOML spec for configurations.
+- Development dependencies are now installed via `dependency-groups` (`PEP 735 <https://peps.python.org/pep-0735/>`_).
+- The `Makefile` now handles more of the installation logic when running specific checks.
 
 .. _changes_0.5.1:
 
-`v0.5.1 <https://github.com/xarray-contrib/xncml/tree/0.5.1>`_ (2025-10-02)
----------------------------------------------------------------------------
+`v0.5.1 <https://github.com/xarray-contrib/xncml/tree/v0.5.1>`_ (2025-10-02)
+----------------------------------------------------------------------------
+
 Contributors: Trevor James Smith (:user:`Zeitsperre`).
 
 Fixes
@@ -36,8 +40,8 @@ Internal changes
 
 .. _changes_0.5.0:
 
-`v0.5.0 <https://github.com/xarray-contrib/xncml/tree/0.5.0>`_ (2025-05-05)
----------------------------------------------------------------------------
+`v0.5.0 <https://github.com/xarray-contrib/xncml/tree/v0.5.0>`_ (2025-05-05)
+----------------------------------------------------------------------------
 
 Bug fixes
 ^^^^^^^^^
@@ -67,8 +71,8 @@ Internal changes
 
 .. _changes-0.4.0:
 
-0.4.0 (2024-01-08)
-------------------
+`v0.4.0 <https://github.com/xarray-contrib/xncml/tree/v0.4.0>`_ (2024-01-08)
+----------------------------------------------------------------------------
 
 - Add support for <EnumTypeDef> (by :user:`bzah`).
 - Update XSD schema and dataclasses to latest version from netcdf-java to add support for unsigned types (by :user:`bzah`).
@@ -77,16 +81,16 @@ Internal changes
 
 .. _changes-0.3.1:
 
-0.3.1 (2023-11-10)
-------------------
+`v0.3.1 <https://github.com/xarray-contrib/xncml/tree/v0.3.1>`_ (2024-01-08)
+----------------------------------------------------------------------------
 
 - Add support for Python 3.12
 - Drop support for Python 3.8
 
 .. _changes-0.3:
 
-0.3 (2023-08-28)
-----------------
+`v0.3 <https://github.com/xarray-contrib/xncml/tree/v0.3>`_ (2023-08-28)
+------------------------------------------------------------------------
 
 - Add `add_aggregation` and `add_variable_agg` to `Dataset` class (by :user:`huard`).
 - Add `add_scan` to `Dataset` class (by :user:`huard`).
@@ -95,8 +99,8 @@ Internal changes
 
 .. _changes-0.2:
 
-0.2 (2023-02-23)
-----------------
+`v0.2 <https://github.com/xarray-contrib/xncml/tree/v0.2>`_ (2023-02-23)
+------------------------------------------------------------------------
 
 - Implement `Dataset.rename_dataset_attribute` (by :user:`huard`).
 - Allow empty `Dataset` creation (by :user:`huard`).
@@ -105,8 +109,8 @@ Internal changes
 
 .. _changes-0.1:
 
-0.1 Initial release (2022-11-24)
---------------------------------
+`v0.1 Initial release <https://github.com/xarray-contrib/xncml/tree/v0.1>`_ (2022-11-24)
+----------------------------------------------------------------------------------------
 
 - Manipulate NcML file: add & remove attributes, variables and dimensions. (by :user:`andersy005`).
 - Implement `open_ncml`, which returns an `xarray.Dataset` built from an NcML. Note that
