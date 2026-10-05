@@ -43,25 +43,25 @@ dev = [
   "pip >=26.0.1",
   "prek >=0.3.0",
   "watchdog >=6.0.0",
-  {include-group = "docs"},
-  {include-group = "lint"},
-  {include-group = "test"},
-  {include-group = "tox"}
+  { include-group = "docs" },
+  { include-group = "lint" },
+  { include-group = "test" },
+  { include-group = "tox" }
 ]
 
 [project]
 name = "xncml"
 authors = [
-  {name = "Anderson Banihirwe", email = "abanihi@ucar.edu"},
-  {name = "David Huard", email = "david.huard@gmail.com"}
+  { name = "Anderson Banihirwe", email = "abanihi@ucar.edu" },
+  { name = "David Huard", email = "david.huard@gmail.com" }
 ]
 maintainers = [
-  {name = "Abel Aoun", email = "aoun.abel@gmail.com"},
-  {name = "David Huard", email = "david.huard@gmail.com"},
-  {name = "Trevor James Smith", email = "smith.trevorj@ouranos.ca"}
+  { name = "Abel Aoun", email = "aoun.abel@gmail.com" },
+  { name = "David Huard", email = "david.huard@gmail.com" },
+  { name = "Trevor James Smith", email = "smith.trevorj@ouranos.ca" }
 ]
 description = "Tools for manipulating and opening NCML (NetCDF Markup) files with/for xarray"
-readme = {file = "README.rst", content-type = "text/x-rst"}
+readme = { file = "README.rst", content-type = "text/x-rst" }
 requires-python = ">=3.10.0"
 keywords = ["xncml", "xarray", "netcdf", "ncml"]
 license = "Apache-2.0"
