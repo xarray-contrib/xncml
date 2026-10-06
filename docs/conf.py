@@ -58,6 +58,7 @@ autodoc_default_options = {
     'undoc-members': True,
     'private-members': False,
     'special-members': False,
+    'exclude-members': "type"  # FIXME: The "type" member is getting confused for the python builtin for "type"
 }
 
 extlinks = {
